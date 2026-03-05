@@ -10,76 +10,80 @@ public class NewTaskDialog
         Console.Clear();
         Console.CursorVisible = true;
 
-        var windowWidth = Math.Max(Console.WindowWidth, 40);
-        TuiHelpers.RenderHeader("New Task", windowWidth, ConsoleColor.DarkGreen);
-        Console.WriteLine();
-        Console.WriteLine();
+        var width = DialogHelper.GetBoxWidth();
+        var borderColor = Theme.DialogBorder;
 
-        var title = PromptText("  Title: ");
+        DialogHelper.RenderBoxTop("New Task", width, borderColor);
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        var title = DialogHelper.PromptTextInBox("Title: ", width, borderColor);
         if (string.IsNullOrWhiteSpace(title))
         {
-            ShowError("Title cannot be empty. Press any key to cancel.");
+            DialogHelper.RenderBoxEmptyLine(width, borderColor);
+            DialogHelper.RenderBoxBottom(width, borderColor);
+            DialogHelper.ShowError("Title cannot be empty. Press any key to cancel.");
             Console.ReadKey(intercept: true);
             return null;
         }
 
-        var type = PromptEnum<TaskType>("  Type");
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        var type = PromptEnumInBox<TaskType>("Type", width, borderColor);
         if (type is null)
+        {
+            DialogHelper.RenderBoxBottom(width, borderColor);
             return null;
+        }
 
-        var priority = PromptEnum<Priority>("  Priority");
+        var priority = PromptEnumInBox<Priority>("Priority", width, borderColor);
         if (priority is null)
+        {
+            DialogHelper.RenderBoxBottom(width, borderColor);
             return null;
+        }
 
-        var labelsInput = PromptText("  Labels (comma-separated, or leave empty): ");
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        var labelsInput = DialogHelper.PromptTextInBox("Labels (comma-separated, or empty): ", width, borderColor);
         var labels = ParseLabels(labelsInput);
 
-        Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"  Creating task: [{type}] {title} ({priority})...");
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        DialogHelper.RenderBoxBottom(width, borderColor);
+
+        Console.ForegroundColor = Theme.Success;
+        Console.WriteLine($"  \u2713 Creating task: [{type}] {title} ({priority})...");
         Console.ResetColor();
 
         return new NewTaskInputs(title.Trim(), type.Value, priority.Value, labels);
     }
 
-    private static string PromptText(string prompt)
-    {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write(prompt);
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.White;
-        var input = Console.ReadLine() ?? string.Empty;
-        Console.ResetColor();
-        return input;
-    }
-
-    private static T? PromptEnum<T>(string label) where T : struct, Enum
+    private static T? PromptEnumInBox<T>(string label, int width, ConsoleColor borderColor) where T : struct, Enum
     {
         var values = Enum.GetValues<T>();
+        var valueNames = values.Select(v => v.ToString()).ToList();
 
-        Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"  {label}:");
-        Console.ResetColor();
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
-        for (var i = 0; i < values.Length; i++)
-        {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"    {i + 1}. ");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(values[i].ToString());
-        }
+        DialogHelper.RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = Theme.DialogPrompt;
+        var labelText = $"{label}:";
+        Console.Write(labelText);
+        DialogHelper.RenderBoxRightBorder(labelText.Length, width, borderColor);
 
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write($"  Enter number (1-{values.Length}): ");
+        DialogHelper.RenderNumberedListInBox(valueNames, width, borderColor);
+
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        DialogHelper.RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = Theme.DialogPrompt;
+        var promptText = $"Enter number (1-{values.Length}): ";
+        Console.Write(promptText);
         Console.ResetColor();
 
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
 
         if (!int.TryParse(input, out var choice) || choice < 1 || choice > values.Length)
         {
-            ShowError("Invalid selection. Press any key to cancel.");
+            DialogHelper.ShowError("Invalid selection. Press any key to cancel.");
             Console.ReadKey(intercept: true);
             return null;
         }
@@ -97,13 +101,5 @@ public class NewTaskDialog
             .Where(l => !string.IsNullOrWhiteSpace(l))
             .ToList()
             .AsReadOnly();
-    }
-
-    private static void ShowError(string message)
-    {
-        Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"  {message}");
-        Console.ResetColor();
     }
 }

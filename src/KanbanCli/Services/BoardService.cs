@@ -8,21 +8,24 @@ namespace KanbanCli.Services;
 public class BoardService : IBoardService
 {
     private readonly ITaskRepository _repository;
+    private readonly IFileSystem _fileSystem;
 
-    public BoardService(ITaskRepository repository)
+    public BoardService(ITaskRepository repository, IFileSystem fileSystem)
     {
         _repository = repository;
+        _fileSystem = fileSystem;
     }
 
     public Board GetBoard()
     {
-        var columns = new[]
-        {
-            new Column { Name = "Backlog", Tasks = _repository.GetAllByColumn(TaskStatus.Backlog) },
-            new Column { Name = "In Progress", Tasks = _repository.GetAllByColumn(TaskStatus.InProgress) },
-            new Column { Name = "Done", Tasks = _repository.GetAllByColumn(TaskStatus.Done) },
-            new Column { Name = "On Hold", Tasks = _repository.GetAllByColumn(TaskStatus.OnHold) }
-        };
+        var columns = BoardConstants.ColumnOrder
+            .Select(status => new Column
+            {
+                Name = BoardConstants.ColumnDisplayNames[status],
+                Status = status,
+                Tasks = _repository.GetAllByColumn(status)
+            })
+            .ToArray();
 
         return new Board { Columns = columns };
     }
@@ -34,17 +37,10 @@ public class BoardService : IBoardService
         if (!allTasks.Any())
             return BuildEmptyBoard();
 
-        var inProgressTasks = allTasks
+        var topPriorities = allTasks
             .Where(t => t.Status == TaskStatus.InProgress)
-            .ToList();
-
-        var highPriorityBacklog = allTasks
-            .Where(t => t.Status == TaskStatus.Backlog && t.Priority == Priority.High)
-            .ToList();
-
-        var topPriorities = inProgressTasks
-            .Concat(highPriorityBacklog)
-            .Take(5)
+            .Concat(allTasks.Where(t => t.Status == TaskStatus.Backlog && t.Priority == Priority.High))
+            .Take(BoardConstants.MaxTopPriorities)
             .ToList();
 
         var recentlyCompleted = allTasks
@@ -53,43 +49,72 @@ public class BoardService : IBoardService
             .ToList();
 
         var sb = new StringBuilder();
+        sb.Append(BuildHeader());
+        sb.Append(BuildPrioritySection(topPriorities));
+        sb.Append(BuildCompletedSection(recentlyCompleted));
+
+        return sb.ToString();
+    }
+
+    public void SavePlanningBoard(string boardPath)
+    {
+        var content = GeneratePlanningBoard();
+        var filePath = Path.Combine(boardPath, "PLANNING-BOARD.md");
+        _fileSystem.WriteAllText(filePath, content);
+    }
+
+    private static string BuildHeader()
+    {
+        var sb = new StringBuilder();
         sb.AppendLine("# Planning Board");
         sb.AppendLine();
         sb.AppendLine("**Current Focus**: Feature development");
         sb.AppendLine();
+        return sb.ToString();
+    }
+
+    private static string BuildPrioritySection(IReadOnlyList<TaskItem> priorities)
+    {
+        var sb = new StringBuilder();
         sb.AppendLine("## Top Priorities");
         sb.AppendLine();
 
-        if (topPriorities.Count == 0)
+        if (priorities.Count == 0)
         {
             sb.AppendLine("No active priorities.");
         }
         else
         {
-            for (var i = 0; i < topPriorities.Count; i++)
+            for (var i = 0; i < priorities.Count; i++)
             {
-                var task = topPriorities[i];
+                var task = priorities[i];
                 var statusLabel = task.Status.ToDisplayString();
-                sb.AppendLine($"{i + 1}. **#{task.Id:D3}** {task.Type.ToString().ToUpperInvariant()}: {task.Title} - {statusLabel}");
+                sb.AppendLine($"{i + 1}. **#{task.Id.ToString(BoardConstants.IdFormat)}** {task.Type.ToString().ToUpperInvariant()}: {task.Title} - {statusLabel}");
             }
         }
 
         sb.AppendLine();
+        return sb.ToString();
+    }
+
+    private static string BuildCompletedSection(IReadOnlyList<TaskItem> completed)
+    {
+        var sb = new StringBuilder();
         sb.AppendLine("## Recently Completed");
         sb.AppendLine();
 
-        if (recentlyCompleted.Count == 0)
+        if (completed.Count == 0)
         {
             sb.AppendLine("No completed tasks.");
         }
         else
         {
-            foreach (var task in recentlyCompleted)
+            foreach (var task in completed)
             {
                 var completedDateStr = task.CompletedDate.HasValue
-                    ? task.CompletedDate.Value.ToString("yyyy-MM-dd")
+                    ? task.CompletedDate.Value.ToString(BoardConstants.DateFormat)
                     : string.Empty;
-                sb.AppendLine($"- **#{task.Id:D3}** {task.Type.ToString().ToUpperInvariant()}: {task.Title} - Done {completedDateStr}");
+                sb.AppendLine($"- **#{task.Id.ToString(BoardConstants.IdFormat)}** {task.Type.ToString().ToUpperInvariant()}: {task.Title} - Done {completedDateStr}");
             }
         }
 
@@ -99,10 +124,7 @@ public class BoardService : IBoardService
     private static string BuildEmptyBoard()
     {
         var sb = new StringBuilder();
-        sb.AppendLine("# Planning Board");
-        sb.AppendLine();
-        sb.AppendLine("**Current Focus**: Feature development");
-        sb.AppendLine();
+        sb.Append(BuildHeader());
         sb.AppendLine("## Top Priorities");
         sb.AppendLine();
         sb.AppendLine("No tasks yet.");

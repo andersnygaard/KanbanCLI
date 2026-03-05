@@ -7,6 +7,7 @@ public record NavigationState
 
     public NavigationState MoveToColumn(int direction, int maxColumns)
     {
+        if (maxColumns <= 0) return this;
         var newColumn = Math.Clamp(SelectedColumn + direction, 0, maxColumns - 1);
         return this with { SelectedColumn = newColumn, SelectedTask = 0 };
     }

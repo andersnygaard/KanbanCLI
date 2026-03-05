@@ -9,13 +9,7 @@ public class MarkdownTaskRepository : ITaskRepository
     private readonly IMarkdownParser _parser;
     private readonly string _boardPath;
 
-    private static readonly Dictionary<TaskStatus, string> FolderNames = new()
-    {
-        [TaskStatus.Backlog] = "backlog",
-        [TaskStatus.InProgress] = "in-progress",
-        [TaskStatus.Done] = "done",
-        [TaskStatus.OnHold] = "on-hold"
-    };
+    private static readonly IReadOnlyDictionary<TaskStatus, string> FolderNames = BoardConstants.FolderNames;
 
     public MarkdownTaskRepository(IFileSystem fileSystem, IMarkdownParser parser, string boardPath)
     {
@@ -31,7 +25,7 @@ public class MarkdownTaskRepository : ITaskRepository
         if (!_fileSystem.DirectoryExists(folderPath))
             return [];
 
-        var files = _fileSystem.GetFiles(folderPath, "*.md");
+        var files = _fileSystem.GetFiles(folderPath, BoardConstants.TaskFileExtension);
         var tasks = new List<TaskItem>();
 
         foreach (var file in files)
@@ -70,8 +64,19 @@ public class MarkdownTaskRepository : ITaskRepository
         _fileSystem.WriteAllText(filePath, content);
     }
 
+    public void Update(TaskItem task)
+    {
+        var folderPath = GetColumnPath(task.Status);
+        var fileName = task.GenerateFileName();
+        var filePath = Path.Combine(folderPath, fileName);
+        var content = _parser.Serialize(task);
+
+        _fileSystem.WriteAllText(filePath, content);
+    }
+
     public void Move(TaskItem task, TaskStatus targetColumn)
     {
+        // Write+delete instead of MoveFile: task content changes (status updated in markdown)
         var sourceFolderPath = GetColumnPath(task.Status);
         var sourceFileName = task.GenerateFileName();
         var sourcePath = Path.Combine(sourceFolderPath, sourceFileName);
@@ -88,7 +93,8 @@ public class MarkdownTaskRepository : ITaskRepository
         var content = _parser.Serialize(updatedTask);
         _fileSystem.WriteAllText(targetPath, content);
 
-        if (sourcePath != targetPath)
+        // Only delete source after verifying target was written successfully
+        if (sourcePath != targetPath && _fileSystem.FileExists(targetPath))
             _fileSystem.DeleteFile(sourcePath);
     }
 
@@ -112,7 +118,7 @@ public class MarkdownTaskRepository : ITaskRepository
             if (!_fileSystem.DirectoryExists(folderPath))
                 continue;
 
-            var files = _fileSystem.GetFiles(folderPath, "*.md");
+            var files = _fileSystem.GetFiles(folderPath, BoardConstants.TaskFileExtension);
 
             foreach (var file in files)
             {
@@ -126,7 +132,9 @@ public class MarkdownTaskRepository : ITaskRepository
     }
 
     private string GetColumnPath(TaskStatus status)
-        => Path.Combine(_boardPath, FolderNames[status]);
+    {
+        return Path.Combine(_boardPath, FolderNames[status]);
+    }
 
     private TaskItem? TryParseFile(string filePath)
     {
@@ -136,7 +144,19 @@ public class MarkdownTaskRepository : ITaskRepository
             var content = _fileSystem.ReadAllText(filePath);
             return _parser.Parse(content, id, type);
         }
-        catch
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return null;
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+        catch (ArgumentException)
         {
             return null;
         }
@@ -149,7 +169,19 @@ public class MarkdownTaskRepository : ITaskRepository
             var (id, _, _) = _parser.ParseFileName(filePath);
             return id;
         }
-        catch
+        catch (IOException)
+        {
+            return 0;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return 0;
+        }
+        catch (FormatException)
+        {
+            return 0;
+        }
+        catch (ArgumentException)
         {
             return 0;
         }

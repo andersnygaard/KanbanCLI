@@ -1,4 +1,5 @@
 namespace KanbanCli.Tui;
+using System.Text;
 using KanbanCli.Models;
 using KanbanCli.Services;
 using TaskStatus = KanbanCli.Models.TaskStatus;
@@ -15,6 +16,16 @@ public class KanbanApp
     private readonly ConfirmDialog _confirmDialog;
     private readonly PriorityDialog _priorityDialog;
     private readonly FilterDialog _filterDialog;
+    private readonly string _boardPath;
+    private readonly Dictionary<BoardCommand, Action> _commandDispatch;
+
+    private NavigationState _state = new();
+    private FilterCriteria? _activeFilter;
+    private Board _board = default!;
+    private Board _displayBoard = default!;
+    private bool _running;
+    private bool _needsFullRedraw;
+    private bool _boardDirty = true;
 
     public KanbanApp(
         ITaskService taskService,
@@ -26,7 +37,8 @@ public class KanbanApp
         MoveDialog moveDialog,
         ConfirmDialog confirmDialog,
         PriorityDialog priorityDialog,
-        FilterDialog filterDialog)
+        FilterDialog filterDialog,
+        string boardPath)
     {
         _taskService = taskService;
         _boardService = boardService;
@@ -38,81 +50,61 @@ public class KanbanApp
         _confirmDialog = confirmDialog;
         _priorityDialog = priorityDialog;
         _filterDialog = filterDialog;
+        _boardPath = boardPath;
+
+        _commandDispatch = InitializeCommandDispatch();
+    }
+
+    private Dictionary<BoardCommand, Action> InitializeCommandDispatch()
+    {
+        return new Dictionary<BoardCommand, Action>
+        {
+            [BoardCommand.Quit] = HandleQuit,
+            [BoardCommand.MoveLeft] = HandleMoveLeft,
+            [BoardCommand.MoveRight] = HandleMoveRight,
+            [BoardCommand.MoveUp] = HandleMoveUp,
+            [BoardCommand.MoveDown] = HandleMoveDown,
+            [BoardCommand.ViewDetails] = HandleViewDetails,
+            [BoardCommand.NewTask] = HandleNewTask,
+            [BoardCommand.MoveTask] = HandleMoveTask,
+            [BoardCommand.DeleteTask] = HandleDeleteTask,
+            [BoardCommand.ChangePriority] = HandleChangePriority,
+            [BoardCommand.ToggleFilter] = HandleToggleFilter,
+        };
     }
 
     public void Run()
     {
-        var state = new NavigationState();
-        FilterCriteria? activeFilter = null;
-        var running = true;
+        _state = new NavigationState();
+        _activeFilter = null;
+        _running = true;
 
         Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.Clear();
 
-        while (running)
+        while (_running)
         {
-            var board = _boardService.GetBoard();
-            var displayBoard = activeFilter is not null ? ApplyFilter(board, activeFilter) : board;
-            var filterInfo = BuildFilterInfo(activeFilter);
-            _boardRenderer.Render(displayBoard, state, filterInfo);
+            if (_needsFullRedraw)
+            {
+                Console.Clear();
+                _needsFullRedraw = false;
+            }
+
+            if (_boardDirty)
+            {
+                _board = _boardService.GetBoard();
+                _boardDirty = false;
+            }
+            _displayBoard = _activeFilter is not null ? ApplyFilter(_board, _activeFilter) : _board;
+            var filterInfo = BuildFilterInfo(_activeFilter);
+
+            // Buffer all console output during rendering to reduce system calls
+            RenderBuffered(_displayBoard, _state, filterInfo);
 
             var command = _inputHandler.ReadCommand();
 
-            switch (command)
-            {
-                case BoardCommand.Quit:
-                    running = false;
-                    break;
-
-                case BoardCommand.MoveLeft:
-                    state = state.MoveToColumn(-1, displayBoard.Columns.Count);
-                    break;
-
-                case BoardCommand.MoveRight:
-                    state = state.MoveToColumn(1, displayBoard.Columns.Count);
-                    break;
-
-                case BoardCommand.MoveUp:
-                {
-                    var col = displayBoard.Columns[state.SelectedColumn];
-                    state = state.MoveToTask(-1, col.Tasks.Count);
-                    break;
-                }
-
-                case BoardCommand.MoveDown:
-                {
-                    var col = displayBoard.Columns[state.SelectedColumn];
-                    state = state.MoveToTask(1, col.Tasks.Count);
-                    break;
-                }
-
-                case BoardCommand.ViewDetails:
-                    HandleViewDetails(displayBoard, state);
-                    break;
-
-                case BoardCommand.NewTask:
-                    state = HandleNewTask(displayBoard, state);
-                    break;
-
-                case BoardCommand.MoveTask:
-                    state = HandleMoveTask(board, displayBoard, state);
-                    break;
-
-                case BoardCommand.DeleteTask:
-                    state = HandleDeleteTask(displayBoard, state);
-                    break;
-
-                case BoardCommand.ChangePriority:
-                    HandleChangePriority(displayBoard, state);
-                    break;
-
-                case BoardCommand.ToggleFilter:
-                    (activeFilter, state) = HandleToggleFilter(board, activeFilter, state);
-                    break;
-
-                case BoardCommand.None:
-                default:
-                    break;
-            }
+            if (_commandDispatch.TryGetValue(command, out var handler))
+                handler();
         }
 
         Console.Clear();
@@ -120,74 +112,144 @@ public class KanbanApp
         Console.WriteLine("Goodbye!");
     }
 
-    private void HandleViewDetails(Board displayBoard, NavigationState state)
+    private void HandleQuit()
     {
-        var col = displayBoard.Columns[state.SelectedColumn];
-        if (col.Tasks.Count > 0 && state.SelectedTask < col.Tasks.Count)
-            _taskDetailPanel.Show(col.Tasks[state.SelectedTask]);
+        _running = false;
     }
 
-    private NavigationState HandleNewTask(Board displayBoard, NavigationState state)
+    private void HandleMoveLeft()
+    {
+        _state = _state.MoveToColumn(-1, _displayBoard.Columns.Count);
+    }
+
+    private void HandleMoveRight()
+    {
+        _state = _state.MoveToColumn(1, _displayBoard.Columns.Count);
+    }
+
+    private void HandleMoveUp()
+    {
+        if (_displayBoard.Columns.Count == 0) return;
+        var safeCol = Math.Clamp(_state.SelectedColumn, 0, _displayBoard.Columns.Count - 1);
+        _state = _state with { SelectedColumn = safeCol };
+        var col = _displayBoard.Columns[safeCol];
+        _state = _state.MoveToTask(-1, col.Tasks.Count);
+    }
+
+    private void HandleMoveDown()
+    {
+        if (_displayBoard.Columns.Count == 0) return;
+        var safeCol = Math.Clamp(_state.SelectedColumn, 0, _displayBoard.Columns.Count - 1);
+        _state = _state with { SelectedColumn = safeCol };
+        var col = _displayBoard.Columns[safeCol];
+        _state = _state.MoveToTask(1, col.Tasks.Count);
+    }
+
+    private void HandleViewDetails()
+    {
+        if (_displayBoard.Columns.Count > 0)
+        {
+            var columnIndex = Math.Clamp(_state.SelectedColumn, 0, _displayBoard.Columns.Count - 1);
+            var col = _displayBoard.Columns[columnIndex];
+            if (col.Tasks.Count > 0 && _state.SelectedTask < col.Tasks.Count)
+            {
+                var taskIndex = Math.Clamp(_state.SelectedTask, 0, col.Tasks.Count - 1);
+                _taskDetailPanel.Show(col.Tasks[taskIndex]);
+            }
+        }
+        _boardDirty = true;
+        _needsFullRedraw = true;
+        _boardService.SavePlanningBoard(_boardPath);
+    }
+
+    private void HandleNewTask()
     {
         var inputs = _newTaskDialog.Show();
-        if (inputs is null)
-            return state;
-
-        _taskService.CreateTask(inputs.Title, inputs.Type, inputs.Priority, inputs.Labels);
-        return state.MoveToColumn(0, displayBoard.Columns.Count);
+        if (inputs is not null)
+        {
+            _taskService.CreateTask(inputs.Title, inputs.Type, inputs.Priority, inputs.Labels);
+            _state = _state.MoveToColumn(0, _displayBoard.Columns.Count);
+            _boardDirty = true;
+        }
+        _needsFullRedraw = true;
+        _boardService.SavePlanningBoard(_boardPath);
     }
 
-    private NavigationState HandleMoveTask(Board board, Board displayBoard, NavigationState state)
+    private void HandleMoveTask()
     {
-        var col = displayBoard.Columns[state.SelectedColumn];
-        if (col.Tasks.Count == 0 || state.SelectedTask >= col.Tasks.Count)
-            return state;
-
-        var task = col.Tasks[state.SelectedTask];
-        var targetStatus = _moveDialog.Show(board, state.SelectedColumn);
-        if (targetStatus is null)
-            return state;
-
-        _taskService.MoveTask(task, targetStatus.Value);
-        return state with { SelectedTask = 0 };
+        if (_displayBoard.Columns.Count > 0)
+        {
+            var columnIndex = Math.Clamp(_state.SelectedColumn, 0, _displayBoard.Columns.Count - 1);
+            var col = _displayBoard.Columns[columnIndex];
+            if (col.Tasks.Count > 0 && _state.SelectedTask < col.Tasks.Count)
+            {
+                var taskIndex = Math.Clamp(_state.SelectedTask, 0, col.Tasks.Count - 1);
+                var task = col.Tasks[taskIndex];
+                var targetStatus = _moveDialog.Show(_board, columnIndex);
+                if (targetStatus is not null)
+                {
+                    _taskService.MoveTask(task, targetStatus.Value);
+                    _state = _state with { SelectedTask = 0 };
+                    _boardDirty = true;
+                }
+            }
+        }
+        _needsFullRedraw = true;
+        _boardService.SavePlanningBoard(_boardPath);
     }
 
-    private NavigationState HandleDeleteTask(Board displayBoard, NavigationState state)
+    private void HandleDeleteTask()
     {
-        var col = displayBoard.Columns[state.SelectedColumn];
-        if (col.Tasks.Count == 0 || state.SelectedTask >= col.Tasks.Count)
-            return state;
-
-        var task = col.Tasks[state.SelectedTask];
-        if (!_confirmDialog.Confirm(task))
-            return state;
-
-        _taskService.DeleteTask(task);
-        return state with { SelectedTask = Math.Max(0, state.SelectedTask - 1) };
+        if (_displayBoard.Columns.Count > 0)
+        {
+            var columnIndex = Math.Clamp(_state.SelectedColumn, 0, _displayBoard.Columns.Count - 1);
+            var col = _displayBoard.Columns[columnIndex];
+            if (col.Tasks.Count > 0 && _state.SelectedTask < col.Tasks.Count)
+            {
+                var taskIndex = Math.Clamp(_state.SelectedTask, 0, col.Tasks.Count - 1);
+                var task = col.Tasks[taskIndex];
+                if (_confirmDialog.Confirm(task))
+                {
+                    _taskService.DeleteTask(task);
+                    _state = _state with { SelectedTask = Math.Max(0, _state.SelectedTask - 1) };
+                    _boardDirty = true;
+                }
+            }
+        }
+        _needsFullRedraw = true;
+        _boardService.SavePlanningBoard(_boardPath);
     }
 
-    private void HandleChangePriority(Board displayBoard, NavigationState state)
+    private void HandleChangePriority()
     {
-        var col = displayBoard.Columns[state.SelectedColumn];
-        if (col.Tasks.Count == 0 || state.SelectedTask >= col.Tasks.Count)
+        if (_displayBoard.Columns.Count == 0) return;
+        var columnIndex = Math.Clamp(_state.SelectedColumn, 0, _displayBoard.Columns.Count - 1);
+        var col = _displayBoard.Columns[columnIndex];
+        if (col.IsEmpty || _state.SelectedTask >= col.Tasks.Count)
             return;
 
-        var task = col.Tasks[state.SelectedTask];
+        var taskIndex = Math.Clamp(_state.SelectedTask, 0, col.Tasks.Count - 1);
+        var task = col.Tasks[taskIndex];
         var newPriority = _priorityDialog.Show(task.Priority);
         if (newPriority == task.Priority)
             return;
 
         var updatedTask = task.SetPriority(newPriority);
-        _taskService.MoveTask(updatedTask, updatedTask.Status);
+        _taskService.UpdateTask(updatedTask);
+        _boardDirty = true;
+        _needsFullRedraw = true;
     }
 
-    private (FilterCriteria? filter, NavigationState state) HandleToggleFilter(
-        Board board, FilterCriteria? activeFilter, NavigationState state)
+    private void HandleToggleFilter()
     {
-        if (activeFilter is not null)
-            return (null, state with { SelectedTask = 0 });
+        if (_activeFilter is not null)
+        {
+            _activeFilter = null;
+            _state = _state with { SelectedTask = 0 };
+            return;
+        }
 
-        var allLabels = board.Columns
+        var allLabels = _board.Columns
             .SelectMany(c => c.Tasks)
             .SelectMany(t => t.Labels)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -196,10 +258,26 @@ public class KanbanApp
             .AsReadOnly();
 
         var newFilter = _filterDialog.Show(allLabels);
-        if (newFilter is null)
-            return (null, state);
+        _needsFullRedraw = true;
+        if (newFilter is not null)
+        {
+            _activeFilter = newFilter;
+            _state = _state with { SelectedTask = 0 };
+        }
+    }
 
-        return (newFilter, state with { SelectedTask = 0 });
+    private void RenderBuffered(Board board, NavigationState state, string? filterInfo)
+    {
+        var originalOut = Console.Out;
+        using (var bufferStream = new BufferedStream(Console.OpenStandardOutput(), 64 * 1024))
+        using (var bufferWriter = new StreamWriter(bufferStream, Console.OutputEncoding) { AutoFlush = false })
+        {
+            Console.SetOut(bufferWriter);
+            _boardRenderer.Render(board, state, filterInfo);
+            bufferWriter.Flush();
+            bufferStream.Flush();
+        }
+        Console.SetOut(originalOut);
     }
 
     private static Board ApplyFilter(Board board, FilterCriteria filter)

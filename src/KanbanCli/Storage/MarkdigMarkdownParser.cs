@@ -15,7 +15,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
 
     private static readonly HashSet<string> KnownMetadataKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Status", "Created", "Priority", "Labels"
+        "Status", "Created", "Completed", "Priority", "Labels"
     };
 
     public TaskItem Parse(string markdown, int id, TaskType type)
@@ -31,6 +31,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
         var priority = ParsePriority(metadata.GetValueOrDefault("Priority"));
         var labels = ParseLabels(metadata.GetValueOrDefault("Labels"));
         var createdDate = ParseCreatedDate(metadata.GetValueOrDefault("Created"));
+        var completedDate = ParseCreatedDate(metadata.GetValueOrDefault("Completed"));
 
         return new TaskItem
         {
@@ -41,6 +42,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
             Priority = priority,
             Labels = labels,
             CreatedDate = createdDate,
+            CompletedDate = completedDate,
             ExtraMetadata = extraMetadata,
             Sections = sections
         };
@@ -54,7 +56,9 @@ public class MarkdigMarkdownParser : IMarkdownParser
         sb.AppendLine($"# {typePrefix}: {task.Title}");
         sb.AppendLine();
         sb.AppendLine($"**Status**: {FormatStatus(task.Status)}");
-        sb.AppendLine($"**Created**: {task.CreatedDate:yyyy-MM-dd}");
+        sb.AppendLine($"**Created**: {task.CreatedDate?.ToString(BoardConstants.DateFormat)}");
+        if (task.CompletedDate.HasValue)
+            sb.AppendLine($"**Completed**: {task.CompletedDate.Value.ToString(BoardConstants.DateFormat)}");
         sb.AppendLine($"**Priority**: {task.Priority}");
 
         var labelsValue = task.Labels.Count > 0
@@ -65,30 +69,16 @@ public class MarkdigMarkdownParser : IMarkdownParser
         foreach (var entry in task.ExtraMetadata)
             sb.AppendLine($"**{entry.Key}**: {entry.Value}");
 
-        if (task.Sections.Count > 0)
+        foreach (var section in task.Sections)
         {
-            foreach (var section in task.Sections)
+            sb.AppendLine();
+            sb.AppendLine($"## {section.Key}");
+            var trimmedContent = section.Value.Trim('\r', '\n');
+            if (!string.IsNullOrWhiteSpace(trimmedContent))
             {
                 sb.AppendLine();
-                sb.AppendLine($"## {section.Key}");
-                var trimmedContent = section.Value.Trim('\r', '\n');
-                if (!string.IsNullOrWhiteSpace(trimmedContent))
-                {
-                    sb.AppendLine();
-                    sb.AppendLine(trimmedContent);
-                }
+                sb.AppendLine(trimmedContent);
             }
-        }
-        else
-        {
-            sb.AppendLine();
-            sb.AppendLine("## Context & Motivation");
-            sb.AppendLine();
-            sb.AppendLine("## Acceptance Criteria");
-            sb.AppendLine();
-            sb.AppendLine("## Progress Log");
-            sb.AppendLine();
-            sb.AppendLine($"- {task.CreatedDate:yyyy-MM-dd} - Created");
         }
 
         return sb.ToString();
@@ -100,13 +90,14 @@ public class MarkdigMarkdownParser : IMarkdownParser
         var match = FileNameRegex.Match(name);
 
         if (!match.Success)
-            throw new ArgumentException($"File name '{fileName}' does not match expected pattern.", nameof(fileName));
+            return (0, TaskType.Feature, string.Empty);
 
         var id = int.Parse(match.Groups[1].Value);
         var typeString = match.Groups[2].Value;
         var description = match.Groups[3].Value;
 
-        var taskType = ParseTaskType(typeString);
+        if (!Enum.TryParse<TaskType>(typeString, ignoreCase: true, out var taskType))
+            return (id, TaskType.Feature, description);
 
         return (id, taskType, description);
     }
@@ -232,11 +223,12 @@ public class MarkdigMarkdownParser : IMarkdownParser
     {
         return value switch
         {
+            null or "" => TaskStatus.Backlog,
             "Backlog" => TaskStatus.Backlog,
             "InProgress" or "In Progress" or "In-Progress" => TaskStatus.InProgress,
             "Done" => TaskStatus.Done,
             "OnHold" or "On Hold" or "On-Hold" => TaskStatus.OnHold,
-            _ => TaskStatus.Backlog
+            _ => throw new FormatException($"Unknown task status: '{value}'")
         };
     }
 
@@ -264,11 +256,16 @@ public class MarkdigMarkdownParser : IMarkdownParser
             .AsReadOnly();
     }
 
-    private static DateTime ParseCreatedDate(string? value)
+    private static DateTime? ParseCreatedDate(string? value)
     {
-        if (DateTime.TryParse(value, out var date))
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        if (DateTime.TryParse(value, System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var date))
             return date;
-        return DateTime.UtcNow;
+
+        return null;
     }
 
     private static string FormatStatus(TaskStatus status)
@@ -276,9 +273,9 @@ public class MarkdigMarkdownParser : IMarkdownParser
         return status switch
         {
             TaskStatus.Backlog => "Backlog",
-            TaskStatus.InProgress => "InProgress",
+            TaskStatus.InProgress => "In Progress",
             TaskStatus.Done => "Done",
-            TaskStatus.OnHold => "OnHold",
+            TaskStatus.OnHold => "On Hold",
             _ => status.ToString()
         };
     }
@@ -287,6 +284,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
     {
         if (Enum.TryParse<TaskType>(value, ignoreCase: true, out var result))
             return result;
-        return TaskType.Feature;
+
+        throw new FormatException($"Unknown task type: '{value}'");
     }
 }

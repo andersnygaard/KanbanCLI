@@ -93,6 +93,18 @@ From the gaps and quality issues found, select the **3 most impactful tasks**.
 2. Include: what spec section it addresses, why it's prioritized now, technical approach hints
 3. Assign sequential number (scan ALL `.task-board/**/*.md` for highest existing number)
 
+**Task file format requirements**:
+- Acceptance criteria MUST appear at the bottom of the task file as checkboxes (`- [ ]`)
+- All code changes MUST be represented with **before and after examples** in the Technical Approach section
+- Example:
+  ```
+  **Before:**
+  Console.ForegroundColor = ConsoleColor.Red;
+
+  **After:**
+  Console.ForegroundColor = Theme.Error;
+  ```
+
 ### Phase 5: Update Planning Board
 
 After creating tasks, update `.task-board/PLANNING-BOARD.md` with:

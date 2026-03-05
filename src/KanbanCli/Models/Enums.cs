@@ -34,12 +34,15 @@ public enum TaskStatus
 
 public static class TaskStatusExtensions
 {
-    public static string ToDisplayString(this TaskStatus status) => status switch
+    public static string ToDisplayString(this TaskStatus status)
     {
-        TaskStatus.Backlog => "Backlog",
-        TaskStatus.InProgress => "In Progress",
-        TaskStatus.Done => "Done",
-        TaskStatus.OnHold => "On Hold",
-        _ => status.ToString()
-    };
+        return status switch
+        {
+            TaskStatus.Backlog => "Backlog",
+            TaskStatus.InProgress => "In Progress",
+            TaskStatus.Done => "Done",
+            TaskStatus.OnHold => "On Hold",
+            _ => status.ToString()
+        };
+    }
 }

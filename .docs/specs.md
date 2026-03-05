@@ -251,14 +251,32 @@ Komponent-basert: små klasser som hver rendrer sin del av skjermen.
 
 ```
 Tui/
-├── BoardView.cs          # Overordnet board-layout (kolonner side om side)
-├── ColumnView.cs         # Én kolonne med header + task-liste
-├── TaskCard.cs           # Én task-rad (tittel, prioritet-farge, labels)
-├── TaskDetailPanel.cs    # Utvidet visning av valgt task
-├── StatusBar.cs          # Bunnen: keybindings, filter-status
-├── NewTaskDialog.cs      # Opprett ny task
-└── InputHandler.cs       # Tastatur-input → kommandoer
+├── KanbanApp.cs              # Hovedloop: input → dispatch → render
+├── BoardView.cs              # Overordnet board-layout (kolonner side om side)
+├── ColumnView.cs             # Én kolonne med header + task-liste + scroll
+├── TaskCard.cs               # Én task-rad (tittel, prioritet-farge, labels)
+├── TaskDetailPanel.cs        # Utvidet visning av valgt task (scrollbar)
+├── StatusBar.cs              # Bunnen: keybindings, filter-status
+├── NavigationState.cs        # Immutable record: SelectedColumn + SelectedTask
+├── Theme.cs                  # Sentralisert fargepalett — alle TUI-farger herfra
+├── TuiHelpers.cs             # Felles rendering-utilities (SafeSetCursorPosition, etc.)
+├── KeyboardInputHandler.cs   # Console.ReadKey → BoardCommand mapping
+├── NewTaskDialog.cs          # Opprett ny task
+├── MoveDialog.cs             # Flytt task til annen kolonne
+├── ConfirmDialog.cs          # Bekreft sletting
+├── PriorityDialog.cs         # Endre prioritet
+├── FilterDialog.cs           # Filtrer board etter label/type/priority
+├── DialogHelper.cs           # Felles dialog-rendering (box borders, etc.)
+└── MarkdownRenderer.cs       # Rendrer markdown-innhold i detail panel
 ```
+
+### TUI-ytelse
+
+Rendering-loopen i `KanbanApp` bruker to teknikker for å unngå lag ved navigasjon:
+
+- **Board-caching:** `BoardService.GetBoard()` (filsystem-lesing) kalles kun etter mutasjoner (opprett, flytt, slett, prioritet, detaljer). Ren navigasjon (piltaster) gjenbruker cached board — ingen disk-I/O.
+- **Buffret output:** All rendering skrives til en `BufferedStream` (64 KB) rundt `Console.Out`. Hundrevis av `Console.Write`- og farge-kall batches til én flush — eliminerer flicker og reduserer systemkall dramatisk.
+- **Full body-clearing:** Kolonner fyller hele sin høyde med blanke linjer etter siste task-kort. Dette forhindrer ghost-innhold fra tidligere skjermbilder (f.eks. detail panel-tekst som "blør igjennom" i tomme kolonner).
 
 ### Markdown-parsing
 
@@ -293,13 +311,28 @@ src/
 │   │   ├── IBoardService.cs
 │   │   └── BoardService.cs
 │   └── Tui/
+│       ├── KanbanApp.cs
 │       ├── IBoardRenderer.cs
 │       ├── BoardView.cs
+│       ├── IColumnView.cs
 │       ├── ColumnView.cs
+│       ├── ITaskCard.cs
 │       ├── TaskCard.cs
 │       ├── TaskDetailPanel.cs
 │       ├── StatusBar.cs
-│       └── InputHandler.cs
+│       ├── NavigationState.cs
+│       ├── Theme.cs
+│       ├── TuiHelpers.cs
+│       ├── IInputHandler.cs
+│       ├── KeyboardInputHandler.cs
+│       ├── BoardCommand.cs
+│       ├── NewTaskDialog.cs
+│       ├── MoveDialog.cs
+│       ├── ConfirmDialog.cs
+│       ├── PriorityDialog.cs
+│       ├── FilterDialog.cs
+│       ├── DialogHelper.cs
+│       └── MarkdownRenderer.cs
 └── KanbanCli.Tests/
     ├── Models/
     │   └── TaskItemTests.cs
