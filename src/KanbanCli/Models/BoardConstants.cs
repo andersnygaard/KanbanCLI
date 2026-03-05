@@ -76,6 +76,17 @@ public static class BoardConstants
     public const int MinWindowHeight = 10;
 
     /// <summary>
+    /// Maximum board height to prevent overly stretched layouts.
+    /// Can be overridden via the KANBAN_HEIGHT environment variable.
+    /// </summary>
+    public const int MaxBoardHeight = 40;
+
+    /// <summary>
+    /// Environment variable name to override board height.
+    /// </summary>
+    public const string HeightEnvVar = "KANBAN_HEIGHT";
+
+    /// <summary>
     /// Maximum number of top-priority items shown in the planning board.
     /// </summary>
     public const int MaxTopPriorities = 5;

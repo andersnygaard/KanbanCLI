@@ -67,8 +67,8 @@ public static class TuiHelpers
     {
         try
         {
-            var safeX = Math.Clamp(x, 0, Math.Max(Console.WindowWidth - 1, 0));
-            var safeY = Math.Clamp(y, 0, Math.Max(Console.WindowHeight - 1, 0));
+            var safeX = Math.Clamp(x, 0, Math.Max(GetEffectiveWidth() - 1, 0));
+            var safeY = Math.Clamp(y, 0, Math.Max(GetEffectiveHeight() - 1, 0));
             Console.SetCursorPosition(safeX, safeY);
         }
         catch (IOException)
@@ -99,14 +99,14 @@ public static class TuiHelpers
     /// </summary>
     public static int GetEffectiveHeight()
     {
-        try
+        var envValue = Environment.GetEnvironmentVariable(BoardConstants.HeightEnvVar);
+        if (!string.IsNullOrEmpty(envValue) && int.TryParse(envValue, out var envHeight) && envHeight >= BoardConstants.MinWindowHeight)
         {
-            return Math.Max(Console.WindowHeight, BoardConstants.MinWindowHeight);
+            return envHeight;
         }
-        catch (IOException)
-        {
-            return BoardConstants.MinWindowHeight;
-        }
+
+        var consoleHeight = TryGetConsoleHeight();
+        return Math.Clamp(consoleHeight, BoardConstants.MinWindowHeight, BoardConstants.MaxBoardHeight);
     }
 
     private static int TryGetConsoleWidth()
@@ -118,6 +118,18 @@ public static class TuiHelpers
         catch (IOException)
         {
             return BoardConstants.MaxBoardWidth;
+        }
+    }
+
+    private static int TryGetConsoleHeight()
+    {
+        try
+        {
+            return Console.WindowHeight;
+        }
+        catch (IOException)
+        {
+            return BoardConstants.MaxBoardHeight;
         }
     }
 
