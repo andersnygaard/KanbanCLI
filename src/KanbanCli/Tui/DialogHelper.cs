@@ -48,7 +48,7 @@ public static class DialogHelper
 
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
 
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > values.Length)
+        if (!int.TryParse(input, out var choice))
         {
             if (!allowZeroCancel)
             {
@@ -56,6 +56,18 @@ public static class DialogHelper
                 Console.ReadKey(intercept: true);
             }
 
+            return null;
+        }
+
+        if (allowZeroCancel && choice == 0)
+        {
+            return null;
+        }
+
+        if (choice < 1 || choice > values.Length)
+        {
+            ShowError("Invalid selection. Press any key to cancel.");
+            Console.ReadKey(intercept: true);
             return null;
         }
 
@@ -232,8 +244,20 @@ public static class DialogHelper
         Console.ResetColor();
 
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > maxValue)
+        if (!int.TryParse(input, out var choice))
+        {
             return null;
+        }
+
+        if (allowZeroCancel && choice == 0)
+        {
+            return null;
+        }
+
+        if (choice < 1 || choice > maxValue)
+        {
+            return null;
+        }
 
         return choice;
     }

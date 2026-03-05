@@ -8,9 +8,9 @@
 
 ## Recently Completed
 
+- **#054** QUALITY: Consolidate Status Formatting and Extract Magic Numbers - Done 2026-03-05
+- **#053** REFACTOR: Extract BoardView.Render() Into Smaller Methods - Done 2026-03-05
+- **#052** BUG: Fix Dialog Boundary Check Vulnerabilities - Done 2026-03-05
 - **#051** CLEANUP: Remove Dead Code and Add Board Width Tests - Done 2026-03-05
 - **#050** QUALITY: Move Hardcoded ConsoleColor Values to Theme.cs - Done 2026-03-05
 - **#049** QUALITY: Convert Expression-Bodied Members to Block Bodies - Done 2026-03-05
-- **#048** QUALITY: Comprehensive Parser and Service Tests - Done 2026-03-05
-- **#047** FEATURE: Show Task Position in Status Bar - Done 2026-03-05
-- **#046** QUALITY: Complete TaskType Color Mapping - Done 2026-03-05

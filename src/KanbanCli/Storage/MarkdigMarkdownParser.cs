@@ -270,13 +270,6 @@ public class MarkdigMarkdownParser : IMarkdownParser
 
     private static string FormatStatus(TaskStatus status)
     {
-        return status switch
-        {
-            TaskStatus.Backlog => "Backlog",
-            TaskStatus.InProgress => "In Progress",
-            TaskStatus.Done => "Done",
-            TaskStatus.OnHold => "On Hold",
-            _ => status.ToString()
-        };
+        return status.ToDisplayString();
     }
 }

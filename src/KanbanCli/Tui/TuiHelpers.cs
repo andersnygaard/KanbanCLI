@@ -59,12 +59,6 @@ public static class TuiHelpers
         };
     }
 
-    /// <summary>Formats a <paramref name="status"/> value as a human-readable display string.</summary>
-    public static string FormatStatus(TaskStatus status)
-    {
-        return status.ToDisplayString();
-    }
-
     /// <summary>
     /// Sets the cursor position, clamping coordinates to valid console bounds.
     /// Prevents ArgumentOutOfRangeException on very small terminals.

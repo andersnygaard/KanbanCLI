@@ -5,6 +5,9 @@ using TaskStatus = KanbanCli.Models.TaskStatus;
 
 public class TaskDetailPanel
 {
+    private const int PageScrollSize = 10;
+    private const int DetailHeightReserve = 4;
+
     private readonly ITaskService _taskService;
 
     public TaskDetailPanel(ITaskService taskService)
@@ -51,11 +54,11 @@ public class TaskDetailPanel
                     break;
 
                 case ConsoleKey.PageUp:
-                    scrollOffset = Math.Max(0, scrollOffset - 10);
+                    scrollOffset = Math.Max(0, scrollOffset - PageScrollSize);
                     break;
 
                 case ConsoleKey.PageDown:
-                    scrollOffset += 10;
+                    scrollOffset += PageScrollSize;
                     break;
 
                 case ConsoleKey.Home:
@@ -78,7 +81,7 @@ public class TaskDetailPanel
 
         var width = DialogHelper.GetBoxWidth();
         var borderColor = Theme.DetailBorder;
-        var visibleHeight = Math.Max(TuiHelpers.GetEffectiveHeight() - 4, 10); // Reserve space for top border, edit hints, bottom border
+        var visibleHeight = Math.Max(TuiHelpers.GetEffectiveHeight() - DetailHeightReserve, BoardConstants.MinWindowHeight); // Reserve space for top border, edit hints, bottom border
 
         // Build all content lines into a list
         var contentLines = BuildContentLines(task, width, borderColor);
