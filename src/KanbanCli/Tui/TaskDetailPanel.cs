@@ -66,7 +66,7 @@ public class TaskDetailPanel
                     return current;
 
                 default:
-                    return current;
+                    break; // Ignore unrecognized keys — only Escape exits
             }
         }
     }

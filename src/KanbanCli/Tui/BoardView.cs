@@ -27,7 +27,7 @@ public class BoardView : IBoardRenderer
     public void Render(Board board, NavigationState state, string? filterInfo = null)
     {
         Console.CursorVisible = false;
-        Console.SetCursorPosition(0, 0);
+        TuiHelpers.SafeSetCursorPosition(0, 0);
 
         var windowWidth = Math.Max(Console.WindowWidth, BoardConstants.MinWindowWidth);
         var windowHeight = Math.Max(Console.WindowHeight, BoardConstants.MinWindowHeight);
@@ -128,21 +128,21 @@ public class BoardView : IBoardRenderer
 
     private static void RenderEmptyBoard(int windowWidth)
     {
-        Console.SetCursorPosition(0, 0);
+        TuiHelpers.SafeSetCursorPosition(0, 0);
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.Write(TopLeft + new string(Horizontal, windowWidth - 2) + TopRight);
-        Console.SetCursorPosition(0, 1);
+        TuiHelpers.SafeSetCursorPosition(0, 1);
         Console.Write(Vertical);
         Console.Write(" No columns defined.".PadRight(windowWidth - 2));
         Console.Write(Vertical);
-        Console.SetCursorPosition(0, 2);
+        TuiHelpers.SafeSetCursorPosition(0, 2);
         Console.Write(BottomLeft + new string(Horizontal, windowWidth - 2) + BottomRight);
         Console.ResetColor();
     }
 
     private static void RenderTitleBar(int row, int windowWidth, ConsoleColor borderColor)
     {
-        Console.SetCursorPosition(0, row);
+        TuiHelpers.SafeSetCursorPosition(0, row);
         Console.ForegroundColor = borderColor;
         Console.Write(Vertical);
 
@@ -160,7 +160,7 @@ public class BoardView : IBoardRenderer
 
     private static void RenderHorizontalLine(int row, int windowWidth, int[] columnWidths, char leftChar, char junctionChar, char rightChar, ConsoleColor color)
     {
-        Console.SetCursorPosition(0, row);
+        TuiHelpers.SafeSetCursorPosition(0, row);
         Console.ForegroundColor = color;
 
         Console.Write(leftChar);
@@ -175,7 +175,7 @@ public class BoardView : IBoardRenderer
 
     private static void RenderSimpleHorizontalLine(int row, int windowWidth, char leftChar, char rightChar, ConsoleColor color)
     {
-        Console.SetCursorPosition(0, row);
+        TuiHelpers.SafeSetCursorPosition(0, row);
         Console.ForegroundColor = color;
         Console.Write(leftChar);
         Console.Write(new string(Horizontal, windowWidth - 2));
@@ -185,7 +185,7 @@ public class BoardView : IBoardRenderer
 
     private static void RenderColumnHeader(Column column, int contentX, int contentWidth, int row, bool isSelected)
     {
-        Console.SetCursorPosition(contentX, row);
+        TuiHelpers.SafeSetCursorPosition(contentX, row);
 
         if (isSelected)
         {
@@ -207,7 +207,7 @@ public class BoardView : IBoardRenderer
     private static void RenderVerticalSeparators(int row, int[] columnXPositions, int[] columnWidths, int columnCount, int windowWidth, int selectedColumn, ConsoleColor defaultColor)
     {
         // Left border
-        Console.SetCursorPosition(0, row);
+        TuiHelpers.SafeSetCursorPosition(0, row);
         var leftBorderColor = selectedColumn == 0 ? ConsoleColor.Cyan : defaultColor;
         Console.ForegroundColor = leftBorderColor;
         Console.Write(Vertical);
@@ -217,7 +217,7 @@ public class BoardView : IBoardRenderer
         for (var i = 0; i < columnCount; i++)
         {
             var separatorX = columnXPositions[i] + columnWidths[i];
-            Console.SetCursorPosition(separatorX, row);
+            TuiHelpers.SafeSetCursorPosition(separatorX, row);
 
             // Separator is highlighted if it borders the selected column
             var isAdjacentToSelected = (i == selectedColumn) || (i + 1 == selectedColumn);

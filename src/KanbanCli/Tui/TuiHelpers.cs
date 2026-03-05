@@ -47,10 +47,28 @@ public static class TuiHelpers
     /// <summary>Formats a <paramref name="status"/> value as a human-readable display string.</summary>
     public static string FormatStatus(TaskStatus status) => status.ToDisplayString();
 
+    /// <summary>
+    /// Sets the cursor position, clamping coordinates to valid console bounds.
+    /// Prevents ArgumentOutOfRangeException on very small terminals.
+    /// </summary>
+    public static void SafeSetCursorPosition(int x, int y)
+    {
+        try
+        {
+            var safeX = Math.Clamp(x, 0, Math.Max(Console.WindowWidth - 1, 0));
+            var safeY = Math.Clamp(y, 0, Math.Max(Console.WindowHeight - 1, 0));
+            Console.SetCursorPosition(safeX, safeY);
+        }
+        catch (IOException)
+        {
+            // Terminal may have been resized between check and set
+        }
+    }
+
     /// <summary>Renders a colored header bar with <paramref name="title"/> spanning the full <paramref name="windowWidth"/>.</summary>
     public static void RenderHeader(string title, int windowWidth, ConsoleColor backgroundColor)
     {
-        Console.SetCursorPosition(0, 0);
+        SafeSetCursorPosition(0, 0);
         Console.BackgroundColor = backgroundColor;
         Console.ForegroundColor = ConsoleColor.White;
         Console.Write($" {title}".PadRight(windowWidth - 1));

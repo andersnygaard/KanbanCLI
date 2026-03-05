@@ -9,7 +9,7 @@ public class StatusBar
 
     public void Render(int row, int width, string? filterInfo = null)
     {
-        Console.SetCursorPosition(0, row);
+        TuiHelpers.SafeSetCursorPosition(0, row);
 
         // Left border
         Console.ForegroundColor = ConsoleColor.DarkGray;

@@ -119,6 +119,7 @@ public class TaskRepositoryTests
         var updatedContent = "# FEATURE: Test task (InProgress)\n";
 
         _fileSystem.DirectoryExists(targetFolder).Returns(true);
+        _fileSystem.FileExists(targetFile).Returns(true);
         _parser.Serialize(Arg.Is<TaskItem>(t => t.Status == TaskStatus.InProgress))
                .Returns(updatedContent);
 

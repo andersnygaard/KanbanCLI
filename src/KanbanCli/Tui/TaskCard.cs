@@ -20,7 +20,7 @@ public class TaskCard : ITaskCard
 
     private static void RenderLine1(TaskItem task, int columnX, int row, int columnWidth, bool isSelected, ConsoleColor bgColor, ConsoleColor defaultFg)
     {
-        Console.SetCursorPosition(columnX, row);
+        TuiHelpers.SafeSetCursorPosition(columnX, row);
         Console.BackgroundColor = bgColor;
         Console.ForegroundColor = defaultFg;
 
@@ -41,7 +41,7 @@ public class TaskCard : ITaskCard
 
     private static void RenderLine2(TaskItem task, int columnX, int row, int columnWidth, ConsoleColor bgColor, ConsoleColor defaultFg)
     {
-        Console.SetCursorPosition(columnX, row);
+        TuiHelpers.SafeSetCursorPosition(columnX, row);
         Console.BackgroundColor = bgColor;
         Console.ForegroundColor = defaultFg;
 
@@ -59,7 +59,7 @@ public class TaskCard : ITaskCard
 
     private static void RenderLine3(TaskItem task, int columnX, int row, int columnWidth, ConsoleColor bgColor, ConsoleColor defaultFg)
     {
-        Console.SetCursorPosition(columnX, row);
+        TuiHelpers.SafeSetCursorPosition(columnX, row);
         Console.BackgroundColor = bgColor;
 
         const string indent = "   ";

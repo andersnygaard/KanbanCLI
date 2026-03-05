@@ -53,6 +53,9 @@ public class MoveDialog
         if (choice < 1 || choice > board.Columns.Count)
             return null;
 
+        if (choice - 1 == currentColumnIndex)
+            return null; // Already in this column
+
         return BoardConstants.ColumnOrder[choice - 1];
     }
 }

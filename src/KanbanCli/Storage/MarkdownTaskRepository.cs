@@ -93,7 +93,8 @@ public class MarkdownTaskRepository : ITaskRepository
         var content = _parser.Serialize(updatedTask);
         _fileSystem.WriteAllText(targetPath, content);
 
-        if (sourcePath != targetPath)
+        // Only delete source after verifying target was written successfully
+        if (sourcePath != targetPath && _fileSystem.FileExists(targetPath))
             _fileSystem.DeleteFile(sourcePath);
     }
 
