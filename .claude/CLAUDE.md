@@ -49,6 +49,11 @@ src/
 - Keep methods short and single-purpose — max ~30 lines
 - Prefer **early returns** over nested conditionals
 - Use **meaningful names** — avoid abbreviations
+- **All methods and properties must use block bodies** — no expression-bodied members (`=>`)
+  - `public int Foo() { return 42; }` — YES
+  - `public int Foo() => 42;` — NO
+  - Switch expressions inside a block body are fine: `return x switch { ... };`
+- **All TUI colors come from `Theme.cs`** — never hardcode `ConsoleColor` values in TUI files
 
 ## Architectural Principles
 - **Layered architecture:** Clear separation between TUI, Services, Models, and Storage

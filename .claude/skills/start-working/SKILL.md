@@ -94,9 +94,21 @@ Move the task file from `.task-board/backlog/` to `.task-board/in-progress/`.
 
 Understand the full task:
 - Context & Motivation
-- Acceptance Criteria (checkboxes to complete)
-- Technical Approach and implementation steps
+- Acceptance Criteria (checkboxes to complete) — **MUST be at the bottom of the task file**
+- Technical Approach with **before and after code examples** for every code change
 - Dependencies and risks
+
+**Task File Requirements:**
+- All acceptance criteria MUST appear at the bottom of the task file as checkboxes
+- All code changes MUST be represented with before/after examples in the Technical Approach section
+- Example format:
+  ```
+  **Before:**
+  Console.ForegroundColor = ConsoleColor.Red;
+
+  **After:**
+  Console.ForegroundColor = Theme.Error;
+  ```
 
 ### Step 5: Clarify Uncertainties
 
@@ -178,6 +190,10 @@ CODE CONVENTIONS:
 - Arrange-Act-Assert pattern
 - One assertion per test where possible
 - Keep methods small and single-purpose
+- ALL methods and properties MUST use block bodies (NO expression-bodied members with =>)
+  - YES: public int Foo() { return 42; }
+  - NO:  public int Foo() => 42;
+- ALL TUI colors MUST come from Theme.cs — never hardcode ConsoleColor values
 
 CRITICAL RESTRICTIONS:
 1. Work ONLY on this task from .task-board/ — no ad-hoc work
