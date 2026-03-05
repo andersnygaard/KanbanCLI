@@ -30,7 +30,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
         var status = ParseStatus(metadata.GetValueOrDefault("Status"));
         var priority = ParsePriority(metadata.GetValueOrDefault("Priority"));
         var labels = ParseLabels(metadata.GetValueOrDefault("Labels"));
-        var createdDate = ParseCreatedDate(metadata.GetValueOrDefault("Created"));
+        var createdDate = ParseCreatedDate(metadata.GetValueOrDefault("Created")) ?? DateTime.UtcNow;
         var completedDate = ParseCreatedDate(metadata.GetValueOrDefault("Completed"));
 
         return new TaskItem
@@ -56,7 +56,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
         sb.AppendLine($"# {typePrefix}: {task.Title}");
         sb.AppendLine();
         sb.AppendLine($"**Status**: {FormatStatus(task.Status)}");
-        sb.AppendLine($"**Created**: {task.CreatedDate?.ToString(BoardConstants.DateFormat)}");
+        sb.AppendLine($"**Created**: {task.CreatedDate.ToString(BoardConstants.DateFormat)}");
         if (task.CompletedDate.HasValue)
             sb.AppendLine($"**Completed**: {task.CompletedDate.Value.ToString(BoardConstants.DateFormat)}");
         sb.AppendLine($"**Priority**: {task.Priority}");

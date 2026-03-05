@@ -25,17 +25,14 @@ public class BoardServiceTests
         Priority priority = Priority.Medium,
         DateTime? completedDate = null)
     {
-        return new()
-        {
-            Id = id,
-            Title = title,
-            Type = type,
-            Status = status,
-            Priority = priority,
-            Labels = [],
-            CreatedDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
-            CompletedDate = completedDate
-        };
+        return new TestTaskBuilder()
+            .WithId(id)
+            .WithTitle(title)
+            .WithType(type)
+            .WithStatus(status)
+            .WithPriority(priority)
+            .WithCompletedDate(completedDate)
+            .Build();
     }
 
     [Fact]
@@ -173,7 +170,7 @@ public class BoardServiceTests
     }
 
     [Fact]
-    public void GeneratePlanningBoard_MixedPriorities_OnlyHighPriorityBacklogInTopPriorities()
+    public void GeneratePlanningBoard_MixedPriorities_ExcludesLowPriorityBacklogFromTopPriorities()
     {
         var lowBacklog = CreateTask(1, "Low priority task", TaskType.Feature, TaskStatus.Backlog, Priority.Low);
         var medBacklog = CreateTask(2, "Medium priority task", TaskType.Feature, TaskStatus.Backlog, Priority.Medium);
@@ -184,14 +181,14 @@ public class BoardServiceTests
         var sut = CreateSut();
         var result = sut.GeneratePlanningBoard();
 
-        result.Should().Contain("High priority task");
         var topPrioritiesSection = result.Substring(
             result.IndexOf("## Top Priorities", StringComparison.Ordinal),
             result.IndexOf("## Recently Completed", StringComparison.Ordinal)
                 - result.IndexOf("## Top Priorities", StringComparison.Ordinal));
 
+        topPrioritiesSection.Should().Contain("High priority task");
+        topPrioritiesSection.Should().Contain("Medium priority task");
         topPrioritiesSection.Should().NotContain("Low priority task");
-        topPrioritiesSection.Should().NotContain("Medium priority task");
     }
 
     [Fact]
@@ -320,6 +317,70 @@ public class BoardServiceTests
         board.Columns[1].Status.Should().Be(TaskStatus.InProgress);
         board.Columns[2].Status.Should().Be(TaskStatus.Done);
         board.Columns[3].Status.Should().Be(TaskStatus.OnHold);
+    }
+
+    [Fact]
+    public void GeneratePlanningBoard_ManyCompletedTasks_LimitsToMaxRecentlyCompleted()
+    {
+        var tasks = Enumerable.Range(1, 15)
+            .Select(i => CreateTask(i, $"Done task {i}", TaskType.Feature, TaskStatus.Done,
+                completedDate: new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(i)))
+            .ToList();
+
+        _repository.GetAll().Returns(tasks);
+
+        var sut = CreateSut();
+        var result = sut.GeneratePlanningBoard();
+
+        var completedSection = result.Substring(
+            result.IndexOf("## Recently Completed", StringComparison.Ordinal));
+
+        // The most recent 10 should be present (tasks 6-15, ordered descending)
+        for (var i = 15; i >= 6; i--)
+        {
+            completedSection.Should().Contain($"Done task {i}");
+        }
+
+        // The oldest 5 should be excluded (tasks 1-5)
+        for (var i = 1; i <= 5; i++)
+        {
+            completedSection.Should().NotContain($"Done task {i}");
+        }
+    }
+
+    [Fact]
+    public void GeneratePlanningBoard_FewHighPriority_FallsBackToMediumPriority()
+    {
+        var inProgressTask = CreateTask(1, "Active work", TaskType.Feature, TaskStatus.InProgress);
+        var highBacklog = CreateTask(2, "High prio item", TaskType.Bug, TaskStatus.Backlog, Priority.High);
+        var medBacklog1 = CreateTask(3, "Medium item one", TaskType.Feature, TaskStatus.Backlog, Priority.Medium);
+        var medBacklog2 = CreateTask(4, "Medium item two", TaskType.Feature, TaskStatus.Backlog, Priority.Medium);
+
+        _repository.GetAll().Returns([inProgressTask, highBacklog, medBacklog1, medBacklog2]);
+
+        var sut = CreateSut();
+        var result = sut.GeneratePlanningBoard();
+
+        var topPrioritiesSection = result.Substring(
+            result.IndexOf("## Top Priorities", StringComparison.Ordinal),
+            result.IndexOf("## Recently Completed", StringComparison.Ordinal)
+                - result.IndexOf("## Top Priorities", StringComparison.Ordinal));
+
+        // In-progress and high-priority appear first
+        topPrioritiesSection.Should().Contain("Active work");
+        topPrioritiesSection.Should().Contain("High prio item");
+
+        // Medium-priority backlog fills remaining slots
+        topPrioritiesSection.Should().Contain("Medium item one");
+        topPrioritiesSection.Should().Contain("Medium item two");
+
+        // Verify ordering: in-progress before high before medium
+        var activeIndex = topPrioritiesSection.IndexOf("Active work", StringComparison.Ordinal);
+        var highIndex = topPrioritiesSection.IndexOf("High prio item", StringComparison.Ordinal);
+        var medIndex = topPrioritiesSection.IndexOf("Medium item one", StringComparison.Ordinal);
+
+        activeIndex.Should().BeLessThan(highIndex);
+        highIndex.Should().BeLessThan(medIndex);
     }
 
     [Fact]

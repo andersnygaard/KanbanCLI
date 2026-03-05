@@ -276,7 +276,7 @@ public class MarkdownParserTests
         reparsed.Status.Should().Be(original.Status);
         reparsed.Priority.Should().Be(original.Priority);
         reparsed.Labels.Should().BeEquivalentTo(original.Labels);
-        reparsed.CreatedDate!.Value.Date.Should().Be(original.CreatedDate!.Value.Date);
+        reparsed.CreatedDate.Date.Should().Be(original.CreatedDate.Date);
     }
 
     [Fact]
@@ -372,7 +372,7 @@ public class MarkdownParserTests
     }
 
     [Fact]
-    public void Parse_InvalidDateFormat_ReturnsNullCreatedDate()
+    public void Parse_InvalidDateFormat_DefaultsToUtcNow()
     {
         var markdown = """
             # FEATURE: Test task
@@ -385,11 +385,11 @@ public class MarkdownParserTests
 
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
-    public void Parse_MissingCreatedDate_ReturnsNullCreatedDate()
+    public void Parse_MissingCreatedDate_DefaultsToUtcNow()
     {
         var markdown = """
             # FEATURE: Test task
@@ -401,7 +401,7 @@ public class MarkdownParserTests
 
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -416,6 +416,7 @@ public class MarkdownParserTests
         result.Status.Should().Be(TaskStatus.Backlog);
         result.Priority.Should().Be(Priority.Medium);
         result.Labels.Should().BeEmpty();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -470,7 +471,7 @@ public class MarkdownParserTests
         secondParse.Status.Should().Be(firstParse.Status);
         secondParse.Priority.Should().Be(firstParse.Priority);
         secondParse.Labels.Should().BeEquivalentTo(firstParse.Labels);
-        secondParse.CreatedDate!.Value.Date.Should().Be(firstParse.CreatedDate!.Value.Date);
+        secondParse.CreatedDate.Date.Should().Be(firstParse.CreatedDate.Date);
         secondParse.ExtraMetadata.Should().BeEquivalentTo(firstParse.ExtraMetadata);
         secondParse.Sections.Keys.Should().BeEquivalentTo(firstParse.Sections.Keys);
 
@@ -573,7 +574,7 @@ public class MarkdownParserTests
     }
 
     [Fact]
-    public void Parse_InvalidDate_ReturnsNullInsteadOfSilentDefault()
+    public void Parse_InvalidDate_DefaultsToUtcNow()
     {
         var markdown = """
             # FEATURE: Task with bad date
@@ -586,11 +587,11 @@ public class MarkdownParserTests
 
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
-    public void Parse_GarbageDate_ReturnsNullInsteadOfSilentDefault()
+    public void Parse_GarbageDate_DefaultsToUtcNow()
     {
         var markdown = """
             # FEATURE: Task with garbage date
@@ -603,7 +604,7 @@ public class MarkdownParserTests
 
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -647,7 +648,7 @@ public class MarkdownParserTests
         result.Status.Should().Be(TaskStatus.Backlog);
         result.Priority.Should().Be(Priority.Medium);
         result.Labels.Should().BeEmpty();
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
         result.ExtraMetadata.Should().BeEmpty();
         result.Sections.Should().BeEmpty();
     }
@@ -692,7 +693,7 @@ public class MarkdownParserTests
         result.Status.Should().Be(TaskStatus.Backlog);
         result.Priority.Should().Be(Priority.Medium);
         result.Labels.Should().BeEmpty();
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
         result.ExtraMetadata.Should().BeEmpty();
         result.Sections.Should().BeEmpty();
     }
@@ -745,7 +746,7 @@ public class MarkdownParserTests
         result.Status.Should().Be(TaskStatus.Backlog);
         result.Priority.Should().Be(Priority.Medium);
         result.Labels.Should().BeEmpty();
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
         result.ExtraMetadata.Should().BeEmpty();
         result.Sections.Should().BeEmpty();
     }

@@ -18,16 +18,11 @@ public class TaskServiceTests
 
     private static TaskItem CreateTask(int id = 1, TaskStatus status = TaskStatus.Backlog, Priority priority = Priority.Medium)
     {
-        return new()
-        {
-            Id = id,
-            Title = "Test task",
-            Type = TaskType.Feature,
-            Status = status,
-            Priority = priority,
-            Labels = [],
-            CreatedDate = new DateTime(2026, 3, 4, 0, 0, 0, DateTimeKind.Utc)
-        };
+        return new TestTaskBuilder()
+            .WithId(id)
+            .WithStatus(status)
+            .WithPriority(priority)
+            .Build();
     }
 
     [Fact]
@@ -429,7 +424,7 @@ public class TaskServiceTests
 
         var task = sut.CreateTask("Test task", TaskType.Feature, Priority.Medium, []);
 
-        var dateString = task.CreatedDate!.Value.ToString(BoardConstants.DateFormat);
+        var dateString = task.CreatedDate.ToString(BoardConstants.DateFormat);
         task.Sections["Progress Log"].Should().Contain(dateString);
     }
 }

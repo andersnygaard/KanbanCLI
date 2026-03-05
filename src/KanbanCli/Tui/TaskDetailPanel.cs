@@ -119,7 +119,7 @@ public class TaskDetailPanel
         lines.Add(ContentLine.StatusWorkflow(task.Status, width, borderColor));
 
         lines.Add(ContentLine.Labels(task.Labels, width, borderColor));
-        lines.Add(ContentLine.Field("Created", task.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "(unknown)", width, borderColor));
+        lines.Add(ContentLine.Field("Created", task.CreatedDate.ToString("yyyy-MM-dd HH:mm"), width, borderColor));
         if (task.CompletedDate.HasValue)
             lines.Add(ContentLine.Field("Completed", task.CompletedDate.Value.ToString("yyyy-MM-dd HH:mm"), width, borderColor));
 

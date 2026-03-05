@@ -14,18 +14,19 @@ public class TaskItemTests
         TaskStatus status = TaskStatus.Backlog,
         IReadOnlyList<string>? labels = null,
         DateTime? createdDate = null,
-        DateTime? completedDate = null) =>
-        new()
-        {
-            Id = id,
-            Title = title,
-            Type = type,
-            Priority = priority,
-            Status = status,
-            Labels = labels ?? [],
-            CreatedDate = createdDate ?? DateTime.UtcNow,
-            CompletedDate = completedDate
-        };
+        DateTime? completedDate = null)
+    {
+        return new TestTaskBuilder()
+            .WithId(id)
+            .WithTitle(title)
+            .WithType(type)
+            .WithPriority(priority)
+            .WithStatus(status)
+            .WithLabels(labels?.ToArray() ?? [])
+            .WithCreatedDate(createdDate ?? DateTime.UtcNow)
+            .WithCompletedDate(completedDate)
+            .Build();
+    }
 
     [Fact]
     public void ChangeStatus_ToDone_SetsCompletedDate()

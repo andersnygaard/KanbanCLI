@@ -90,4 +90,9 @@ public static class BoardConstants
     /// Maximum number of top-priority items shown in the planning board.
     /// </summary>
     public const int MaxTopPriorities = 5;
+
+    /// <summary>
+    /// Maximum number of recently completed items shown in the planning board.
+    /// </summary>
+    public const int MaxRecentlyCompleted = 10;
 }

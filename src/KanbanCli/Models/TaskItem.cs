@@ -8,7 +8,7 @@ public record TaskItem
     public Priority Priority { get; init; }
     public TaskStatus Status { get; init; }
     public IReadOnlyList<string> Labels { get; init; } = [];
-    public DateTime? CreatedDate { get; init; }
+    public DateTime CreatedDate { get; init; }
     public DateTime? CompletedDate { get; init; }
     public IReadOnlyDictionary<string, string> ExtraMetadata { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> Sections { get; init; } = new Dictionary<string, string>();
