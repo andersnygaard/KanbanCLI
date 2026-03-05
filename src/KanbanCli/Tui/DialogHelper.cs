@@ -46,6 +46,7 @@ public static class DialogHelper
         Console.Write($"  Enter number (1-{values.Length}{cancelHint}): ");
         Console.ResetColor();
 
+        Console.Out.Flush();
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
 
         if (!int.TryParse(input, out var choice))
@@ -53,6 +54,7 @@ public static class DialogHelper
             if (!allowZeroCancel)
             {
                 ShowError("Invalid selection. Press any key to cancel.");
+                Console.Out.Flush();
                 Console.ReadKey(intercept: true);
             }
 
@@ -67,6 +69,7 @@ public static class DialogHelper
         if (choice < 1 || choice > values.Length)
         {
             ShowError("Invalid selection. Press any key to cancel.");
+            Console.Out.Flush();
             Console.ReadKey(intercept: true);
             return null;
         }
@@ -209,6 +212,7 @@ public static class DialogHelper
         Console.Write(prompt);
         Console.ResetColor();
         Console.ForegroundColor = Theme.DialogText;
+        Console.Out.Flush();
         var input = Console.ReadLine() ?? string.Empty;
         Console.ResetColor();
         return input;
@@ -243,6 +247,7 @@ public static class DialogHelper
         Console.Write($"  Enter number (1-{maxValue}{cancelHint}): ");
         Console.ResetColor();
 
+        Console.Out.Flush();
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
         if (!int.TryParse(input, out var choice))
         {
@@ -291,6 +296,7 @@ public static class DialogHelper
             if (!allowZeroCancel)
             {
                 ShowError("Invalid selection. Press any key to cancel.");
+                Console.Out.Flush();
                 Console.ReadKey(intercept: true);
             }
 
