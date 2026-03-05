@@ -858,6 +858,17 @@ public class MarkdownParserTests
     }
 
     [Fact]
+    public void Parse_AcceptanceCriteria_ParsesCheckboxes()
+    {
+        var result = _parser.Parse(FullTaskMarkdown, 42, TaskType.Feature);
+
+        result.Sections.Should().ContainKey("Acceptance Criteria");
+        var criteria = result.Sections["Acceptance Criteria"];
+        criteria.Should().Contain("- [ ] First item");
+        criteria.Should().Contain("- [x] Second item");
+    }
+
+    [Fact]
     public void ParseFileName_EmptyString_ReturnsSensibleDefaults()
     {
         var (id, type, description) = _parser.ParseFileName("");

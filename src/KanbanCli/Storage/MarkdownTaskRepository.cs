@@ -76,6 +76,7 @@ public class MarkdownTaskRepository : ITaskRepository
 
     public void Move(TaskItem task, TaskStatus targetColumn)
     {
+        // Write+delete instead of MoveFile: task content changes (status updated in markdown)
         var sourceFolderPath = GetColumnPath(task.Status);
         var sourceFileName = task.GenerateFileName();
         var sourcePath = Path.Combine(sourceFolderPath, sourceFileName);

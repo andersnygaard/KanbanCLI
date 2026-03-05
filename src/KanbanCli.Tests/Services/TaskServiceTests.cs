@@ -81,6 +81,32 @@ public class TaskServiceTests
     }
 
     [Fact]
+    public void MoveTask_UpdatesStatusAndMovesFile()
+    {
+        var task = CreateTask(1, TaskStatus.Backlog);
+        var sut = CreateSut();
+
+        sut.MoveTask(task, TaskStatus.InProgress);
+
+        _repository.Received(1).Move(
+            Arg.Is<TaskItem>(t => t.Id == 1),
+            TaskStatus.InProgress);
+    }
+
+    [Fact]
+    public void MoveTask_ToDone_SetsCompletedDate()
+    {
+        var task = CreateTask(1, TaskStatus.InProgress);
+        var sut = CreateSut();
+
+        sut.MoveTask(task, TaskStatus.Done);
+
+        _repository.Received(1).Move(
+            Arg.Is<TaskItem>(t => t.Id == 1),
+            TaskStatus.Done);
+    }
+
+    [Fact]
     public void DeleteTask_CallsRepositoryDelete()
     {
         var task = CreateTask(1, TaskStatus.Backlog);

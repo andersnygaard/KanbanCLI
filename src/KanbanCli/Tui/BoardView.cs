@@ -3,8 +3,13 @@ using KanbanCli.Models;
 
 public class BoardView : IBoardRenderer
 {
-    private readonly ColumnView _columnView = new();
+    private readonly IColumnView _columnView;
     private readonly StatusBar _statusBar = new();
+
+    public BoardView(IColumnView columnView)
+    {
+        _columnView = columnView;
+    }
 
     public void Render(Board board, NavigationState state, string? filterInfo = null)
     {

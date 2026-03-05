@@ -14,7 +14,7 @@ var app = new KanbanApp(
     taskService,
     boardService,
     inputHandler: new KeyboardInputHandler(),
-    boardRenderer: new BoardView(),
+    boardRenderer: new BoardView(new ColumnView(new TaskCard())),
     taskDetailPanel: new TaskDetailPanel(taskService),
     newTaskDialog: new NewTaskDialog(),
     moveDialog: new MoveDialog(),

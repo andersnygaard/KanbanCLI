@@ -1,7 +1,7 @@
 namespace KanbanCli.Tui;
 using KanbanCli.Models;
 
-public class TaskCard
+public class TaskCard : ITaskCard
 {
     public void RenderWithColors(TaskItem task, int columnX, int row, int columnWidth, bool isSelected)
     {

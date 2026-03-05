@@ -1,9 +1,14 @@
 namespace KanbanCli.Tui;
 using KanbanCli.Models;
 
-public class ColumnView
+public class ColumnView : IColumnView
 {
-    private readonly TaskCard _taskCard = new();
+    private readonly ITaskCard _taskCard;
+
+    public ColumnView(ITaskCard taskCard)
+    {
+        _taskCard = taskCard;
+    }
 
     public void Render(Column column, int columnIndex, int columnX, int columnWidth, NavigationState state, int startRow, int maxRows, bool isFiltered = false)
     {
