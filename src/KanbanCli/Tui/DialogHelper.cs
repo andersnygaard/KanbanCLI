@@ -185,6 +185,58 @@ public static class DialogHelper
     }
 
     /// <summary>
+    /// Prompts for text input inside a box border. Renders the left border, prompt text in cyan,
+    /// then reads user input in white.
+    /// </summary>
+    public static string PromptTextInBox(string prompt, int width, ConsoleColor borderColor)
+    {
+        RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.Write(prompt);
+        Console.ResetColor();
+        Console.ForegroundColor = ConsoleColor.White;
+        var input = Console.ReadLine() ?? string.Empty;
+        Console.ResetColor();
+        return input;
+    }
+
+    /// <summary>
+    /// Renders a numbered list of items inside a box with left and right borders.
+    /// </summary>
+    public static void RenderNumberedListInBox(IReadOnlyList<string> items, int width, ConsoleColor borderColor)
+    {
+        for (var i = 0; i < items.Count; i++)
+        {
+            RenderBoxLeftBorder(borderColor);
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            var numText = $"  {i + 1}. ";
+            Console.Write(numText);
+            Console.ForegroundColor = ConsoleColor.White;
+            var valText = items[i];
+            Console.Write(valText);
+            RenderBoxRightBorder(numText.Length + valText.Length, width, borderColor);
+        }
+    }
+
+    /// <summary>
+    /// Prompts the user to enter a numeric choice. Returns the chosen number (1-based),
+    /// or null if the input is invalid or cancelled.
+    /// </summary>
+    public static int? PromptNumericChoice(int maxValue, bool allowZeroCancel = false)
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        var cancelHint = allowZeroCancel ? ", or 0 to cancel" : "";
+        Console.Write($"  Enter number (1-{maxValue}{cancelHint}): ");
+        Console.ResetColor();
+
+        var input = Console.ReadLine()?.Trim() ?? string.Empty;
+        if (!int.TryParse(input, out var choice) || choice < 1 || choice > maxValue)
+            return null;
+
+        return choice;
+    }
+
+    /// <summary>
     /// Returns the default box width based on Console.WindowWidth.
     /// </summary>
     public static int GetBoxWidth()

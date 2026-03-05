@@ -44,13 +44,13 @@ Consolidate these shared patterns into `DialogHelper` so all dialogs use the sam
 
 ## Acceptance Criteria
 
-- [ ] Move `PromptText` pattern into `DialogHelper.PromptTextInBox(string prompt, int width, ConsoleColor borderColor)`
-- [ ] Move `RenderNumberedList` into `DialogHelper.RenderNumberedListInBox(IReadOnlyList<string> items, int width, ConsoleColor borderColor)`
-- [ ] Move `PromptForChoice` into `DialogHelper.PromptNumericChoice(int maxValue, bool allowZeroCancel = false)`
-- [ ] Update `NewTaskDialog` to use `DialogHelper` methods
-- [ ] Update `TaskDetailPanel` to use `DialogHelper` methods
-- [ ] Verify consistent styling across all dialogs
-- [ ] All existing tests pass (`dotnet build src/` and `dotnet test src/`)
+- [x] Move `PromptText` pattern into `DialogHelper.PromptTextInBox(string prompt, int width, ConsoleColor borderColor)`
+- [x] Move `RenderNumberedList` into `DialogHelper.RenderNumberedListInBox(IReadOnlyList<string> items, int width, ConsoleColor borderColor)`
+- [x] Move `PromptForChoice` into `DialogHelper.PromptNumericChoice(int maxValue, bool allowZeroCancel = false)`
+- [x] Update `NewTaskDialog` to use `DialogHelper` methods
+- [x] Update `TaskDetailPanel` to use `DialogHelper` methods
+- [x] Verify consistent styling across all dialogs
+- [x] All existing tests pass (`dotnet build src/` and `dotnet test src/`)
 
 ## Technical Approach
 

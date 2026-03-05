@@ -270,9 +270,10 @@ public class TaskDetailPanel
         Console.WriteLine("  Select label to remove:");
         Console.ResetColor();
 
-        RenderNumberedList(task.Labels);
+        var width = DialogHelper.GetBoxWidth();
+        DialogHelper.RenderNumberedListInBox(task.Labels, width, ConsoleColor.DarkGray);
 
-        var choice = PromptForChoice(task.Labels.Count);
+        var choice = DialogHelper.PromptNumericChoice(task.Labels.Count, allowZeroCancel: true);
         if (choice is null)
             return task;
 
@@ -292,9 +293,10 @@ public class TaskDetailPanel
 
         var priorities = Enum.GetValues<Priority>();
         var priorityNames = priorities.Select(p => p.ToString()).ToList();
-        RenderNumberedList(priorityNames);
+        var width = DialogHelper.GetBoxWidth();
+        DialogHelper.RenderNumberedListInBox(priorityNames, width, ConsoleColor.DarkGray);
 
-        var choice = PromptForChoice(priorities.Length);
+        var choice = DialogHelper.PromptNumericChoice(priorities.Length, allowZeroCancel: true);
         if (choice is null)
             return task;
 
@@ -305,33 +307,6 @@ public class TaskDetailPanel
         var updated = task.SetPriority(newPriority);
         _taskService.UpdateTask(updated);
         return updated;
-    }
-
-    private static void RenderNumberedList(IReadOnlyList<string> items)
-    {
-        for (var i = 0; i < items.Count; i++)
-        {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"    {i + 1}. ");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(items[i]);
-        }
-
-        Console.ResetColor();
-    }
-
-    private static int? PromptForChoice(int maxValue)
-    {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write($"  Enter number (1-{maxValue}), or 0 to cancel: ");
-        Console.ResetColor();
-
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
-
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > maxValue)
-            return null;
-
-        return choice;
     }
 
 }

@@ -16,7 +16,7 @@ public class NewTaskDialog
         DialogHelper.RenderBoxTop("New Task", width, borderColor);
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
-        var title = PromptText("Title: ", width, borderColor);
+        var title = DialogHelper.PromptTextInBox("Title: ", width, borderColor);
         if (string.IsNullOrWhiteSpace(title))
         {
             DialogHelper.RenderBoxEmptyLine(width, borderColor);
@@ -43,7 +43,7 @@ public class NewTaskDialog
         }
 
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
-        var labelsInput = PromptText("Labels (comma-separated, or empty): ", width, borderColor);
+        var labelsInput = DialogHelper.PromptTextInBox("Labels (comma-separated, or empty): ", width, borderColor);
         var labels = ParseLabels(labelsInput);
 
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
@@ -56,21 +56,10 @@ public class NewTaskDialog
         return new NewTaskInputs(title.Trim(), type.Value, priority.Value, labels);
     }
 
-    private static string PromptText(string prompt, int width, ConsoleColor borderColor)
-    {
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write(prompt);
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.White;
-        var input = Console.ReadLine() ?? string.Empty;
-        Console.ResetColor();
-        return input;
-    }
-
     private static T? PromptEnumInBox<T>(string label, int width, ConsoleColor borderColor) where T : struct, Enum
     {
         var values = Enum.GetValues<T>();
+        var valueNames = values.Select(v => v.ToString()).ToList();
 
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
@@ -80,17 +69,7 @@ public class NewTaskDialog
         Console.Write(labelText);
         DialogHelper.RenderBoxRightBorder(labelText.Length, width, borderColor);
 
-        for (var i = 0; i < values.Length; i++)
-        {
-            DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            var numText = $"  {i + 1}. ";
-            Console.Write(numText);
-            Console.ForegroundColor = ConsoleColor.White;
-            var valText = values[i].ToString();
-            Console.Write(valText);
-            DialogHelper.RenderBoxRightBorder(numText.Length + valText.Length, width, borderColor);
-        }
+        DialogHelper.RenderNumberedListInBox(valueNames, width, borderColor);
 
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
