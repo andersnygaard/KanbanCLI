@@ -398,4 +398,109 @@ public class TaskItemTests
         // Assert
         result.Should().BeFalse();
     }
+
+    [Fact]
+    public void ChangeStatus_FromDoneToInProgress_ClearsCompletedDate()
+    {
+        // Arrange
+        var task = CreateSampleTask(status: TaskStatus.Done, completedDate: DateTime.UtcNow);
+
+        // Act
+        var result = task.ChangeStatus(TaskStatus.InProgress);
+
+        // Assert
+        result.Status.Should().Be(TaskStatus.InProgress);
+        result.CompletedDate.Should().BeNull();
+    }
+
+    [Fact]
+    public void GenerateFileName_UnicodeTitle_GeneratesValidFilename()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 10, title: "Implémenter la résolution des données");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("010-FEATURE-implémenter-la-résolution-des-données.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_ChineseCharacterTitle_GeneratesValidFilename()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 11, title: "修复登录问题");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("011-FEATURE-修复登录问题.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_EmojiTitle_StripsEmojisAndUsesUntitled()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 12, title: "🚀🔥💯");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("012-FEATURE-untitled.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_MixedUnicodeAndAscii_GeneratesValidFilename()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 13, title: "Fix café display bug");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("013-FEATURE-fix-café-display-bug.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_TitleWithTabs_ConvertsToDashes()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 14, title: "Fix\tthe\tbug");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("014-FEATURE-fix-the-bug.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_TitleWithLeadingTrailingSpecialChars_TrimsCleanly()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 15, title: "---Fix the bug---");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("015-FEATURE-fix-the-bug.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_TitleWithNumbers_PreservesNumbers()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 16, title: "Add OAuth2 Support v3");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("016-FEATURE-add-oauth2-support-v3.md");
+    }
 }

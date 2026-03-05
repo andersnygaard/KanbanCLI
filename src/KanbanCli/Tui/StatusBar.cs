@@ -15,9 +15,18 @@ public class StatusBar
         if (filterInfo is not null)
             statusText += $"  | Filter: {filterInfo}";
 
-        var padded = statusText.Length >= width
-            ? statusText[..(width - 1)]
-            : statusText.PadRight(width - 1);
+        var maxLen = width - 1;
+        string padded;
+        if (statusText.Length > maxLen)
+        {
+            padded = maxLen > 3
+                ? statusText[..(maxLen - 3)] + "..."
+                : statusText[..maxLen];
+        }
+        else
+        {
+            padded = statusText.PadRight(maxLen);
+        }
 
         Console.Write(padded);
         Console.ResetColor();

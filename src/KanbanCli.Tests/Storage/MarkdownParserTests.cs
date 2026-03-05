@@ -335,19 +335,23 @@ public class MarkdownParserTests
     }
 
     [Fact]
-    public void ParseFileName_InvalidFormat_ThrowsArgumentException()
+    public void ParseFileName_InvalidFormat_ReturnsSensibleDefaults()
     {
-        var act = () => _parser.ParseFileName("not-a-valid-filename.txt");
+        var (id, type, description) = _parser.ParseFileName("not-a-valid-filename.txt");
 
-        act.Should().Throw<ArgumentException>();
+        id.Should().Be(0);
+        type.Should().Be(TaskType.Feature);
+        description.Should().BeEmpty();
     }
 
     [Fact]
-    public void ParseFileName_UnknownTaskType_ThrowsFormatException()
+    public void ParseFileName_UnknownTaskType_ReturnsDefaultType()
     {
-        var act = () => _parser.ParseFileName("001-UNKNOWNTYPE-some-desc.md");
+        var (id, type, description) = _parser.ParseFileName("001-UNKNOWNTYPE-some-desc.md");
 
-        act.Should().Throw<FormatException>();
+        id.Should().Be(1);
+        type.Should().Be(TaskType.Feature);
+        description.Should().Be("some-desc");
     }
 
     [Fact]
@@ -600,5 +604,179 @@ public class MarkdownParserTests
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
         result.CreatedDate.Should().BeNull();
+    }
+
+    [Fact]
+    public void Parse_EmptySections_PreservesThem()
+    {
+        var markdown = """
+            # FEATURE: Task with empty sections
+
+            **Status**: Backlog
+            **Created**: 2026-03-04
+            **Priority**: Medium
+            **Labels**:
+
+            ## Context & Motivation
+
+            ## Acceptance Criteria
+
+            ## Progress Log
+            - 2026-03-04 - Created
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.Sections.Should().ContainKey("Context & Motivation");
+        result.Sections.Should().ContainKey("Acceptance Criteria");
+        result.Sections.Should().ContainKey("Progress Log");
+        result.Sections["Progress Log"].Should().Contain("2026-03-04 - Created");
+    }
+
+    [Fact]
+    public void Parse_OnlyTitleNoMetadata_UsesDefaults()
+    {
+        var markdown = """
+            # FEATURE: Just a title
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.Id.Should().Be(1);
+        result.Title.Should().Be("Just a title");
+        result.Status.Should().Be(TaskStatus.Backlog);
+        result.Priority.Should().Be(Priority.Medium);
+        result.Labels.Should().BeEmpty();
+        result.CreatedDate.Should().BeNull();
+        result.ExtraMetadata.Should().BeEmpty();
+        result.Sections.Should().BeEmpty();
+    }
+
+    // --- Robustness tests for malformed input ---
+
+    [Fact]
+    public void Parse_NoHeading_ReturnsSensibleDefaults()
+    {
+        var markdown = """
+            **Status**: Backlog
+            **Created**: 2026-03-04
+            **Priority**: High
+            **Labels**: core
+
+            ## Some Section
+            Content here.
+            """;
+
+        var result = _parser.Parse(markdown, 5, TaskType.Bug);
+
+        result.Id.Should().Be(5);
+        result.Title.Should().BeEmpty();
+        result.Type.Should().Be(TaskType.Bug);
+        result.Status.Should().Be(TaskStatus.Backlog);
+        result.Priority.Should().Be(Priority.High);
+        result.Labels.Should().BeEquivalentTo(new[] { "core" });
+        result.CreatedDate.Should().Be(new DateTime(2026, 3, 4));
+        result.Sections.Should().ContainKey("Some Section");
+    }
+
+    [Fact]
+    public void Parse_OnlyWhitespace_ReturnsSensibleDefaults()
+    {
+        var markdown = "   \n  \n\t\n   ";
+
+        var result = _parser.Parse(markdown, 3, TaskType.Feature);
+
+        result.Id.Should().Be(3);
+        result.Title.Should().BeEmpty();
+        result.Type.Should().Be(TaskType.Feature);
+        result.Status.Should().Be(TaskStatus.Backlog);
+        result.Priority.Should().Be(Priority.Medium);
+        result.Labels.Should().BeEmpty();
+        result.CreatedDate.Should().BeNull();
+        result.ExtraMetadata.Should().BeEmpty();
+        result.Sections.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Parse_DuplicateMetadataKeys_UsesLastValue()
+    {
+        var markdown = """
+            # FEATURE: Duplicate keys
+
+            **Priority**: Low
+            **Priority**: High
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.Priority.Should().Be(Priority.High);
+    }
+
+    [Fact]
+    public void Parse_MarkdownFormattingInMetadataValues_HandlesCorrectly()
+    {
+        var markdown = """
+            # FEATURE: Formatted metadata
+
+            **Status**: Backlog
+            **Created**: 2026-03-04
+            **Priority**: Medium
+            **Labels**: core
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.Status.Should().Be(TaskStatus.Backlog);
+        result.Priority.Should().Be(Priority.Medium);
+        result.Labels.Should().Contain("core");
+        result.CreatedDate.Should().Be(new DateTime(2026, 3, 4));
+    }
+
+    [Fact]
+    public void Parse_CompletelyEmptyFile_ReturnsSensibleDefaults()
+    {
+        var markdown = "";
+
+        var result = _parser.Parse(markdown, 10, TaskType.Explore);
+
+        result.Id.Should().Be(10);
+        result.Title.Should().BeEmpty();
+        result.Type.Should().Be(TaskType.Explore);
+        result.Status.Should().Be(TaskStatus.Backlog);
+        result.Priority.Should().Be(Priority.Medium);
+        result.Labels.Should().BeEmpty();
+        result.CreatedDate.Should().BeNull();
+        result.ExtraMetadata.Should().BeEmpty();
+        result.Sections.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ParseFileName_MalformedFilename_ReturnsSensibleDefaults()
+    {
+        var (id, type, description) = _parser.ParseFileName("random-garbage.txt");
+
+        id.Should().Be(0);
+        type.Should().Be(TaskType.Feature);
+        description.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ParseFileName_EmptyString_ReturnsSensibleDefaults()
+    {
+        var (id, type, description) = _parser.ParseFileName("");
+
+        id.Should().Be(0);
+        type.Should().Be(TaskType.Feature);
+        description.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ParseFileName_NoExtension_ReturnsSensibleDefaults()
+    {
+        var (id, type, description) = _parser.ParseFileName("just-a-name");
+
+        id.Should().Be(0);
+        type.Should().Be(TaskType.Feature);
+        description.Should().BeEmpty();
     }
 }

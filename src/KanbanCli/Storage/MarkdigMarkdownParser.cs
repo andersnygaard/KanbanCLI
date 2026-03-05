@@ -86,13 +86,14 @@ public class MarkdigMarkdownParser : IMarkdownParser
         var match = FileNameRegex.Match(name);
 
         if (!match.Success)
-            throw new ArgumentException($"File name '{fileName}' does not match expected pattern.", nameof(fileName));
+            return (0, TaskType.Feature, string.Empty);
 
         var id = int.Parse(match.Groups[1].Value);
         var typeString = match.Groups[2].Value;
         var description = match.Groups[3].Value;
 
-        var taskType = ParseTaskType(typeString);
+        if (!Enum.TryParse<TaskType>(typeString, ignoreCase: true, out var taskType))
+            return (id, TaskType.Feature, description);
 
         return (id, taskType, description);
     }

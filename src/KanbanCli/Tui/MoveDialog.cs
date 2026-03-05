@@ -35,9 +35,6 @@ public class MoveDialog
         if (choice < 1 || choice > board.Columns.Count)
             return null;
 
-        if (choice - 1 >= BoardConstants.ColumnOrder.Count)
-            return null;
-
         return BoardConstants.ColumnOrder[choice - 1];
     }
 }
