@@ -7,87 +7,112 @@ public class FilterDialog
 
     public FilterCriteria? Show(IReadOnlyList<string> availableLabels)
     {
-        DialogHelper.SetupDialog("Filter Board", ConsoleColor.DarkMagenta);
-        Console.WriteLine();
+        Console.Clear();
+        Console.CursorVisible = true;
 
-        Console.WriteLine();
+        var width = DialogHelper.GetBoxWidth();
+        var borderColor = ConsoleColor.DarkGray;
+
+        DialogHelper.RenderBoxTop("Filter Board", width, borderColor);
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        DialogHelper.RenderBoxLeftBorder(borderColor);
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("  Filter by:");
-        Console.ResetColor();
+        var headerText = "Filter by:";
+        Console.Write(headerText);
+        DialogHelper.RenderBoxRightBorder(headerText.Length, width, borderColor);
 
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.Write("    1. ");
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("By Type");
+        RenderFilterOption(1, "By Type", width, borderColor);
+        RenderFilterOption(2, "By Label", width, borderColor);
+        RenderFilterOption(3, "By Priority", width, borderColor);
 
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.Write("    2. ");
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("By Label");
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.Write("    3. ");
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("By Priority");
-
-        Console.ResetColor();
+        DialogHelper.RenderBoxLeftBorder(borderColor);
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write("  Enter number (1-3), or 0 to cancel: ");
+        Console.Write("Enter number (1-3), or 0 to cancel: ");
         Console.ResetColor();
 
         var modeInput = Console.ReadLine()?.Trim() ?? string.Empty;
 
         if (!int.TryParse(modeInput, out var modeChoice) || modeChoice == 0)
         {
+            DialogHelper.RenderBoxEmptyLine(width, borderColor);
+            DialogHelper.RenderBoxBottom(width, borderColor);
             Console.CursorVisible = false;
             return null;
         }
 
-        return modeChoice switch
+        var result = modeChoice switch
         {
-            (int)FilterMode.ByType => PromptByType(),
-            (int)FilterMode.ByLabel => PromptByLabel(availableLabels),
-            (int)FilterMode.ByPriority => PromptByPriority(),
+            (int)FilterMode.ByType => PromptByType(width, borderColor),
+            (int)FilterMode.ByLabel => PromptByLabel(availableLabels, width, borderColor),
+            (int)FilterMode.ByPriority => PromptByPriority(width, borderColor),
             _ => null
         };
+
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        DialogHelper.RenderBoxBottom(width, borderColor);
+
+        return result;
     }
 
-    private static FilterCriteria? PromptByType()
+    private static void RenderFilterOption(int number, string text, int width, ConsoleColor borderColor)
     {
-        var selected = DialogHelper.PromptEnum<TaskType>("Task type", allowZeroCancel: true);
+        DialogHelper.RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        var numText = $"  {number}. ";
+        Console.Write(numText);
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write(text);
+        DialogHelper.RenderBoxRightBorder(numText.Length + text.Length, width, borderColor);
+    }
+
+    private static FilterCriteria? PromptByType(int width, ConsoleColor borderColor)
+    {
+        var selected = PromptEnumInBox<TaskType>("Task type", width, borderColor);
 
         Console.CursorVisible = false;
 
         return selected.HasValue ? new FilterCriteria(Type: selected.Value) : null;
     }
 
-    private static FilterCriteria? PromptByLabel(IReadOnlyList<string> availableLabels)
+    private static FilterCriteria? PromptByLabel(IReadOnlyList<string> availableLabels, int width, ConsoleColor borderColor)
     {
-        Console.WriteLine();
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         if (availableLabels.Count > 0)
         {
+            DialogHelper.RenderBoxLeftBorder(borderColor);
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("  Available labels:");
-            Console.ResetColor();
+            var headerText = "Available labels:";
+            Console.Write(headerText);
+            DialogHelper.RenderBoxRightBorder(headerText.Length, width, borderColor);
 
             for (var i = 0; i < availableLabels.Count; i++)
             {
+                DialogHelper.RenderBoxLeftBorder(borderColor);
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write($"    {i + 1}. ");
+                var numText = $"  {i + 1}. ";
+                Console.Write(numText);
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine(availableLabels[i]);
+                var labelText = availableLabels[i];
+                Console.Write(labelText);
+                DialogHelper.RenderBoxRightBorder(numText.Length + labelText.Length, width, borderColor);
             }
 
-            Console.ResetColor();
+            DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+            DialogHelper.RenderBoxLeftBorder(borderColor);
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write($"  Enter number (1-{availableLabels.Count}), label name, or 0 to cancel: ");
+            Console.Write($"Enter number (1-{availableLabels.Count}), label name, or 0 to cancel: ");
             Console.ResetColor();
         }
         else
         {
+            DialogHelper.RenderBoxLeftBorder(borderColor);
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("  Enter label name, or leave empty to cancel: ");
+            Console.Write("Enter label name, or leave empty to cancel: ");
             Console.ResetColor();
         }
 
@@ -111,13 +136,52 @@ public class FilterDialog
         return new FilterCriteria(Label: input);
     }
 
-    private static FilterCriteria? PromptByPriority()
+    private static FilterCriteria? PromptByPriority(int width, ConsoleColor borderColor)
     {
-        var selected = DialogHelper.PromptEnum<Priority>("Priority", allowZeroCancel: true);
+        var selected = PromptEnumInBox<Priority>("Priority", width, borderColor);
 
         Console.CursorVisible = false;
 
         return selected.HasValue ? new FilterCriteria(Priority: selected.Value) : null;
     }
 
+    private static T? PromptEnumInBox<T>(string label, int width, ConsoleColor borderColor) where T : struct, Enum
+    {
+        var values = Enum.GetValues<T>();
+
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        DialogHelper.RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        var labelText = $"{label}:";
+        Console.Write(labelText);
+        DialogHelper.RenderBoxRightBorder(labelText.Length, width, borderColor);
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            DialogHelper.RenderBoxLeftBorder(borderColor);
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            var numText = $"  {i + 1}. ";
+            Console.Write(numText);
+            Console.ForegroundColor = ConsoleColor.White;
+            var valText = values[i].ToString();
+            Console.Write(valText);
+            DialogHelper.RenderBoxRightBorder(numText.Length + valText.Length, width, borderColor);
+        }
+
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        DialogHelper.RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        var promptText = $"Enter number (1-{values.Length}), or 0 to cancel: ";
+        Console.Write(promptText);
+        Console.ResetColor();
+
+        var input = Console.ReadLine()?.Trim() ?? string.Empty;
+
+        if (!int.TryParse(input, out var choice) || choice < 1 || choice > values.Length)
+            return null;
+
+        return values[choice - 1];
+    }
 }

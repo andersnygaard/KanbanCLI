@@ -14,52 +14,42 @@ public class ColumnView : IColumnView
     {
         var isSelectedColumn = state.SelectedColumn == columnIndex;
 
-        RenderHeader(column, columnX, columnWidth, startRow, isSelectedColumn);
-
-        var taskStartRow = startRow + 2;
-
         if (column.IsEmpty)
         {
-            RenderEmptyPlaceholder(columnX, columnWidth, taskStartRow, isFiltered);
+            RenderEmptyPlaceholder(columnX, columnWidth, startRow, isFiltered);
             return;
         }
 
-        for (var i = 0; i < column.Tasks.Count; i++)
+        // Each card takes CardLineCount lines + CardSeparatorLines blank line
+        // Last card doesn't need a separator, but we keep the math simple
+        var visibleCardCount = Math.Max(1, (maxRows + TuiHelpers.CardSeparatorLines) / TuiHelpers.CardTotalHeight);
+
+        for (var i = 0; i < column.Tasks.Count && i < visibleCardCount; i++)
         {
-            var taskRow = taskStartRow + i;
-            if (taskRow >= startRow + maxRows)
+            var cardStartRow = startRow + (i * TuiHelpers.CardTotalHeight);
+
+            // Don't render if the card would overflow the available space
+            if (cardStartRow + TuiHelpers.CardLineCount > startRow + maxRows)
                 break;
 
             var task = column.Tasks[i];
             var isSelectedTask = isSelectedColumn && state.SelectedTask == i;
-            _taskCard.RenderWithColors(task, columnX, taskRow, columnWidth, isSelectedTask);
+            _taskCard.RenderWithColors(task, columnX, cardStartRow, columnWidth, isSelectedTask);
+
+            // Render blank separator line between cards (not after the last visible card)
+            var separatorRow = cardStartRow + TuiHelpers.CardLineCount;
+            if (separatorRow < startRow + maxRows)
+            {
+                RenderBlankLine(columnX, columnWidth, separatorRow);
+            }
         }
     }
 
-    private static void RenderHeader(Column column, int columnX, int columnWidth, int startRow, bool isSelected)
+    private static void RenderBlankLine(int columnX, int columnWidth, int row)
     {
-        Console.SetCursorPosition(columnX, startRow);
-
-        if (isSelected)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.DarkBlue;
-        }
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.BackgroundColor = ConsoleColor.Black;
-        }
-
-        var headerText = $" {column.Name} ({column.Tasks.Count})";
-        var paddedHeader = headerText.PadRight(columnWidth - 1);
-        Console.Write(paddedHeader);
-        Console.ResetColor();
-
-        // Separator line
-        Console.SetCursorPosition(columnX, startRow + 1);
-        Console.ForegroundColor = isSelected ? ConsoleColor.Cyan : ConsoleColor.DarkGray;
-        Console.Write(new string('-', columnWidth - 1));
+        Console.SetCursorPosition(columnX, row);
+        Console.BackgroundColor = ConsoleColor.Black;
+        Console.Write(new string(' ', columnWidth));
         Console.ResetColor();
     }
 
@@ -68,7 +58,10 @@ public class ColumnView : IColumnView
         Console.SetCursorPosition(columnX, row);
         Console.ForegroundColor = ConsoleColor.DarkGray;
         var placeholder = isFiltered ? " (no matching tasks)" : " (no tasks)";
-        Console.Write(placeholder.PadRight(columnWidth - 1));
+        var padded = placeholder.Length > columnWidth
+            ? placeholder[..columnWidth]
+            : placeholder.PadRight(columnWidth);
+        Console.Write(padded);
         Console.ResetColor();
     }
 }

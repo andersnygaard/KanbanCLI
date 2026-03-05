@@ -4,6 +4,24 @@ using TaskStatus = KanbanCli.Models.TaskStatus;
 
 public static class TuiHelpers
 {
+    /// <summary>Number of rendered lines per task card (ID+Type, Title, Priority+Labels).</summary>
+    public const int CardLineCount = 3;
+
+    /// <summary>Blank separator lines between cards.</summary>
+    public const int CardSeparatorLines = 1;
+
+    /// <summary>Total vertical space per card (content lines + separator).</summary>
+    public const int CardTotalHeight = CardLineCount + CardSeparatorLines;
+
+    /// <summary>Returns the Unicode priority indicator symbol for the given <paramref name="priority"/>.</summary>
+    public static string GetPrioritySymbol(Priority priority) => priority switch
+    {
+        Priority.High => "\u25CF",    // ●
+        Priority.Medium => "\u25D0",  // ◐
+        Priority.Low => "\u25CB",     // ○
+        _ => " "
+    };
+
     /// <summary>Returns the console color associated with the given <paramref name="priority"/> level.</summary>
     public static ConsoleColor GetPriorityColor(Priority priority) => priority switch
     {

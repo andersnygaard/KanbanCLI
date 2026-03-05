@@ -63,13 +63,132 @@ public static class DialogHelper
     }
 
     /// <summary>
-    /// Displays an error message in red.
+    /// Displays an error message in red with ✗ symbol.
     /// </summary>
     public static void ShowError(string message)
     {
         Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"  {message}");
+        Console.WriteLine($"  \u2717 {message}");
         Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Displays a success message in green with ✓ symbol.
+    /// </summary>
+    public static void ShowSuccess(string message)
+    {
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"  \u2713 {message}");
+        Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Renders the top border of a box with an embedded title.
+    /// Example: ┌─── Title ────────────┐
+    /// </summary>
+    public static void RenderBoxTop(string title, int width, ConsoleColor borderColor = ConsoleColor.DarkGray)
+    {
+        Console.ForegroundColor = borderColor;
+        Console.Write("\u250C\u2500\u2500\u2500 ");
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write(title);
+        Console.ForegroundColor = borderColor;
+        Console.Write(" ");
+        var remaining = width - title.Length - 7;
+        if (remaining > 0)
+            Console.Write(new string('\u2500', remaining));
+        Console.WriteLine("\u2510");
+        Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Renders the bottom border of a box.
+    /// Example: └───────────────────────┘
+    /// </summary>
+    public static void RenderBoxBottom(int width, ConsoleColor borderColor = ConsoleColor.DarkGray)
+    {
+        Console.ForegroundColor = borderColor;
+        Console.Write("\u2514");
+        Console.Write(new string('\u2500', width - 2));
+        Console.WriteLine("\u2518");
+        Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Renders a content line inside a box with left and right borders.
+    /// Example: │  content here              │
+    /// </summary>
+    public static void RenderBoxLine(string content, int width, ConsoleColor borderColor = ConsoleColor.DarkGray)
+    {
+        Console.ForegroundColor = borderColor;
+        Console.Write("\u2502 ");
+        Console.ResetColor();
+        var padded = content.Length > width - 4
+            ? content[..(width - 4)]
+            : content.PadRight(width - 4);
+        Console.Write(padded);
+        Console.ForegroundColor = borderColor;
+        Console.WriteLine(" \u2502");
+        Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Renders an empty line inside a box.
+    /// Example: │                             │
+    /// </summary>
+    public static void RenderBoxEmptyLine(int width, ConsoleColor borderColor = ConsoleColor.DarkGray)
+    {
+        Console.ForegroundColor = borderColor;
+        Console.Write("\u2502");
+        Console.Write(new string(' ', width - 2));
+        Console.WriteLine("\u2502");
+        Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Renders a horizontal separator inside a box.
+    /// Example: ├───────────────────────┤
+    /// </summary>
+    public static void RenderBoxSeparator(int width, ConsoleColor borderColor = ConsoleColor.DarkGray)
+    {
+        Console.ForegroundColor = borderColor;
+        Console.Write("\u251C");
+        Console.Write(new string('\u2500', width - 2));
+        Console.WriteLine("\u2524");
+        Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Renders a line inside a box where the content has already been written with custom colors.
+    /// Only renders the left border prefix; caller must handle content and right border.
+    /// </summary>
+    public static void RenderBoxLeftBorder(ConsoleColor borderColor = ConsoleColor.DarkGray)
+    {
+        Console.ForegroundColor = borderColor;
+        Console.Write("\u2502 ");
+        Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Renders the right border to close a box line. Pads remaining space.
+    /// </summary>
+    public static void RenderBoxRightBorder(int currentLength, int width, ConsoleColor borderColor = ConsoleColor.DarkGray)
+    {
+        var remaining = width - currentLength - 3;
+        if (remaining > 0)
+            Console.Write(new string(' ', remaining));
+        Console.ForegroundColor = borderColor;
+        Console.WriteLine(" \u2502");
+        Console.ResetColor();
+    }
+
+    /// <summary>
+    /// Returns the default box width based on Console.WindowWidth.
+    /// </summary>
+    public static int GetBoxWidth()
+    {
+        return Math.Min(Math.Max(Console.WindowWidth, 40), 80);
     }
 }

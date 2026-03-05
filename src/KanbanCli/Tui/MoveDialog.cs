@@ -9,25 +9,43 @@ public class MoveDialog
         Console.Clear();
         Console.CursorVisible = true;
 
+        var width = DialogHelper.GetBoxWidth();
+        var borderColor = ConsoleColor.DarkGray;
+
+        DialogHelper.RenderBoxTop("Move Task", width, borderColor);
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        DialogHelper.RenderBoxLeftBorder(borderColor);
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("  Move task to column:");
-        Console.ResetColor();
+        var headerText = "Move task to column:";
+        Console.Write(headerText);
+        DialogHelper.RenderBoxRightBorder(headerText.Length, width, borderColor);
 
         for (var i = 0; i < board.Columns.Count; i++)
         {
             var marker = i == currentColumnIndex ? " (current)" : string.Empty;
+            DialogHelper.RenderBoxLeftBorder(borderColor);
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"    {i + 1}. ");
+            var numText = $"  {i + 1}. ";
+            Console.Write(numText);
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"{board.Columns[i].Name}{marker}");
+            var colText = $"{board.Columns[i].Name}{marker}";
+            Console.Write(colText);
+            DialogHelper.RenderBoxRightBorder(numText.Length + colText.Length, width, borderColor);
         }
 
-        Console.ResetColor();
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        DialogHelper.RenderBoxLeftBorder(borderColor);
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write($"  Enter number (1-{board.Columns.Count}), or 0 to cancel: ");
+        var promptText = $"Enter number (1-{board.Columns.Count}), or 0 to cancel: ";
+        Console.Write(promptText);
         Console.ResetColor();
 
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
+
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        DialogHelper.RenderBoxBottom(width, borderColor);
 
         if (!int.TryParse(input, out var choice) || choice == 0)
             return null;

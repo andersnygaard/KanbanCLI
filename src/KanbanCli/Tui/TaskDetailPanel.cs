@@ -51,55 +51,58 @@ public class TaskDetailPanel
         Console.Clear();
         Console.CursorVisible = true;
 
-        var windowWidth = Math.Max(Console.WindowWidth, 40);
+        var width = DialogHelper.GetBoxWidth();
+        var borderColor = ConsoleColor.DarkGray;
 
-        TuiHelpers.RenderHeader("Task Details", windowWidth, ConsoleColor.DarkBlue);
+        DialogHelper.RenderBoxTop($"Task #{task.Id:D3}", width, borderColor);
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
-        var row = RenderMetadataFields(task, startRow: 2);
+        RenderMetadataFields(task, width, borderColor);
 
-        row++;
-        RenderSeparator(row, windowWidth);
-        row++;
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        DialogHelper.RenderBoxSeparator(width, borderColor);
 
-        row = RenderSections(task.Sections, row);
+        RenderSections(task.Sections, width, borderColor);
 
-        row++;
-        RenderEditHints(row);
+        DialogHelper.RenderBoxSeparator(width, borderColor);
+        RenderEditHints(width, borderColor);
+        DialogHelper.RenderBoxBottom(width, borderColor);
     }
 
-    private static int RenderMetadataFields(TaskItem task, int startRow)
+    private static void RenderMetadataFields(TaskItem task, int width, ConsoleColor borderColor)
     {
-        var row = startRow;
-        row = RenderField("ID", $"#{task.Id:D3}", row);
-        row = RenderField("Title", task.Title, row);
-        row = RenderField("Type", task.Type.ToString(), row);
-        row = RenderField("Priority", task.Priority.ToString(), row, TuiHelpers.GetPriorityColor(task.Priority));
-        row = RenderField("Status", TuiHelpers.FormatStatus(task.Status), row);
-        row = RenderField("Labels", task.Labels.Count > 0 ? string.Join(", ", task.Labels) : "(none)", row);
-        row = RenderField("Created", task.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "(unknown)", row);
+        RenderField("ID", $"#{task.Id:D3}", width, borderColor);
+        RenderField("Title", task.Title, width, borderColor);
+        RenderField("Type", task.Type.ToString(), width, borderColor);
+        RenderField("Priority", task.Priority.ToString(), width, borderColor, TuiHelpers.GetPriorityColor(task.Priority));
+        RenderField("Status", TuiHelpers.FormatStatus(task.Status), width, borderColor);
+
+        var labelsText = task.Labels.Count > 0
+            ? string.Join("  ", task.Labels.Select(l => $"[{l}]"))
+            : "(none)";
+        RenderField("Labels", labelsText, width, borderColor);
+
+        RenderField("Created", task.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "(unknown)", width, borderColor);
 
         if (task.CompletedDate.HasValue)
-            row = RenderField("Completed", task.CompletedDate.Value.ToString("yyyy-MM-dd HH:mm"), row);
-
-        return row;
+            RenderField("Completed", task.CompletedDate.Value.ToString("yyyy-MM-dd HH:mm"), width, borderColor);
     }
 
-    private static int RenderSections(IReadOnlyDictionary<string, string> sections, int row)
+    private static void RenderSections(IReadOnlyDictionary<string, string> sections, int width, ConsoleColor borderColor)
     {
         foreach (var section in sections)
         {
-            row = RenderSectionHeading(section.Key, row);
-            row = RenderSectionContent(section.Value, row);
+            RenderSectionHeading(section.Key, width, borderColor);
+            RenderSectionContent(section.Value, width, borderColor);
         }
-
-        return row;
     }
 
-    private static void RenderEditHints(int row)
+    private static void RenderEditHints(int width, ConsoleColor borderColor)
     {
-        Console.SetCursorPosition(0, row);
+        DialogHelper.RenderBoxLeftBorder(borderColor);
+
         Console.ForegroundColor = ConsoleColor.DarkYellow;
-        Console.Write("  [T]");
+        Console.Write("[T]");
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.Write("itle  ");
         Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -114,8 +117,9 @@ public class TaskDetailPanel
         Console.Write("[Esc]");
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.Write(" back");
-        Console.ResetColor();
-        Console.WriteLine();
+
+        // "[T]itle  [L]abels  [P]riority  [Esc] back" = 42 chars
+        DialogHelper.RenderBoxRightBorder(42, width, borderColor);
     }
 
     private TaskItem HandleEditTitle(TaskItem task)
@@ -251,51 +255,51 @@ public class TaskDetailPanel
         return choice;
     }
 
-    private static int RenderField(string label, string value, int row, ConsoleColor? valueColor = null)
+    private static void RenderField(string label, string value, int width, ConsoleColor borderColor, ConsoleColor? valueColor = null)
     {
-        Console.SetCursorPosition(0, row);
+        DialogHelper.RenderBoxLeftBorder(borderColor);
+
         Console.ForegroundColor = ConsoleColor.DarkCyan;
-        Console.Write($"  {label,-12}: ");
+        Console.Write($"{label,-12}");
 
         Console.ForegroundColor = valueColor ?? ConsoleColor.White;
-        Console.WriteLine(value);
-        Console.ResetColor();
+        Console.Write(value);
 
-        return row + 1;
+        var contentLen = label.Length + value.Length;
+        if (label.Length < 12)
+            contentLen = 12 + value.Length;
+
+        DialogHelper.RenderBoxRightBorder(contentLen, width, borderColor);
     }
 
-    private static void RenderSeparator(int row, int windowWidth)
+    private static void RenderSectionHeading(string heading, int width, ConsoleColor borderColor)
     {
-        Console.SetCursorPosition(0, row);
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.Write(new string('-', Math.Min(windowWidth - 1, 60)));
-        Console.ResetColor();
-    }
-
-    private static int RenderSectionHeading(string heading, int row)
-    {
-        Console.SetCursorPosition(0, row);
+        DialogHelper.RenderBoxLeftBorder(borderColor);
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"  ## {heading}");
-        Console.ResetColor();
-        return row + 1;
+        var text = $"## {heading}";
+        Console.Write(text);
+        DialogHelper.RenderBoxRightBorder(text.Length, width, borderColor);
     }
 
-    private static int RenderSectionContent(string content, int row)
+    private static void RenderSectionContent(string content, int width, ConsoleColor borderColor)
     {
         if (string.IsNullOrWhiteSpace(content))
-            return row;
+            return;
 
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+
+        var maxContentWidth = width - 6;
         var lines = content.Split('\n');
         foreach (var line in lines)
         {
-            Console.SetCursorPosition(0, row);
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine($"    {line.TrimEnd('\r')}");
-            Console.ResetColor();
-            row++;
+            var trimmed = line.TrimEnd('\r');
+            var displayLine = $"  {trimmed}";
+            if (displayLine.Length > maxContentWidth)
+                displayLine = displayLine[..maxContentWidth];
+
+            DialogHelper.RenderBoxLine(displayLine, width, borderColor);
         }
 
-        return row;
+        DialogHelper.RenderBoxEmptyLine(width, borderColor);
     }
 }
