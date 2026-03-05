@@ -70,7 +70,7 @@ public class FilterDialog
 
     private static FilterCriteria? PromptByType(int width, ConsoleColor borderColor)
     {
-        var selected = PromptEnumInBox<TaskType>("Task type", width, borderColor);
+        var selected = DialogHelper.PromptEnumInBox<TaskType>("Task type", width, borderColor, allowZeroCancel: true);
 
         Console.CursorVisible = false;
 
@@ -138,50 +138,11 @@ public class FilterDialog
 
     private static FilterCriteria? PromptByPriority(int width, ConsoleColor borderColor)
     {
-        var selected = PromptEnumInBox<Priority>("Priority", width, borderColor);
+        var selected = DialogHelper.PromptEnumInBox<Priority>("Priority", width, borderColor, allowZeroCancel: true);
 
         Console.CursorVisible = false;
 
         return selected.HasValue ? new FilterCriteria(Priority: selected.Value) : null;
     }
 
-    private static T? PromptEnumInBox<T>(string label, int width, ConsoleColor borderColor) where T : struct, Enum
-    {
-        var values = Enum.GetValues<T>();
-
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
-
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = Theme.DialogPrompt;
-        var labelText = $"{label}:";
-        Console.Write(labelText);
-        DialogHelper.RenderBoxRightBorder(labelText.Length, width, borderColor);
-
-        for (var i = 0; i < values.Length; i++)
-        {
-            DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = Theme.DialogListNumber;
-            var numText = $"  {i + 1}. ";
-            Console.Write(numText);
-            Console.ForegroundColor = Theme.DialogListItem;
-            var valText = values[i].ToString();
-            Console.Write(valText);
-            DialogHelper.RenderBoxRightBorder(numText.Length + valText.Length, width, borderColor);
-        }
-
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
-
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = Theme.DialogPrompt;
-        var promptText = $"Enter number (1-{values.Length}), or 0 to cancel: ";
-        Console.Write(promptText);
-        Console.ResetColor();
-
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
-
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > values.Length)
-            return null;
-
-        return values[choice - 1];
-    }
 }

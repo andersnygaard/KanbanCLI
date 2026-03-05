@@ -27,51 +27,33 @@ public class TaskDetailPanel
         {
             RenderDetailView(current, scrollOffset);
             var key = Console.ReadKey(intercept: true);
+            var (updatedTask, updatedScroll, shouldExit) = HandleKeyPress(current, scrollOffset, key);
+            current = updatedTask;
+            scrollOffset = updatedScroll;
 
-            switch (key.Key)
+            if (shouldExit)
             {
-                case ConsoleKey.T:
-                    current = HandleEditTitle(current);
-                    scrollOffset = 0;
-                    break;
-
-                case ConsoleKey.L:
-                    current = HandleEditLabels(current);
-                    scrollOffset = 0;
-                    break;
-
-                case ConsoleKey.P:
-                    current = HandleEditPriority(current);
-                    scrollOffset = 0;
-                    break;
-
-                case ConsoleKey.UpArrow:
-                    scrollOffset = Math.Max(0, scrollOffset - 1);
-                    break;
-
-                case ConsoleKey.DownArrow:
-                    scrollOffset++;
-                    break;
-
-                case ConsoleKey.PageUp:
-                    scrollOffset = Math.Max(0, scrollOffset - PageScrollSize);
-                    break;
-
-                case ConsoleKey.PageDown:
-                    scrollOffset += PageScrollSize;
-                    break;
-
-                case ConsoleKey.Home:
-                    scrollOffset = 0;
-                    break;
-
-                case ConsoleKey.Escape:
-                    return current;
-
-                default:
-                    break; // Ignore unrecognized keys — only Escape exits
+                return current;
             }
         }
+    }
+
+    private (TaskItem Task, int ScrollOffset, bool ShouldExit) HandleKeyPress(
+        TaskItem current, int scrollOffset, ConsoleKeyInfo key)
+    {
+        return key.Key switch
+        {
+            ConsoleKey.T => (HandleEditTitle(current), 0, false),
+            ConsoleKey.L => (HandleEditLabels(current), 0, false),
+            ConsoleKey.P => (HandleEditPriority(current), 0, false),
+            ConsoleKey.UpArrow => (current, Math.Max(0, scrollOffset - 1), false),
+            ConsoleKey.DownArrow => (current, scrollOffset + 1, false),
+            ConsoleKey.PageUp => (current, Math.Max(0, scrollOffset - PageScrollSize), false),
+            ConsoleKey.PageDown => (current, scrollOffset + PageScrollSize, false),
+            ConsoleKey.Home => (current, 0, false),
+            ConsoleKey.Escape => (current, scrollOffset, true),
+            _ => (current, scrollOffset, false)
+        };
     }
 
     private void RenderDetailView(TaskItem task, int scrollOffset)

@@ -263,6 +263,44 @@ public static class DialogHelper
     }
 
     /// <summary>
+    /// Displays an enum's values as a numbered list inside a box and prompts the user to select one.
+    /// Returns null if the user cancels or enters an invalid selection.
+    /// When allowZeroCancel is false, shows an error message on invalid input.
+    /// </summary>
+    public static T? PromptEnumInBox<T>(string label, int width, ConsoleColor borderColor, bool allowZeroCancel = false) where T : struct, Enum
+    {
+        var values = Enum.GetValues<T>();
+
+        RenderBoxEmptyLine(width, borderColor);
+
+        RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = Theme.DialogPrompt;
+        var labelText = $"{label}:";
+        Console.Write(labelText);
+        RenderBoxRightBorder(labelText.Length, width, borderColor);
+
+        var names = values.Select(v => v.ToString()).ToList();
+        RenderNumberedListInBox(names, width, borderColor);
+
+        RenderBoxEmptyLine(width, borderColor);
+
+        RenderBoxLeftBorder(borderColor);
+        var choice = PromptNumericChoice(values.Length, allowZeroCancel: allowZeroCancel);
+        if (choice is null)
+        {
+            if (!allowZeroCancel)
+            {
+                ShowError("Invalid selection. Press any key to cancel.");
+                Console.ReadKey(intercept: true);
+            }
+
+            return null;
+        }
+
+        return values[choice.Value - 1];
+    }
+
+    /// <summary>
     /// Returns the default box width based on Console.WindowWidth.
     /// </summary>
     public static int GetBoxWidth()
