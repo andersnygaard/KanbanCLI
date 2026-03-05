@@ -13,14 +13,24 @@ public class TaskRepositoryTests
     private readonly IMarkdownParser _parser = Substitute.For<IMarkdownParser>();
     private static readonly string BoardPath = Path.Combine("board");
 
-    private static string BoardFolder(string subfolder) => Path.Combine(BoardPath, subfolder);
-    private static string BoardFile(string subfolder, string file) => Path.Combine(BoardPath, subfolder, file);
+    private static string BoardFolder(string subfolder)
+    {
+        return Path.Combine(BoardPath, subfolder);
+    }
+
+    private static string BoardFile(string subfolder, string file)
+    {
+        return Path.Combine(BoardPath, subfolder, file);
+    }
 
     private MarkdownTaskRepository CreateSut()
-        => new(_fileSystem, _parser, BoardPath);
+    {
+        return new(_fileSystem, _parser, BoardPath);
+    }
 
     private static TaskItem CreateTask(int id = 1, TaskStatus status = TaskStatus.Backlog)
-        => new()
+    {
+        return new()
         {
             Id = id,
             Title = "Test task",
@@ -30,6 +40,7 @@ public class TaskRepositoryTests
             Labels = [],
             CreatedDate = new DateTime(2026, 3, 4)
         };
+    }
 
     [Fact]
     public void GetAllByColumn_BacklogWithTasks_ReturnsParsedItems()

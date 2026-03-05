@@ -12,7 +12,10 @@ public class BoardServiceTests
     private readonly ITaskRepository _repository = Substitute.For<ITaskRepository>();
     private readonly IFileSystem _fileSystem = Substitute.For<IFileSystem>();
 
-    private BoardService CreateSut() => new(_repository, _fileSystem);
+    private BoardService CreateSut()
+    {
+        return new(_repository, _fileSystem);
+    }
 
     private static TaskItem CreateTask(
         int id,
@@ -21,7 +24,8 @@ public class BoardServiceTests
         TaskStatus status,
         Priority priority = Priority.Medium,
         DateTime? completedDate = null)
-        => new()
+    {
+        return new()
         {
             Id = id,
             Title = title,
@@ -32,6 +36,7 @@ public class BoardServiceTests
             CreatedDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
             CompletedDate = completedDate
         };
+    }
 
     [Fact]
     public void GeneratePlanningBoard_TopPriorities_FormatsCorrectly()
@@ -329,5 +334,25 @@ public class BoardServiceTests
         var result = sut.GeneratePlanningBoard();
 
         result.Should().Contain(longTitle);
+    }
+
+    [Fact]
+    public void GetBoard_EmptyRepository_ReturnsEmptyColumns()
+    {
+        // Arrange
+        _repository.GetAllByColumn(Arg.Any<TaskStatus>()).Returns([]);
+
+        // Act
+        var sut = CreateSut();
+        var board = sut.GetBoard();
+
+        // Assert
+        board.Columns.Should().HaveCount(4);
+        board.TotalTaskCount.Should().Be(0);
+        board.Columns.Should().AllSatisfy(c =>
+        {
+            c.IsEmpty.Should().BeTrue();
+            c.Tasks.Should().BeEmpty();
+        });
     }
 }

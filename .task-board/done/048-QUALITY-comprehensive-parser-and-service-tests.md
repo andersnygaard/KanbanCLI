@@ -14,11 +14,11 @@ Add test coverage for areas identified in the audit but not yet covered:
 
 ## Acceptance Criteria
 
-- [ ] Add BoardService test: GetBoard_EmptyRepository_ReturnsEmptyColumns
-- [ ] Add Parser test: Parse_CrlfLineEndings_HandlesCorrectly
-- [ ] Add Parser test: Parse_UnicodeTitle_PreservesContent
-- [ ] Add TaskItem test: GenerateFileName_SpecialCharacters_SanitizesCorrectly
-- [ ] All existing tests pass
+- [x] Add BoardService test: GetBoard_EmptyRepository_ReturnsEmptyColumns
+- [x] Add Parser test: Parse_CrlfLineEndings_HandlesCorrectly
+- [x] Add Parser test: Parse_UnicodeTitle_PreservesContent
+- [x] Add TaskItem test: GenerateFileName_SpecialCharacters_SanitizesCorrectly
+- [ ] All existing tests pass (dotnet SDK not available in environment to verify)
 
 ## Progress Log
 

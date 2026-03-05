@@ -279,12 +279,4 @@ public class MarkdigMarkdownParser : IMarkdownParser
             _ => status.ToString()
         };
     }
-
-    private static TaskType ParseTaskType(string value)
-    {
-        if (Enum.TryParse<TaskType>(value, ignoreCase: true, out var result))
-            return result;
-
-        throw new FormatException($"Unknown task type: '{value}'");
-    }
 }

@@ -6,5 +6,8 @@ public record Column
     public TaskStatus Status { get; init; }
     public IReadOnlyList<TaskItem> Tasks { get; init; } = [];
 
-    public bool IsEmpty => Tasks.Count == 0;
+    public bool IsEmpty
+    {
+        get { return Tasks.Count == 0; }
+    }
 }

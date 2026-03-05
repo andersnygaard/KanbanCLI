@@ -503,4 +503,25 @@ public class TaskItemTests
         // Assert
         fileName.Should().Be("016-FEATURE-add-oauth2-support-v3.md");
     }
+
+    [Fact]
+    public void GenerateFileName_SpecialCharacters_SanitizesCorrectly()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 20, title: "Fix: login/signup [broken] & auth?");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().StartWith("020-FEATURE-");
+        fileName.Should().EndWith(".md");
+        fileName.Should().NotContain(":");
+        fileName.Should().NotContain("/");
+        fileName.Should().NotContain("[");
+        fileName.Should().NotContain("]");
+        fileName.Should().NotContain("&");
+        fileName.Should().NotContain("?");
+        fileName.Should().NotContain("--");
+    }
 }

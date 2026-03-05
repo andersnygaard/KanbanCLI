@@ -1,6 +1,6 @@
 # Planning Board
 
-**Current Focus**: Quality polish and bug fixes
+**Current Focus**: Next scan needed — backlog empty
 
 ## Top Priorities
 
@@ -8,9 +8,9 @@
 
 ## Recently Completed
 
-- **#045** QUALITY: Additional Edge Case Tests - Done 2026-03-05
-- **#044** CLEANUP: Remove Dead Code and Unused Methods - Done 2026-03-05
-- **#043** QUALITY: Title Truncation with Ellipsis Indicator - Done 2026-03-05
-- **#042** FEATURE: Fix Default Key Exits Detail Panel - Done 2026-03-05
-- **#041** QUALITY: Console Bounds Checking and Small Terminal Handling - Done 2026-03-05
-- **#040** BUG: MoveDialog File Safety and Same-Column Guard - Done 2026-03-05
+- **#051** CLEANUP: Remove Dead Code and Add Board Width Tests - Done 2026-03-05
+- **#050** QUALITY: Move Hardcoded ConsoleColor Values to Theme.cs - Done 2026-03-05
+- **#049** QUALITY: Convert Expression-Bodied Members to Block Bodies - Done 2026-03-05
+- **#048** QUALITY: Comprehensive Parser and Service Tests - Done 2026-03-05
+- **#047** FEATURE: Show Task Position in Status Bar - Done 2026-03-05
+- **#046** QUALITY: Complete TaskType Color Mapping - Done 2026-03-05

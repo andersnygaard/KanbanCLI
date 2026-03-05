@@ -36,7 +36,8 @@ public class TaskRepositoryIntegrationTests : IDisposable
         Priority priority = Priority.Medium,
         IReadOnlyList<string>? labels = null,
         DateTime? createdDate = null)
-        => new()
+    {
+        return new()
         {
             Id = id,
             Title = title,
@@ -46,6 +47,7 @@ public class TaskRepositoryIntegrationTests : IDisposable
             Labels = labels ?? [],
             CreatedDate = createdDate ?? new DateTime(2026, 3, 5)
         };
+    }
 
     [Fact]
     public void Save_CreatesFileOnDisk_WithCorrectContent()

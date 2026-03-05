@@ -30,10 +30,10 @@ public static class TuiHelpers
     {
         return priority switch
         {
-            Priority.High => ConsoleColor.Red,
-            Priority.Medium => ConsoleColor.Yellow,
-            Priority.Low => ConsoleColor.Green,
-            _ => ConsoleColor.Gray
+            Priority.High => Theme.PriorityHigh,
+            Priority.Medium => Theme.PriorityMedium,
+            Priority.Low => Theme.PriorityLow,
+            _ => Theme.PriorityDefault
         };
     }
 
@@ -42,20 +42,20 @@ public static class TuiHelpers
     {
         return type switch
         {
-            TaskType.Feature => ConsoleColor.Cyan,
-            TaskType.Bug => ConsoleColor.Red,
-            TaskType.Security => ConsoleColor.DarkYellow,
-            TaskType.Refactor => ConsoleColor.Green,
-            TaskType.Test => ConsoleColor.Magenta,
-            TaskType.Perf => ConsoleColor.DarkCyan,
-            TaskType.Docs => ConsoleColor.Blue,
-            TaskType.Design => ConsoleColor.DarkMagenta,
-            TaskType.Epic => ConsoleColor.White,
-            TaskType.Explore => ConsoleColor.DarkGreen,
-            TaskType.Cleanup => ConsoleColor.DarkGray,
-            TaskType.A11y => ConsoleColor.DarkYellow,
-            TaskType.Quality => ConsoleColor.Yellow,
-            _ => ConsoleColor.Gray
+            TaskType.Feature => Theme.TypeFeature,
+            TaskType.Bug => Theme.TypeBug,
+            TaskType.Security => Theme.TypeSecurity,
+            TaskType.Refactor => Theme.TypeRefactor,
+            TaskType.Test => Theme.TypeTest,
+            TaskType.Perf => Theme.TypePerf,
+            TaskType.Docs => Theme.TypeDocs,
+            TaskType.Design => Theme.TypeDesign,
+            TaskType.Epic => Theme.TypeEpic,
+            TaskType.Explore => Theme.TypeExplore,
+            TaskType.Cleanup => Theme.TypeCleanup,
+            TaskType.A11y => Theme.TypeA11y,
+            TaskType.Quality => Theme.TypeQuality,
+            _ => Theme.TypeDefault
         };
     }
 

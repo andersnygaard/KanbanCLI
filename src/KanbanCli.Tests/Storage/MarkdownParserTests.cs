@@ -887,4 +887,47 @@ public class MarkdownParserTests
         type.Should().Be(TaskType.Feature);
         description.Should().BeEmpty();
     }
+
+    [Fact]
+    public void Parse_CrlfLineEndings_HandlesCorrectly()
+    {
+        // Arrange
+        var markdown = "# FEATURE: CRLF task\r\n\r\n**Status**: InProgress\r\n**Created**: 2026-03-04\r\n**Priority**: High\r\n**Labels**: frontend, api\r\n\r\n## Context & Motivation\r\nSome context here.\r\n\r\n## Progress Log\r\n- 2026-03-04 - Created\r\n";
+
+        // Act
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        // Assert
+        result.Title.Should().Be("CRLF task");
+        result.Status.Should().Be(TaskStatus.InProgress);
+        result.Priority.Should().Be(Priority.High);
+        result.Labels.Should().BeEquivalentTo(new[] { "frontend", "api" });
+        result.CreatedDate.Should().Be(new DateTime(2026, 3, 4));
+        result.Sections.Should().ContainKey("Context & Motivation");
+        result.Sections.Should().ContainKey("Progress Log");
+    }
+
+    [Fact]
+    public void Parse_UnicodeTitle_PreservesContent()
+    {
+        // Arrange
+        var markdown = """
+            # FEATURE: Implémenter la résolution des données — café ☕
+
+            **Status**: Backlog
+            **Created**: 2026-03-04
+            **Priority**: Medium
+            **Labels**: i18n
+            """;
+
+        // Act
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        // Assert
+        result.Title.Should().Contain("Implémenter");
+        result.Title.Should().Contain("résolution");
+        result.Title.Should().Contain("données");
+        result.Title.Should().Contain("café");
+        result.Labels.Should().Contain("i18n");
+    }
 }

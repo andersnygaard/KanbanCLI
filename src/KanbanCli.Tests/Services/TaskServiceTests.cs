@@ -11,10 +11,14 @@ public class TaskServiceTests
 {
     private readonly ITaskRepository _repository = Substitute.For<ITaskRepository>();
 
-    private TaskService CreateSut() => new(_repository);
+    private TaskService CreateSut()
+    {
+        return new(_repository);
+    }
 
     private static TaskItem CreateTask(int id = 1, TaskStatus status = TaskStatus.Backlog, Priority priority = Priority.Medium)
-        => new()
+    {
+        return new()
         {
             Id = id,
             Title = "Test task",
@@ -24,6 +28,7 @@ public class TaskServiceTests
             Labels = [],
             CreatedDate = new DateTime(2026, 3, 4, 0, 0, 0, DateTimeKind.Utc)
         };
+    }
 
     [Fact]
     public void CreateTask_ValidInput_SavesAndReturnsTask()
