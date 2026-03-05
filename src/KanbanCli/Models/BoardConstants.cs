@@ -60,6 +60,17 @@ public static class BoardConstants
     public const int MinWindowWidth = 40;
 
     /// <summary>
+    /// Maximum board width to prevent overly stretched layouts.
+    /// Can be overridden via the KANBAN_WIDTH environment variable.
+    /// </summary>
+    public const int MaxBoardWidth = 120;
+
+    /// <summary>
+    /// Environment variable name to override board width.
+    /// </summary>
+    public const string WidthEnvVar = "KANBAN_WIDTH";
+
+    /// <summary>
     /// Minimum window height used when rendering the board.
     /// </summary>
     public const int MinWindowHeight = 10;

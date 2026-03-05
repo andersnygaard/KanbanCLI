@@ -78,7 +78,7 @@ public class TaskDetailPanel
 
         var width = DialogHelper.GetBoxWidth();
         var borderColor = Theme.DetailBorder;
-        var visibleHeight = Math.Max(Console.WindowHeight - 4, 10); // Reserve space for top border, edit hints, bottom border
+        var visibleHeight = Math.Max(TuiHelpers.GetEffectiveHeight() - 4, 10); // Reserve space for top border, edit hints, bottom border
 
         // Build all content lines into a list
         var contentLines = BuildContentLines(task, width, borderColor);

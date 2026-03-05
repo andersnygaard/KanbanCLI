@@ -83,6 +83,50 @@ public static class TuiHelpers
         }
     }
 
+    /// <summary>
+    /// Returns the effective board width by reading the actual terminal width,
+    /// capping it to BoardConstants.MaxBoardWidth, and respecting the KANBAN_WIDTH
+    /// environment variable if set.
+    /// </summary>
+    public static int GetEffectiveWidth()
+    {
+        var envValue = Environment.GetEnvironmentVariable(BoardConstants.WidthEnvVar);
+        if (!string.IsNullOrEmpty(envValue) && int.TryParse(envValue, out var envWidth) && envWidth >= BoardConstants.MinWindowWidth)
+        {
+            return envWidth;
+        }
+
+        var consoleWidth = TryGetConsoleWidth();
+        return Math.Clamp(consoleWidth, BoardConstants.MinWindowWidth, BoardConstants.MaxBoardWidth);
+    }
+
+    /// <summary>
+    /// Returns the effective board height from the terminal.
+    /// </summary>
+    public static int GetEffectiveHeight()
+    {
+        try
+        {
+            return Math.Max(Console.WindowHeight, BoardConstants.MinWindowHeight);
+        }
+        catch (IOException)
+        {
+            return BoardConstants.MinWindowHeight;
+        }
+    }
+
+    private static int TryGetConsoleWidth()
+    {
+        try
+        {
+            return Console.WindowWidth;
+        }
+        catch (IOException)
+        {
+            return BoardConstants.MaxBoardWidth;
+        }
+    }
+
     /// <summary>Renders a colored header bar with <paramref name="title"/> spanning the full <paramref name="windowWidth"/>.</summary>
     public static void RenderHeader(string title, int windowWidth, ConsoleColor backgroundColor)
     {

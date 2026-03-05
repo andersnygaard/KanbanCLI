@@ -29,8 +29,8 @@ public class BoardView : IBoardRenderer
         Console.CursorVisible = false;
         TuiHelpers.SafeSetCursorPosition(0, 0);
 
-        var windowWidth = Math.Max(Console.WindowWidth, BoardConstants.MinWindowWidth);
-        var windowHeight = Math.Max(Console.WindowHeight, BoardConstants.MinWindowHeight);
+        var windowWidth = TuiHelpers.GetEffectiveWidth();
+        var windowHeight = TuiHelpers.GetEffectiveHeight();
 
         var columnCount = board.Columns.Count;
         if (columnCount == 0)

@@ -12,7 +12,7 @@ public static class DialogHelper
 
         if (header is not null)
         {
-            var windowWidth = Math.Max(Console.WindowWidth, 40);
+            var windowWidth = TuiHelpers.GetEffectiveWidth();
             TuiHelpers.RenderHeader(header, windowWidth, headerColor ?? Theme.DialogHeader);
             Console.WriteLine();
         }
@@ -243,6 +243,6 @@ public static class DialogHelper
     /// </summary>
     public static int GetBoxWidth()
     {
-        return Math.Min(Math.Max(Console.WindowWidth, 40), 80);
+        return Math.Min(TuiHelpers.GetEffectiveWidth(), 80);
     }
 }
