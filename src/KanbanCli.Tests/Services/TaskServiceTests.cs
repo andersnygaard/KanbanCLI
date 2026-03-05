@@ -92,6 +92,74 @@ public class TaskServiceTests
     }
 
     [Fact]
+    public void CreateTask_EmptyTitle_ThrowsArgumentException()
+    {
+        var sut = CreateSut();
+
+        var act = () => sut.CreateTask("", TaskType.Feature, Priority.Medium, []);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("title");
+    }
+
+    [Fact]
+    public void CreateTask_WhitespaceTitle_ThrowsArgumentException()
+    {
+        var sut = CreateSut();
+
+        var act = () => sut.CreateTask("   ", TaskType.Feature, Priority.Medium, []);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("title");
+    }
+
+    [Fact]
+    public void CreateTask_NullTitle_ThrowsArgumentException()
+    {
+        var sut = CreateSut();
+
+        var act = () => sut.CreateTask(null!, TaskType.Feature, Priority.Medium, []);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("title");
+    }
+
+    [Fact]
+    public void CreateTask_TitleExceedsMaxLength_ThrowsArgumentException()
+    {
+        var sut = CreateSut();
+        var longTitle = new string('A', 201);
+
+        var act = () => sut.CreateTask(longTitle, TaskType.Feature, Priority.Medium, []);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("title");
+    }
+
+    [Fact]
+    public void CreateTask_TitleAtMaxLength_DoesNotThrow()
+    {
+        _repository.GetNextId().Returns(1);
+        var sut = CreateSut();
+        var title = new string('A', 200);
+
+        var act = () => sut.CreateTask(title, TaskType.Feature, Priority.Medium, []);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void CreateTask_TitleWithInvalidFileNameChars_ThrowsArgumentException()
+    {
+        var sut = CreateSut();
+
+        var act = () => sut.CreateTask("invalid/title", TaskType.Feature, Priority.Medium, []);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("title");
+    }
+
+    [Fact]
     public void GetBoard_ReturnsAllColumnsWithTasks()
     {
         var backlogTask = CreateTask(1, TaskStatus.Backlog);
@@ -102,11 +170,115 @@ public class TaskServiceTests
         _repository.GetAllByColumn(TaskStatus.Done).Returns([]);
         _repository.GetAllByColumn(TaskStatus.OnHold).Returns([]);
 
-        var boardService = new BoardService(_repository);
+        var fileSystem = Substitute.For<IFileSystem>();
+        var boardService = new BoardService(_repository, fileSystem);
         var board = boardService.GetBoard();
 
         board.Columns.Should().HaveCount(4);
         board.Columns.First(c => c.Name == "Backlog").Tasks.Should().ContainSingle(t => t.Id == 1);
         board.Columns.First(c => c.Name == "In Progress").Tasks.Should().ContainSingle(t => t.Id == 2);
+    }
+
+    [Fact]
+    public void GetAllByColumn_DelegatesToRepository()
+    {
+        var backlogTask = CreateTask(1, TaskStatus.Backlog);
+        _repository.GetAllByColumn(TaskStatus.Backlog).Returns([backlogTask]);
+
+        var sut = CreateSut();
+        var result = sut.GetAllByColumn(TaskStatus.Backlog);
+
+        result.Should().ContainSingle(t => t.Id == 1);
+        _repository.Received(1).GetAllByColumn(TaskStatus.Backlog);
+    }
+
+    [Fact]
+    public void GetAllByColumn_EmptyColumn_ReturnsEmptyList()
+    {
+        _repository.GetAllByColumn(TaskStatus.Done).Returns([]);
+
+        var sut = CreateSut();
+        var result = sut.GetAllByColumn(TaskStatus.Done);
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetAll_DelegatesToRepository()
+    {
+        var tasks = new List<TaskItem> { CreateTask(1), CreateTask(2) };
+        _repository.GetAll().Returns(tasks);
+
+        var sut = CreateSut();
+        var result = sut.GetAll();
+
+        result.Should().HaveCount(2);
+        _repository.Received(1).GetAll();
+    }
+
+    [Fact]
+    public void UpdateTask_CallsRepositoryUpdate()
+    {
+        var task = CreateTask(1, TaskStatus.InProgress);
+        var sut = CreateSut();
+
+        sut.UpdateTask(task);
+
+        _repository.Received(1).Update(task);
+    }
+
+    [Fact]
+    public void CreateTask_RepositorySaveThrows_PropagatesException()
+    {
+        _repository.GetNextId().Returns(1);
+        _repository.When(r => r.Save(Arg.Any<TaskItem>()))
+            .Do(_ => throw new IOException("Disk full"));
+
+        var sut = CreateSut();
+
+        var act = () => sut.CreateTask("Valid title", TaskType.Feature, Priority.Medium, []);
+
+        act.Should().Throw<IOException>().WithMessage("Disk full");
+    }
+
+    [Fact]
+    public void MoveTask_RepositoryMoveThrows_PropagatesException()
+    {
+        var task = CreateTask(1, TaskStatus.Backlog);
+        _repository.When(r => r.Move(Arg.Any<TaskItem>(), Arg.Any<TaskStatus>()))
+            .Do(_ => throw new IOException("Permission denied"));
+
+        var sut = CreateSut();
+
+        var act = () => sut.MoveTask(task, TaskStatus.InProgress);
+
+        act.Should().Throw<IOException>().WithMessage("Permission denied");
+    }
+
+    [Fact]
+    public void DeleteTask_RepositoryDeleteThrows_PropagatesException()
+    {
+        var task = CreateTask(1, TaskStatus.Backlog);
+        _repository.When(r => r.Delete(Arg.Any<TaskItem>()))
+            .Do(_ => throw new IOException("File not found"));
+
+        var sut = CreateSut();
+
+        var act = () => sut.DeleteTask(task);
+
+        act.Should().Throw<IOException>().WithMessage("File not found");
+    }
+
+    [Fact]
+    public void GetAllByColumn_RepositoryThrows_PropagatesException()
+    {
+        _repository.GetAllByColumn(Arg.Any<TaskStatus>())
+            .Returns(_ => throw new IOException("Cannot read directory"));
+
+        var sut = CreateSut();
+
+        var act = () => sut.GetAllByColumn(TaskStatus.Backlog);
+
+        act.Should().Throw<IOException>().WithMessage("Cannot read directory");
     }
 }

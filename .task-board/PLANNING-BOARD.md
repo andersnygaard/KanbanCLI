@@ -1,19 +1,18 @@
 # Planning Board
 
-**Current Focus**: Backlog empty — ready for next scan
+**Current Focus**: Refinement, polish, and integration testing
 
 ## Top Priorities
 
-_(none — all tasks completed)_
+1. **#019** REFACTOR: Extract KanbanApp.Run() into Command Dispatcher - Backlog
+2. **#020** QUALITY: Fix Status Serialization Consistency and Date Handling - Backlog
+3. **#021** QUALITY: Add Integration Tests for File I/O Operations - Backlog
 
 ## Recently Completed
 
-- **#009** REFACTOR: Extract Program.cs into Structured Application Class - Done 2026-03-05
-- **#008** FEATURE: Filter Board by Label and Type - Done 2026-03-05
-- **#007** FEATURE: Roundtrip-Safe Markdown Parsing (ExtraMetadata & Sections) - Done 2026-03-05
-- **#006** FEATURE: TUI Board Rendering - Done 2026-03-04
-- **#005** FEATURE: TUI Input Handler & Keyboard Navigation - Done 2026-03-04
-- **#004** FEATURE: Service Layer (TaskService & BoardService) - Done 2026-03-04
-- **#003** FEATURE: Markdown Storage Layer - Done 2026-03-04
-- **#002** FEATURE: Rich Domain Models - Done 2026-03-04
-- **#001** FEATURE: .NET Solution Scaffolding - Done 2026-03-04
+- **#018** REFACTOR: Extract Methods in BoardService - Done 2026-03-05
+- **#017** REFACTOR: Extract Shared Dialog Helper - Done 2026-03-05
+- **#016** FEATURE: Task Edit Dialog for Enter Key - Done 2026-03-05
+- **#015** QUALITY: Expand Test Coverage for Services and Filtering - Done 2026-03-05
+- **#014** FEATURE: Priority Filtering UI and RemoveLabel Support - Done 2026-03-05
+- **#013** FEATURE: PLANNING-BOARD.md Auto-Persistence - Done 2026-03-05

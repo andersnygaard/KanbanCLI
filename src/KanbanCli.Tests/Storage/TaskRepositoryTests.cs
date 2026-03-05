@@ -2,6 +2,7 @@ using FluentAssertions;
 using KanbanCli.Models;
 using KanbanCli.Storage;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using TaskStatus = KanbanCli.Models.TaskStatus;
 
 namespace KanbanCli.Tests.Storage;
@@ -172,6 +173,92 @@ public class TaskRepositoryTests
     {
         _fileSystem.DirectoryExists(Arg.Any<string>()).Returns(true);
         _fileSystem.GetFiles(Arg.Any<string>(), "*.md").Returns([]);
+
+        var sut = CreateSut();
+        var result = sut.GetNextId();
+
+        result.Should().Be(1);
+    }
+
+    [Fact]
+    public void GetAllByColumn_FileThrowsIOException_SkipsFileGracefully()
+    {
+        var folderPath = BoardFolder("backlog");
+        var filePath = BoardFile("backlog", "001-FEATURE-test-task.md");
+
+        _fileSystem.DirectoryExists(folderPath).Returns(true);
+        _fileSystem.GetFiles(folderPath, "*.md").Returns([filePath]);
+        _fileSystem.ReadAllText(filePath).Throws(new IOException("disk error"));
+        _parser.ParseFileName(filePath).Returns((1, TaskType.Feature, "test-task"));
+
+        var sut = CreateSut();
+        var result = sut.GetAllByColumn(TaskStatus.Backlog);
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetAllByColumn_FileThrowsUnauthorizedAccess_SkipsFileGracefully()
+    {
+        var folderPath = BoardFolder("backlog");
+        var filePath = BoardFile("backlog", "001-FEATURE-test-task.md");
+
+        _fileSystem.DirectoryExists(folderPath).Returns(true);
+        _fileSystem.GetFiles(folderPath, "*.md").Returns([filePath]);
+        _fileSystem.ReadAllText(filePath).Throws(new UnauthorizedAccessException("no permission"));
+        _parser.ParseFileName(filePath).Returns((1, TaskType.Feature, "test-task"));
+
+        var sut = CreateSut();
+        var result = sut.GetAllByColumn(TaskStatus.Backlog);
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetAllByColumn_ParserThrowsFormatException_SkipsFileGracefully()
+    {
+        var folderPath = BoardFolder("backlog");
+        var filePath = BoardFile("backlog", "001-FEATURE-test-task.md");
+        var markdown = "# Bad content";
+
+        _fileSystem.DirectoryExists(folderPath).Returns(true);
+        _fileSystem.GetFiles(folderPath, "*.md").Returns([filePath]);
+        _fileSystem.ReadAllText(filePath).Returns(markdown);
+        _parser.ParseFileName(filePath).Returns((1, TaskType.Feature, "test-task"));
+        _parser.Parse(markdown, 1, TaskType.Feature).Throws(new FormatException("bad format"));
+
+        var sut = CreateSut();
+        var result = sut.GetAllByColumn(TaskStatus.Backlog);
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetAllByColumn_InvalidFileName_SkipsFileGracefully()
+    {
+        var folderPath = BoardFolder("backlog");
+        var filePath = BoardFile("backlog", "bad-file.md");
+
+        _fileSystem.DirectoryExists(folderPath).Returns(true);
+        _fileSystem.GetFiles(folderPath, "*.md").Returns([filePath]);
+        _parser.ParseFileName(filePath).Throws(new ArgumentException("bad filename"));
+
+        var sut = CreateSut();
+        var result = sut.GetAllByColumn(TaskStatus.Backlog);
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetNextId_InvalidFileName_ReturnsZeroForThatFile()
+    {
+        var backlogFolder = BoardFolder("backlog");
+        var badFile = BoardFile("backlog", "bad-file.md");
+
+        _fileSystem.DirectoryExists(Arg.Any<string>()).Returns(true);
+        _fileSystem.GetFiles(backlogFolder, "*.md").Returns([badFile]);
+        _fileSystem.GetFiles(Arg.Is<string>(s => s != backlogFolder), "*.md").Returns([]);
+        _parser.ParseFileName(badFile).Throws(new ArgumentException("bad filename"));
 
         var sut = CreateSut();
         var result = sut.GetNextId();

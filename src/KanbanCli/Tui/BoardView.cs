@@ -11,8 +11,8 @@ public class BoardView : IBoardRenderer
         Console.Clear();
         Console.CursorVisible = false;
 
-        var windowWidth = Math.Max(Console.WindowWidth, 40);
-        var windowHeight = Math.Max(Console.WindowHeight, 10);
+        var windowWidth = Math.Max(Console.WindowWidth, BoardConstants.MinWindowWidth);
+        var windowHeight = Math.Max(Console.WindowHeight, BoardConstants.MinWindowHeight);
 
         RenderTitle(windowWidth);
 

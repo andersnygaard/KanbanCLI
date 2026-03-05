@@ -97,6 +97,50 @@ public class TaskItemTests
     }
 
     [Fact]
+    public void RemoveLabel_ExistingLabel_RemovesFromList()
+    {
+        // Arrange
+        var task = CreateSampleTask(labels: ["frontend", "backend"]);
+
+        // Act
+        var result = task.RemoveLabel("frontend");
+
+        // Assert
+        result.Labels.Should().HaveCount(1);
+        result.Labels.Should().NotContain("frontend");
+        result.Labels.Should().Contain("backend");
+    }
+
+    [Fact]
+    public void RemoveLabel_NonExistentLabel_ReturnsSameInstance()
+    {
+        // Arrange
+        var task = CreateSampleTask(labels: ["frontend"]);
+
+        // Act
+        var result = task.RemoveLabel("backend");
+
+        // Assert
+        result.Should().BeSameAs(task);
+        result.Labels.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void RemoveLabel_DifferentCase_RemovesCaseInsensitive()
+    {
+        // Arrange
+        var task = CreateSampleTask(labels: ["Frontend", "api"]);
+
+        // Act
+        var result = task.RemoveLabel("frontend");
+
+        // Assert
+        result.Labels.Should().HaveCount(1);
+        result.Labels.Should().NotContain("Frontend");
+        result.Labels.Should().Contain("api");
+    }
+
+    [Fact]
     public void SetPriority_High_UpdatesPriority()
     {
         // Arrange
@@ -135,6 +179,34 @@ public class TaskItemTests
 
         // Assert
         result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void MatchesFilter_ByPriority_ReturnsTrue()
+    {
+        // Arrange
+        var task = CreateSampleTask(priority: Priority.High);
+        var filter = new FilterCriteria(Priority: Priority.High);
+
+        // Act
+        var result = task.MatchesFilter(filter);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void MatchesFilter_ByPriority_NoMatch_ReturnsFalse()
+    {
+        // Arrange
+        var task = CreateSampleTask(priority: Priority.Low);
+        var filter = new FilterCriteria(Priority: Priority.High);
+
+        // Act
+        var result = task.MatchesFilter(filter);
+
+        // Assert
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -189,5 +261,141 @@ public class TaskItemTests
         // Assert
         result.Status.Should().Be(TaskStatus.InProgress);
         result.CompletedDate.Should().BeNull();
+    }
+
+    [Fact]
+    public void GenerateFileName_EmptyTitle_UsesUntitled()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 1, title: "");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("001-FEATURE-untitled.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_AllSpecialCharacters_UsesUntitled()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 2, title: "!@#$%^&*()");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("002-FEATURE-untitled.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_WhitespaceOnlyTitle_UsesUntitled()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 3, title: "   ");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("003-FEATURE-untitled.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_TitleWithMixedSpecialChars_ProducesValidKebab()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 4, title: "Fix--the  bug!!");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().Be("004-FEATURE-fix-the-bug.md");
+    }
+
+    [Fact]
+    public void MatchesFilter_CombinedLabelAndType_BothMatch_ReturnsTrue()
+    {
+        // Arrange
+        var task = CreateSampleTask(type: TaskType.Bug, labels: ["backend", "api"]);
+        var filter = new FilterCriteria(Type: TaskType.Bug, Label: "backend");
+
+        // Act
+        var result = task.MatchesFilter(filter);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void MatchesFilter_CombinedLabelAndType_TypeMismatch_ReturnsFalse()
+    {
+        // Arrange
+        var task = CreateSampleTask(type: TaskType.Feature, labels: ["backend"]);
+        var filter = new FilterCriteria(Type: TaskType.Bug, Label: "backend");
+
+        // Act
+        var result = task.MatchesFilter(filter);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void MatchesFilter_CombinedLabelTypePriority_AllMatch_ReturnsTrue()
+    {
+        // Arrange
+        var task = CreateSampleTask(type: TaskType.Bug, priority: Priority.High, labels: ["api"]);
+        var filter = new FilterCriteria(Type: TaskType.Bug, Priority: Priority.High, Label: "api");
+
+        // Act
+        var result = task.MatchesFilter(filter);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void MatchesFilter_CombinedLabelTypePriority_PriorityMismatch_ReturnsFalse()
+    {
+        // Arrange
+        var task = CreateSampleTask(type: TaskType.Bug, priority: Priority.Low, labels: ["api"]);
+        var filter = new FilterCriteria(Type: TaskType.Bug, Priority: Priority.High, Label: "api");
+
+        // Act
+        var result = task.MatchesFilter(filter);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void MatchesFilter_EmptyCriteria_ReturnsTrue()
+    {
+        // Arrange
+        var task = CreateSampleTask(type: TaskType.Feature, priority: Priority.Low, labels: ["frontend"]);
+        var filter = new FilterCriteria();
+
+        // Act
+        var result = task.MatchesFilter(filter);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void MatchesFilter_CombinedLabelAndPriority_LabelMismatch_ReturnsFalse()
+    {
+        // Arrange
+        var task = CreateSampleTask(priority: Priority.High, labels: ["frontend"]);
+        var filter = new FilterCriteria(Priority: Priority.High, Label: "backend");
+
+        // Act
+        var result = task.MatchesFilter(filter);
+
+        // Assert
+        result.Should().BeFalse();
     }
 }

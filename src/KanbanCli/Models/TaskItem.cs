@@ -8,7 +8,7 @@ public record TaskItem
     public Priority Priority { get; init; }
     public TaskStatus Status { get; init; }
     public IReadOnlyList<string> Labels { get; init; } = [];
-    public DateTime CreatedDate { get; init; }
+    public DateTime? CreatedDate { get; init; }
     public DateTime? CompletedDate { get; init; }
     public IReadOnlyDictionary<string, string> ExtraMetadata { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> Sections { get; init; } = new Dictionary<string, string>();
@@ -26,6 +26,18 @@ public record TaskItem
             return this;
 
         var updatedLabels = Labels.Append(label).ToList();
+        return this with { Labels = updatedLabels };
+    }
+
+    public TaskItem RemoveLabel(string label)
+    {
+        var updatedLabels = Labels
+            .Where(existing => !string.Equals(existing, label, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (updatedLabels.Count == Labels.Count)
+            return this;
+
         return this with { Labels = updatedLabels };
     }
 
@@ -49,7 +61,11 @@ public record TaskItem
     {
         var typePrefix = Type.ToString().ToUpperInvariant();
         var kebabTitle = ToKebabCase(Title);
-        return $"{Id:D3}-{typePrefix}-{kebabTitle}.md";
+
+        if (string.IsNullOrEmpty(kebabTitle))
+            kebabTitle = "untitled";
+
+        return $"{Id.ToString(BoardConstants.IdFormat)}-{typePrefix}-{kebabTitle}.md";
     }
 
     private DateTime? DetermineCompletedDate(TaskStatus newStatus)

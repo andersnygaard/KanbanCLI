@@ -199,9 +199,6 @@ public class MarkdownParserTests
         result.Should().Contain("**Priority**: High");
         result.Should().Contain("**Labels**: backend, api");
         result.Should().Contain("**Created**: 2026-03-04");
-        result.Should().Contain("## Context & Motivation");
-        result.Should().Contain("## Acceptance Criteria");
-        result.Should().Contain("## Progress Log");
     }
 
     [Fact]
@@ -279,7 +276,7 @@ public class MarkdownParserTests
         reparsed.Status.Should().Be(original.Status);
         reparsed.Priority.Should().Be(original.Priority);
         reparsed.Labels.Should().BeEquivalentTo(original.Labels);
-        reparsed.CreatedDate.Date.Should().Be(original.CreatedDate.Date);
+        reparsed.CreatedDate!.Value.Date.Should().Be(original.CreatedDate!.Value.Date);
     }
 
     [Fact]
@@ -335,5 +332,273 @@ public class MarkdownParserTests
         id.Should().Be(1);
         type.Should().Be(TaskType.Bug);
         description.Should().Be("fix-login");
+    }
+
+    [Fact]
+    public void ParseFileName_InvalidFormat_ThrowsArgumentException()
+    {
+        var act = () => _parser.ParseFileName("not-a-valid-filename.txt");
+
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void ParseFileName_UnknownTaskType_ThrowsFormatException()
+    {
+        var act = () => _parser.ParseFileName("001-UNKNOWNTYPE-some-desc.md");
+
+        act.Should().Throw<FormatException>();
+    }
+
+    [Fact]
+    public void Parse_UnknownStatus_ThrowsFormatException()
+    {
+        var markdown = """
+            # FEATURE: Test task
+
+            **Status**: InvalidStatus
+            **Created**: 2026-03-04
+            **Priority**: Medium
+            **Labels**:
+            """;
+
+        var act = () => _parser.Parse(markdown, 1, TaskType.Feature);
+
+        act.Should().Throw<FormatException>();
+    }
+
+    [Fact]
+    public void Parse_InvalidDateFormat_ReturnsNullCreatedDate()
+    {
+        var markdown = """
+            # FEATURE: Test task
+
+            **Status**: Backlog
+            **Created**: not-a-date
+            **Priority**: Medium
+            **Labels**:
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.CreatedDate.Should().BeNull();
+    }
+
+    [Fact]
+    public void Parse_MissingCreatedDate_ReturnsNullCreatedDate()
+    {
+        var markdown = """
+            # FEATURE: Test task
+
+            **Status**: Backlog
+            **Priority**: Medium
+            **Labels**:
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.CreatedDate.Should().BeNull();
+    }
+
+    [Fact]
+    public void Parse_EmptyMarkdown_ReturnsTaskWithDefaults()
+    {
+        var markdown = "";
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.Id.Should().Be(1);
+        result.Title.Should().BeEmpty();
+        result.Status.Should().Be(TaskStatus.Backlog);
+        result.Priority.Should().Be(Priority.Medium);
+        result.Labels.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Parse_MissingPriority_DefaultsToMedium()
+    {
+        var markdown = """
+            # BUG: No priority
+
+            **Status**: Backlog
+            **Created**: 2026-03-04
+            **Labels**:
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Bug);
+
+        result.Priority.Should().Be(Priority.Medium);
+    }
+
+    [Fact]
+    public void Roundtrip_ParseSerializeParse_ProducesIdenticalTaskItem()
+    {
+        var markdown = """
+            # FEATURE: Full roundtrip identity test
+
+            **Status**: InProgress
+            **Created**: 2026-03-04
+            **Priority**: High
+            **Labels**: storage, core
+            **Estimated Effort**: Medium - 2-3 days
+
+            ## Context & Motivation
+            Why this task exists and what problem it solves.
+
+            ## Acceptance Criteria
+            - [ ] First requirement
+            - [x] Second requirement
+
+            ## Technical Approach
+            Implementation details here.
+
+            ## Progress Log
+            - 2026-03-04 - Task created
+            """;
+
+        var firstParse = _parser.Parse(markdown, 7, TaskType.Feature);
+        var serialized = _parser.Serialize(firstParse);
+        var secondParse = _parser.Parse(serialized, 7, TaskType.Feature);
+
+        secondParse.Id.Should().Be(firstParse.Id);
+        secondParse.Title.Should().Be(firstParse.Title);
+        secondParse.Type.Should().Be(firstParse.Type);
+        secondParse.Status.Should().Be(firstParse.Status);
+        secondParse.Priority.Should().Be(firstParse.Priority);
+        secondParse.Labels.Should().BeEquivalentTo(firstParse.Labels);
+        secondParse.CreatedDate!.Value.Date.Should().Be(firstParse.CreatedDate!.Value.Date);
+        secondParse.ExtraMetadata.Should().BeEquivalentTo(firstParse.ExtraMetadata);
+        secondParse.Sections.Keys.Should().BeEquivalentTo(firstParse.Sections.Keys);
+
+        foreach (var key in firstParse.Sections.Keys)
+        {
+            secondParse.Sections[key].Trim().Should().Be(firstParse.Sections[key].Trim());
+        }
+    }
+
+    [Fact]
+    public void Serialize_TaskWithNoSections_DoesNotInjectSections()
+    {
+        var task = new TaskItem
+        {
+            Id = 1,
+            Title = "No sections task",
+            Type = TaskType.Bug,
+            Status = TaskStatus.Backlog,
+            Priority = Priority.Low,
+            Labels = new[] { "test" }.ToList().AsReadOnly(),
+            CreatedDate = new DateTime(2026, 3, 4),
+            Sections = new Dictionary<string, string>()
+        };
+
+        var result = _parser.Serialize(task);
+
+        result.Should().NotContain("## ");
+    }
+
+    [Fact]
+    public void Serialize_TaskWithOnlyOneSection_DoesNotInjectOtherSections()
+    {
+        var task = new TaskItem
+        {
+            Id = 2,
+            Title = "Single section task",
+            Type = TaskType.Feature,
+            Status = TaskStatus.InProgress,
+            Priority = Priority.Medium,
+            Labels = [],
+            CreatedDate = new DateTime(2026, 3, 4),
+            Sections = new Dictionary<string, string>
+            {
+                ["Progress Log"] = "- 2026-03-04 - Created"
+            }
+        };
+
+        var result = _parser.Serialize(task);
+
+        result.Should().Contain("## Progress Log");
+        result.Should().NotContain("## Context & Motivation");
+        result.Should().NotContain("## Acceptance Criteria");
+        result.Should().NotContain("## Technical Approach");
+    }
+
+    [Fact]
+    public void Roundtrip_InProgressStatus_PreservesHumanReadableFormat()
+    {
+        var task = new TaskItem
+        {
+            Id = 1,
+            Title = "In progress roundtrip",
+            Type = TaskType.Feature,
+            Status = TaskStatus.InProgress,
+            Priority = Priority.Medium,
+            Labels = [],
+            CreatedDate = new DateTime(2026, 3, 4)
+        };
+
+        var serialized = _parser.Serialize(task);
+
+        serialized.Should().Contain("**Status**: In Progress");
+
+        var reparsed = _parser.Parse(serialized, task.Id, task.Type);
+
+        reparsed.Status.Should().Be(TaskStatus.InProgress);
+    }
+
+    [Fact]
+    public void Roundtrip_OnHoldStatus_PreservesHumanReadableFormat()
+    {
+        var task = new TaskItem
+        {
+            Id = 2,
+            Title = "On hold roundtrip",
+            Type = TaskType.Bug,
+            Status = TaskStatus.OnHold,
+            Priority = Priority.Low,
+            Labels = [],
+            CreatedDate = new DateTime(2026, 3, 4)
+        };
+
+        var serialized = _parser.Serialize(task);
+
+        serialized.Should().Contain("**Status**: On Hold");
+
+        var reparsed = _parser.Parse(serialized, task.Id, task.Type);
+
+        reparsed.Status.Should().Be(TaskStatus.OnHold);
+    }
+
+    [Fact]
+    public void Parse_InvalidDate_ReturnsNullInsteadOfSilentDefault()
+    {
+        var markdown = """
+            # FEATURE: Task with bad date
+
+            **Status**: Backlog
+            **Created**: 99-99-9999
+            **Priority**: Medium
+            **Labels**:
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.CreatedDate.Should().BeNull();
+    }
+
+    [Fact]
+    public void Parse_GarbageDate_ReturnsNullInsteadOfSilentDefault()
+    {
+        var markdown = """
+            # FEATURE: Task with garbage date
+
+            **Status**: Backlog
+            **Created**: lorem-ipsum
+            **Priority**: Medium
+            **Labels**:
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.CreatedDate.Should().BeNull();
     }
 }

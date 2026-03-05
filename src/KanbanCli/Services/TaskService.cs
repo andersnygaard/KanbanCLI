@@ -13,8 +13,14 @@ public class TaskService : ITaskService
         _repository = repository;
     }
 
+    private const int MaxTitleLength = 200;
+
+    private static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
+
     public TaskItem CreateTask(string title, TaskType type, Priority priority, IReadOnlyList<string> labels)
     {
+        ValidateTitle(title);
+
         var id = _repository.GetNextId();
         var task = new TaskItem
         {
@@ -29,6 +35,11 @@ public class TaskService : ITaskService
 
         _repository.Save(task);
         return task;
+    }
+
+    public void UpdateTask(TaskItem task)
+    {
+        _repository.Update(task);
     }
 
     public void MoveTask(TaskItem task, TaskStatus targetColumn)
@@ -50,5 +61,17 @@ public class TaskService : ITaskService
     public IReadOnlyList<TaskItem> GetAll()
     {
         return _repository.GetAll();
+    }
+
+    private static void ValidateTitle(string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("Task title cannot be empty or whitespace.", nameof(title));
+
+        if (title.Length > MaxTitleLength)
+            throw new ArgumentException($"Task title cannot exceed {MaxTitleLength} characters.", nameof(title));
+
+        if (title.Any(c => InvalidFileNameChars.Contains(c)))
+            throw new ArgumentException("Task title contains invalid filename characters.", nameof(title));
     }
 }

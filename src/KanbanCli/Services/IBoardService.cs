@@ -6,4 +6,5 @@ public interface IBoardService
 {
     Board GetBoard();
     string GeneratePlanningBoard();
+    void SavePlanningBoard(string boardPath);
 }

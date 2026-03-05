@@ -8,18 +8,19 @@ var fileSystem = new FileSystem();
 var markdownParser = new MarkdigMarkdownParser();
 var repository = new MarkdownTaskRepository(fileSystem, markdownParser, boardPath);
 var taskService = new TaskService(repository);
-var boardService = new BoardService(repository);
+var boardService = new BoardService(repository, fileSystem);
 
 var app = new KanbanApp(
     taskService,
     boardService,
     inputHandler: new KeyboardInputHandler(),
     boardRenderer: new BoardView(),
-    taskDetailPanel: new TaskDetailPanel(),
+    taskDetailPanel: new TaskDetailPanel(taskService),
     newTaskDialog: new NewTaskDialog(),
     moveDialog: new MoveDialog(),
     confirmDialog: new ConfirmDialog(),
     priorityDialog: new PriorityDialog(),
-    filterDialog: new FilterDialog());
+    filterDialog: new FilterDialog(),
+    boardPath: boardPath);
 
 app.Run();

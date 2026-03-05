@@ -4,14 +4,6 @@ using TaskStatus = KanbanCli.Models.TaskStatus;
 
 public class MoveDialog
 {
-    private static readonly TaskStatus[] StatusMap =
-    [
-        TaskStatus.Backlog,
-        TaskStatus.InProgress,
-        TaskStatus.Done,
-        TaskStatus.OnHold
-    ];
-
     public TaskStatus? Show(Board board, int currentColumnIndex)
     {
         Console.Clear();
@@ -40,9 +32,12 @@ public class MoveDialog
         if (!int.TryParse(input, out var choice) || choice == 0)
             return null;
 
-        if (choice < 1 || choice > StatusMap.Length)
+        if (choice < 1 || choice > board.Columns.Count)
             return null;
 
-        return StatusMap[choice - 1];
+        if (choice - 1 >= BoardConstants.ColumnOrder.Count)
+            return null;
+
+        return BoardConstants.ColumnOrder[choice - 1];
     }
 }

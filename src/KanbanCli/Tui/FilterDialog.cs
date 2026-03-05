@@ -3,15 +3,11 @@ using KanbanCli.Models;
 
 public class FilterDialog
 {
-    private enum FilterMode { ByType = 1, ByLabel = 2 }
+    private enum FilterMode { ByType = 1, ByLabel = 2, ByPriority = 3 }
 
     public FilterCriteria? Show(IReadOnlyList<string> availableLabels)
     {
-        Console.Clear();
-        Console.CursorVisible = true;
-
-        var windowWidth = Math.Max(Console.WindowWidth, 40);
-        TuiHelpers.RenderHeader("Filter Board", windowWidth, ConsoleColor.DarkMagenta);
+        DialogHelper.SetupDialog("Filter Board", ConsoleColor.DarkMagenta);
         Console.WriteLine();
 
         Console.WriteLine();
@@ -29,9 +25,14 @@ public class FilterDialog
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("By Label");
 
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.Write("    3. ");
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("By Priority");
+
         Console.ResetColor();
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write("  Enter number (1-2), or 0 to cancel: ");
+        Console.Write("  Enter number (1-3), or 0 to cancel: ");
         Console.ResetColor();
 
         var modeInput = Console.ReadLine()?.Trim() ?? string.Empty;
@@ -46,40 +47,18 @@ public class FilterDialog
         {
             (int)FilterMode.ByType => PromptByType(),
             (int)FilterMode.ByLabel => PromptByLabel(availableLabels),
+            (int)FilterMode.ByPriority => PromptByPriority(),
             _ => null
         };
     }
 
     private static FilterCriteria? PromptByType()
     {
-        var types = Enum.GetValues<TaskType>();
-
-        Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("  Task type:");
-        Console.ResetColor();
-
-        for (var i = 0; i < types.Length; i++)
-        {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"    {i + 1}. ");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(types[i].ToString());
-        }
-
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write($"  Enter number (1-{types.Length}), or 0 to cancel: ");
-        Console.ResetColor();
-
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
+        var selected = DialogHelper.PromptEnum<TaskType>("Task type", allowZeroCancel: true);
 
         Console.CursorVisible = false;
 
-        if (!int.TryParse(input, out var choice) || choice == 0 || choice < 1 || choice > types.Length)
-            return null;
-
-        return new FilterCriteria(Type: types[choice - 1]);
+        return selected.HasValue ? new FilterCriteria(Type: selected.Value) : null;
     }
 
     private static FilterCriteria? PromptByLabel(IReadOnlyList<string> availableLabels)
@@ -130,6 +109,15 @@ public class FilterDialog
         }
 
         return new FilterCriteria(Label: input);
+    }
+
+    private static FilterCriteria? PromptByPriority()
+    {
+        var selected = DialogHelper.PromptEnum<Priority>("Priority", allowZeroCancel: true);
+
+        Console.CursorVisible = false;
+
+        return selected.HasValue ? new FilterCriteria(Priority: selected.Value) : null;
     }
 
 }
