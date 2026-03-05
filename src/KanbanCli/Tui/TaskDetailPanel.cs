@@ -1,6 +1,7 @@
 namespace KanbanCli.Tui;
 using KanbanCli.Models;
 using KanbanCli.Services;
+using TaskStatus = KanbanCli.Models.TaskStatus;
 
 public class TaskDetailPanel
 {
@@ -124,17 +125,21 @@ public class TaskDetailPanel
         // Metadata fields
         lines.Add(ContentLine.Field("ID", $"#{task.Id:D3}", width, borderColor));
         lines.Add(ContentLine.Field("Title", task.Title, width, borderColor));
-        lines.Add(ContentLine.Field("Type", task.Type.ToString(), width, borderColor));
-        lines.Add(ContentLine.Field("Priority", task.Priority.ToString(), width, borderColor, TuiHelpers.GetPriorityColor(task.Priority)));
-        lines.Add(ContentLine.Field("Status", TuiHelpers.FormatStatus(task.Status), width, borderColor));
+        lines.Add(ContentLine.Field("Type", task.Type.ToString(), width, borderColor, TuiHelpers.GetTypeColor(task.Type)));
 
-        var labelsText = task.Labels.Count > 0
-            ? string.Join("  ", task.Labels.Select(l => $"[{l}]"))
-            : "(none)";
-        lines.Add(ContentLine.Field("Labels", labelsText, width, borderColor));
+        var prioritySymbol = TuiHelpers.GetPrioritySymbol(task.Priority);
+        lines.Add(ContentLine.Field("Priority", $"{prioritySymbol} {task.Priority}", width, borderColor, TuiHelpers.GetPriorityColor(task.Priority)));
+
+        lines.Add(ContentLine.StatusWorkflow(task.Status, width, borderColor));
+
+        lines.Add(ContentLine.Labels(task.Labels, width, borderColor));
         lines.Add(ContentLine.Field("Created", task.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "(unknown)", width, borderColor));
         if (task.CompletedDate.HasValue)
             lines.Add(ContentLine.Field("Completed", task.CompletedDate.Value.ToString("yyyy-MM-dd HH:mm"), width, borderColor));
+
+        // Extra metadata fields
+        foreach (var meta in task.ExtraMetadata)
+            lines.Add(ContentLine.Field(meta.Key, meta.Value, width, borderColor));
 
         lines.Add(ContentLine.Empty(width, borderColor));
         lines.Add(ContentLine.Separator(width, borderColor));
@@ -352,8 +357,92 @@ internal class ContentLine
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.Write($"{label,-12}");
             Console.ForegroundColor = valueColor ?? ConsoleColor.White;
-            Console.Write(value);
-            var contentLen = Math.Max(label.Length, 12) + value.Length;
+            var maxValueLen = width - 15; // 2 border + 12 label + 1 padding
+            var truncatedValue = value.Length > maxValueLen ? value[..maxValueLen] : value;
+            Console.Write(truncatedValue);
+            var contentLen = Math.Max(label.Length, 12) + truncatedValue.Length;
             DialogHelper.RenderBoxRightBorder(contentLen, width, borderColor);
+        });
+
+    public static ContentLine StatusWorkflow(TaskStatus status, int width, ConsoleColor borderColor) =>
+        new(() =>
+        {
+            DialogHelper.RenderBoxLeftBorder(borderColor);
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.Write($"{"Status",-12}");
+
+            var statuses = new[]
+            {
+                (TaskStatus.Backlog, "Backlog"),
+                (TaskStatus.InProgress, "In Progress"),
+                (TaskStatus.Done, "Done"),
+                (TaskStatus.OnHold, "On Hold")
+            };
+
+            var written = 12;
+            for (var i = 0; i < statuses.Length; i++)
+            {
+                var (s, name) = statuses[i];
+                if (s == status)
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.BackgroundColor = ConsoleColor.DarkBlue;
+                    Console.Write($" {name} ");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write($" {name} ");
+                }
+                written += name.Length + 2;
+
+                if (i < statuses.Length - 1)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("\u2192");
+                    written += 1;
+                }
+            }
+
+            DialogHelper.RenderBoxRightBorder(written, width, borderColor);
+        });
+
+    public static ContentLine Labels(IReadOnlyList<string> labels, int width, ConsoleColor borderColor) =>
+        new(() =>
+        {
+            DialogHelper.RenderBoxLeftBorder(borderColor);
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.Write($"{"Labels",-12}");
+
+            var written = 12;
+
+            if (labels.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("(none)");
+                written += 6;
+            }
+            else
+            {
+                for (var i = 0; i < labels.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        Console.Write("  ");
+                        written += 2;
+                    }
+
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.Write("[");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write(labels[i]);
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.Write("]");
+                    written += labels[i].Length + 2;
+                }
+            }
+
+            DialogHelper.RenderBoxRightBorder(written, width, borderColor);
         });
 }

@@ -43,13 +43,13 @@ A richer metadata display:
 
 ## Acceptance Criteria
 
-- [ ] Type field uses `TuiHelpers.GetTypeColor()` for color coding
-- [ ] Priority field shows priority symbol (●/◐/○) from `TuiHelpers.GetPrioritySymbol()`
-- [ ] Status shows visual workflow indicator with current status highlighted
-- [ ] Labels rendered with individual colored brackets matching task card style
-- [ ] ExtraMetadata fields rendered after standard metadata
-- [ ] Long field values properly truncated to fit box width
-- [ ] All existing tests pass (`dotnet build src/` and `dotnet test src/`)
+- [x] Type field uses `TuiHelpers.GetTypeColor()` for color coding
+- [x] Priority field shows priority symbol (●/◐/○) from `TuiHelpers.GetPrioritySymbol()`
+- [x] Status shows visual workflow indicator with current status highlighted
+- [x] Labels rendered with individual colored brackets matching task card style
+- [x] ExtraMetadata fields rendered after standard metadata
+- [x] Long field values properly truncated to fit box width
+- [x] All existing tests pass (`dotnet build src/` and `dotnet test src/`)
 
 ## Technical Approach
 
