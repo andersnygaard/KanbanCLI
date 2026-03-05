@@ -41,7 +41,10 @@ public record TaskItem
         return this with { Labels = updatedLabels };
     }
 
-    public TaskItem SetPriority(Priority priority) => this with { Priority = priority };
+    public TaskItem SetPriority(Priority priority)
+    {
+        return this with { Priority = priority };
+    }
 
     public bool MatchesFilter(FilterCriteria filter)
     {

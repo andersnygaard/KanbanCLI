@@ -14,38 +14,56 @@ public static class TuiHelpers
     public const int CardTotalHeight = CardLineCount + CardSeparatorLines;
 
     /// <summary>Returns the Unicode priority indicator symbol for the given <paramref name="priority"/>.</summary>
-    public static string GetPrioritySymbol(Priority priority) => priority switch
+    public static string GetPrioritySymbol(Priority priority)
     {
-        Priority.High => "\u25CF",    // ●
-        Priority.Medium => "\u25D0",  // ◐
-        Priority.Low => "\u25CB",     // ○
-        _ => " "
-    };
+        return priority switch
+        {
+            Priority.High => "\u25CF",    // ●
+            Priority.Medium => "\u25D0",  // ◐
+            Priority.Low => "\u25CB",     // ○
+            _ => " "
+        };
+    }
 
     /// <summary>Returns the console color associated with the given <paramref name="priority"/> level.</summary>
-    public static ConsoleColor GetPriorityColor(Priority priority) => priority switch
+    public static ConsoleColor GetPriorityColor(Priority priority)
     {
-        Priority.High => ConsoleColor.Red,
-        Priority.Medium => ConsoleColor.Yellow,
-        Priority.Low => ConsoleColor.Green,
-        _ => ConsoleColor.Gray
-    };
+        return priority switch
+        {
+            Priority.High => ConsoleColor.Red,
+            Priority.Medium => ConsoleColor.Yellow,
+            Priority.Low => ConsoleColor.Green,
+            _ => ConsoleColor.Gray
+        };
+    }
 
     /// <summary>Returns the console color associated with the given <paramref name="type"/>.</summary>
-    public static ConsoleColor GetTypeColor(TaskType type) => type switch
+    public static ConsoleColor GetTypeColor(TaskType type)
     {
-        TaskType.Feature => ConsoleColor.Cyan,
-        TaskType.Bug => ConsoleColor.Red,
-        TaskType.Security => ConsoleColor.DarkYellow,
-        TaskType.Refactor => ConsoleColor.Green,
-        TaskType.Test => ConsoleColor.Magenta,
-        TaskType.Perf => ConsoleColor.DarkCyan,
-        TaskType.Docs => ConsoleColor.Blue,
-        _ => ConsoleColor.Gray
-    };
+        return type switch
+        {
+            TaskType.Feature => ConsoleColor.Cyan,
+            TaskType.Bug => ConsoleColor.Red,
+            TaskType.Security => ConsoleColor.DarkYellow,
+            TaskType.Refactor => ConsoleColor.Green,
+            TaskType.Test => ConsoleColor.Magenta,
+            TaskType.Perf => ConsoleColor.DarkCyan,
+            TaskType.Docs => ConsoleColor.Blue,
+            TaskType.Design => ConsoleColor.DarkMagenta,
+            TaskType.Epic => ConsoleColor.White,
+            TaskType.Explore => ConsoleColor.DarkGreen,
+            TaskType.Cleanup => ConsoleColor.DarkGray,
+            TaskType.A11y => ConsoleColor.DarkYellow,
+            TaskType.Quality => ConsoleColor.Yellow,
+            _ => ConsoleColor.Gray
+        };
+    }
 
     /// <summary>Formats a <paramref name="status"/> value as a human-readable display string.</summary>
-    public static string FormatStatus(TaskStatus status) => status.ToDisplayString();
+    public static string FormatStatus(TaskStatus status)
+    {
+        return status.ToDisplayString();
+    }
 
     /// <summary>
     /// Sets the cursor position, clamping coordinates to valid console bounds.
@@ -70,7 +88,7 @@ public static class TuiHelpers
     {
         SafeSetCursorPosition(0, 0);
         Console.BackgroundColor = backgroundColor;
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = Theme.BoardTitleFg;
         Console.Write($" {title}".PadRight(windowWidth - 1));
         Console.ResetColor();
     }

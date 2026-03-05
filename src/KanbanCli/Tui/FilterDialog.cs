@@ -11,13 +11,13 @@ public class FilterDialog
         Console.CursorVisible = true;
 
         var width = DialogHelper.GetBoxWidth();
-        var borderColor = ConsoleColor.DarkGray;
+        var borderColor = Theme.DialogBorder;
 
         DialogHelper.RenderBoxTop("Filter Board", width, borderColor);
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         var headerText = "Filter by:";
         Console.Write(headerText);
         DialogHelper.RenderBoxRightBorder(headerText.Length, width, borderColor);
@@ -29,7 +29,7 @@ public class FilterDialog
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         Console.Write("Enter number (1-3), or 0 to cancel: ");
         Console.ResetColor();
 
@@ -60,10 +60,10 @@ public class FilterDialog
     private static void RenderFilterOption(int number, string text, int width, ConsoleColor borderColor)
     {
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = Theme.DialogListNumber;
         var numText = $"  {number}. ";
         Console.Write(numText);
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = Theme.DialogListItem;
         Console.Write(text);
         DialogHelper.RenderBoxRightBorder(numText.Length + text.Length, width, borderColor);
     }
@@ -84,7 +84,7 @@ public class FilterDialog
         if (availableLabels.Count > 0)
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = Theme.DialogPrompt;
             var headerText = "Available labels:";
             Console.Write(headerText);
             DialogHelper.RenderBoxRightBorder(headerText.Length, width, borderColor);
@@ -92,10 +92,10 @@ public class FilterDialog
             for (var i = 0; i < availableLabels.Count; i++)
             {
                 DialogHelper.RenderBoxLeftBorder(borderColor);
-                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.ForegroundColor = Theme.DialogListNumber;
                 var numText = $"  {i + 1}. ";
                 Console.Write(numText);
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = Theme.DialogListItem;
                 var labelText = availableLabels[i];
                 Console.Write(labelText);
                 DialogHelper.RenderBoxRightBorder(numText.Length + labelText.Length, width, borderColor);
@@ -104,19 +104,19 @@ public class FilterDialog
             DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = Theme.DialogPrompt;
             Console.Write($"Enter number (1-{availableLabels.Count}), label name, or 0 to cancel: ");
             Console.ResetColor();
         }
         else
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = Theme.DialogPrompt;
             Console.Write("Enter label name, or leave empty to cancel: ");
             Console.ResetColor();
         }
 
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = Theme.DialogListItem;
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
         Console.ResetColor();
         Console.CursorVisible = false;
@@ -152,7 +152,7 @@ public class FilterDialog
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         var labelText = $"{label}:";
         Console.Write(labelText);
         DialogHelper.RenderBoxRightBorder(labelText.Length, width, borderColor);
@@ -160,10 +160,10 @@ public class FilterDialog
         for (var i = 0; i < values.Length; i++)
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.ForegroundColor = Theme.DialogListNumber;
             var numText = $"  {i + 1}. ";
             Console.Write(numText);
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = Theme.DialogListItem;
             var valText = values[i].ToString();
             Console.Write(valText);
             DialogHelper.RenderBoxRightBorder(numText.Length + valText.Length, width, borderColor);
@@ -172,7 +172,7 @@ public class FilterDialog
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         var promptText = $"Enter number (1-{values.Length}), or 0 to cancel: ";
         Console.Write(promptText);
         Console.ResetColor();

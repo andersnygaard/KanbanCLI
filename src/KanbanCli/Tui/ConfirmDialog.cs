@@ -9,13 +9,13 @@ public class ConfirmDialog
         Console.CursorVisible = true;
 
         var width = DialogHelper.GetBoxWidth();
-        var borderColor = ConsoleColor.Red;
+        var borderColor = Theme.DangerBorder;
 
         DialogHelper.RenderBoxTop("Confirm Delete", width, borderColor);
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = Theme.DangerText;
         var warningText = $"Delete task #{task.Id:D3}: {task.Title}?";
         Console.Write(warningText);
         DialogHelper.RenderBoxRightBorder(warningText.Length, width, borderColor);

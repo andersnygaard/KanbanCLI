@@ -132,7 +132,9 @@ public class MarkdownTaskRepository : ITaskRepository
     }
 
     private string GetColumnPath(TaskStatus status)
-        => Path.Combine(_boardPath, FolderNames[status]);
+    {
+        return Path.Combine(_boardPath, FolderNames[status]);
+    }
 
     private TaskItem? TryParseFile(string filePath)
     {

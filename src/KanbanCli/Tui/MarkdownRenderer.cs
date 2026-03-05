@@ -68,9 +68,9 @@ public static class MarkdownRenderer
         var text = ExtractPlainText(heading.Inline);
         var color = heading.Level switch
         {
-            2 => ConsoleColor.Cyan,
-            3 => ConsoleColor.DarkCyan,
-            _ => ConsoleColor.DarkCyan
+            2 => Theme.MdHeading,
+            3 => Theme.MdSubheading,
+            _ => Theme.MdSubheading
         };
 
         var displayText = $"  {text}";
@@ -109,19 +109,19 @@ public static class MarkdownRenderer
         {
             if (isChecked)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
+                Console.ForegroundColor = Theme.MdCheckboxChecked;
                 Console.Write("  \u2611 ");
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.ForegroundColor = Theme.MdCheckboxUnchecked;
                 Console.Write("  \u2610 ");
             }
             writtenLength = 4;
         }
         else
         {
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.ForegroundColor = Theme.MdBullet;
             Console.Write("  \u2022 ");
             Console.ResetColor();
             writtenLength = 4;
@@ -188,14 +188,14 @@ public static class MarkdownRenderer
                     case EmphasisInline emphasis when emphasis.DelimiterChar == '*' && emphasis.DelimiterCount == 2:
                         var boldText = ExtractPlainText(emphasis);
                         boldText = TruncateText(boldText, remaining);
-                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = Theme.MdLiteral;
                         Console.Write(boldText);
                         writtenLength += boldText.Length;
                         break;
 
                     case CodeInline code:
                         var codeText = TruncateText(code.Content, remaining);
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.ForegroundColor = Theme.MdCode;
                         Console.Write(codeText);
                         writtenLength += codeText.Length;
                         break;
@@ -203,7 +203,7 @@ public static class MarkdownRenderer
                     case LiteralInline literal:
                         var literalText = literal.Content.ToString();
                         literalText = TruncateText(literalText, remaining);
-                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = Theme.MdLiteral;
                         Console.Write(literalText);
                         writtenLength += literalText.Length;
                         break;
@@ -214,7 +214,7 @@ public static class MarkdownRenderer
                     default:
                         var fallbackText = inline.ToString() ?? string.Empty;
                         fallbackText = TruncateText(fallbackText, remaining);
-                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = Theme.MdLiteral;
                         Console.Write(fallbackText);
                         writtenLength += fallbackText.Length;
                         break;
@@ -235,7 +235,7 @@ public static class MarkdownRenderer
                 displayText = displayText[..maxContentWidth];
 
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.ForegroundColor = Theme.MdCode;
             Console.Write(displayText);
             Console.ResetColor();
             DialogHelper.RenderBoxRightBorder(displayText.Length, boxWidth, borderColor);
@@ -268,14 +268,14 @@ public static class MarkdownRenderer
                 case EmphasisInline emphasis when emphasis.DelimiterChar == '*' && emphasis.DelimiterCount == 2:
                     var boldText = ExtractPlainText(emphasis);
                     boldText = TruncateText(boldText, remaining);
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = Theme.MdLiteral;
                     Console.Write(boldText);
                     writtenLength += boldText.Length;
                     break;
 
                 case CodeInline code:
                     var codeText = TruncateText(code.Content, remaining);
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.ForegroundColor = Theme.MdCode;
                     Console.Write(codeText);
                     writtenLength += codeText.Length;
                     break;
@@ -283,7 +283,7 @@ public static class MarkdownRenderer
                 case LiteralInline literal:
                     var literalText = literal.Content.ToString();
                     literalText = TruncateText(literalText, remaining);
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = Theme.MdLiteral;
                     Console.Write(literalText);
                     writtenLength += literalText.Length;
                     break;
@@ -294,7 +294,7 @@ public static class MarkdownRenderer
                 default:
                     var fallbackText = inline.ToString() ?? string.Empty;
                     fallbackText = TruncateText(fallbackText, remaining);
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = Theme.MdLiteral;
                     Console.Write(fallbackText);
                     writtenLength += fallbackText.Length;
                     break;

@@ -53,20 +53,23 @@ public class KanbanApp
         _commandDispatch = InitializeCommandDispatch();
     }
 
-    private Dictionary<BoardCommand, Action> InitializeCommandDispatch() => new()
+    private Dictionary<BoardCommand, Action> InitializeCommandDispatch()
     {
-        [BoardCommand.Quit] = HandleQuit,
-        [BoardCommand.MoveLeft] = HandleMoveLeft,
-        [BoardCommand.MoveRight] = HandleMoveRight,
-        [BoardCommand.MoveUp] = HandleMoveUp,
-        [BoardCommand.MoveDown] = HandleMoveDown,
-        [BoardCommand.ViewDetails] = HandleViewDetails,
-        [BoardCommand.NewTask] = HandleNewTask,
-        [BoardCommand.MoveTask] = HandleMoveTask,
-        [BoardCommand.DeleteTask] = HandleDeleteTask,
-        [BoardCommand.ChangePriority] = HandleChangePriority,
-        [BoardCommand.ToggleFilter] = HandleToggleFilter,
-    };
+        return new Dictionary<BoardCommand, Action>
+        {
+            [BoardCommand.Quit] = HandleQuit,
+            [BoardCommand.MoveLeft] = HandleMoveLeft,
+            [BoardCommand.MoveRight] = HandleMoveRight,
+            [BoardCommand.MoveUp] = HandleMoveUp,
+            [BoardCommand.MoveDown] = HandleMoveDown,
+            [BoardCommand.ViewDetails] = HandleViewDetails,
+            [BoardCommand.NewTask] = HandleNewTask,
+            [BoardCommand.MoveTask] = HandleMoveTask,
+            [BoardCommand.DeleteTask] = HandleDeleteTask,
+            [BoardCommand.ChangePriority] = HandleChangePriority,
+            [BoardCommand.ToggleFilter] = HandleToggleFilter,
+        };
+    }
 
     public void Run()
     {
@@ -101,13 +104,20 @@ public class KanbanApp
         Console.WriteLine("Goodbye!");
     }
 
-    private void HandleQuit() => _running = false;
+    private void HandleQuit()
+    {
+        _running = false;
+    }
 
-    private void HandleMoveLeft() =>
+    private void HandleMoveLeft()
+    {
         _state = _state.MoveToColumn(-1, _displayBoard.Columns.Count);
+    }
 
-    private void HandleMoveRight() =>
+    private void HandleMoveRight()
+    {
         _state = _state.MoveToColumn(1, _displayBoard.Columns.Count);
+    }
 
     private void HandleMoveUp()
     {

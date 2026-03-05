@@ -5,8 +5,8 @@ public class TaskCard : ITaskCard
 {
     public void RenderWithColors(TaskItem task, int columnX, int row, int columnWidth, bool isSelected)
     {
-        var bgColor = isSelected ? ConsoleColor.DarkCyan : ConsoleColor.Black;
-        var defaultFg = isSelected ? ConsoleColor.White : ConsoleColor.Gray;
+        var bgColor = isSelected ? Theme.CardSelectedBg : Theme.CardBg;
+        var defaultFg = isSelected ? Theme.CardSelectedFg : Theme.CardFg;
 
         // Line 1: Selection indicator + ID + Type
         RenderLine1(task, columnX, row, columnWidth, isSelected, bgColor, defaultFg);
@@ -77,7 +77,7 @@ public class TaskCard : ITaskCard
         // Labels
         if (task.Labels.Count > 0)
         {
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.ForegroundColor = Theme.CardLabel;
             Console.BackgroundColor = bgColor;
             foreach (var label in task.Labels)
             {

@@ -11,7 +11,7 @@ public class NewTaskDialog
         Console.CursorVisible = true;
 
         var width = DialogHelper.GetBoxWidth();
-        var borderColor = ConsoleColor.DarkGray;
+        var borderColor = Theme.DialogBorder;
 
         DialogHelper.RenderBoxTop("New Task", width, borderColor);
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
@@ -49,7 +49,7 @@ public class NewTaskDialog
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
         DialogHelper.RenderBoxBottom(width, borderColor);
 
-        Console.ForegroundColor = ConsoleColor.Green;
+        Console.ForegroundColor = Theme.Success;
         Console.WriteLine($"  \u2713 Creating task: [{type}] {title} ({priority})...");
         Console.ResetColor();
 
@@ -64,7 +64,7 @@ public class NewTaskDialog
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         var labelText = $"{label}:";
         Console.Write(labelText);
         DialogHelper.RenderBoxRightBorder(labelText.Length, width, borderColor);
@@ -74,7 +74,7 @@ public class NewTaskDialog
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         var promptText = $"Enter number (1-{values.Length}): ";
         Console.Write(promptText);
         Console.ResetColor();

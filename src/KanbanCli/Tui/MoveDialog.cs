@@ -10,13 +10,13 @@ public class MoveDialog
         Console.CursorVisible = true;
 
         var width = DialogHelper.GetBoxWidth();
-        var borderColor = ConsoleColor.DarkGray;
+        var borderColor = Theme.DialogBorder;
 
         DialogHelper.RenderBoxTop("Move Task", width, borderColor);
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         var headerText = "Move task to column:";
         Console.Write(headerText);
         DialogHelper.RenderBoxRightBorder(headerText.Length, width, borderColor);
@@ -25,10 +25,10 @@ public class MoveDialog
         {
             var marker = i == currentColumnIndex ? " (current)" : string.Empty;
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.ForegroundColor = Theme.DialogListNumber;
             var numText = $"  {i + 1}. ";
             Console.Write(numText);
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = Theme.DialogListItem;
             var colText = $"{board.Columns[i].Name}{marker}";
             Console.Write(colText);
             DialogHelper.RenderBoxRightBorder(numText.Length + colText.Length, width, borderColor);
@@ -37,7 +37,7 @@ public class MoveDialog
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         var promptText = $"Enter number (1-{board.Columns.Count}), or 0 to cancel: ";
         Console.Write(promptText);
         Console.ResetColor();

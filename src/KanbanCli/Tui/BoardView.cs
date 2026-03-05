@@ -87,9 +87,9 @@ public class BoardView : IBoardRenderer
         var bodyHeight = bottomBodyRow - bodyStartRow;
 
         // Render frame
-        RenderHorizontalLine(topBorderRow, windowWidth, columnWidths, TopLeft, TopTee, TopRight, ConsoleColor.DarkGray);
-        RenderTitleBar(titleRow, windowWidth, ConsoleColor.DarkGray);
-        RenderHorizontalLine(headerSepRow, windowWidth, columnWidths, LeftTee, Cross, RightTee, ConsoleColor.DarkGray);
+        RenderHorizontalLine(topBorderRow, windowWidth, columnWidths, TopLeft, TopTee, TopRight, Theme.BoardBorder);
+        RenderTitleBar(titleRow, windowWidth, Theme.BoardBorder);
+        RenderHorizontalLine(headerSepRow, windowWidth, columnWidths, LeftTee, Cross, RightTee, Theme.BoardBorder);
 
         // Render column headers
         for (var i = 0; i < columnCount; i++)
@@ -99,9 +99,9 @@ public class BoardView : IBoardRenderer
             RenderColumnHeader(column, columnXPositions[i], columnWidths[i], headerRow, isSelected);
         }
         // Draw vertical separators for header row
-        RenderVerticalSeparators(headerRow, columnXPositions, columnWidths, columnCount, windowWidth, state.SelectedColumn, ConsoleColor.DarkGray);
+        RenderVerticalSeparators(headerRow, columnXPositions, columnWidths, columnCount, windowWidth, state.SelectedColumn, Theme.BoardBorder);
 
-        RenderHorizontalLine(bodySepRow, windowWidth, columnWidths, LeftTee, Cross, RightTee, ConsoleColor.DarkGray);
+        RenderHorizontalLine(bodySepRow, windowWidth, columnWidths, LeftTee, Cross, RightTee, Theme.BoardBorder);
 
         // Render column body content (tasks)
         var isFiltered = filterInfo is not null;
@@ -113,23 +113,33 @@ public class BoardView : IBoardRenderer
         // Draw vertical separators for all body rows
         for (var row = bodyStartRow; row < bottomBodyRow; row++)
         {
-            RenderVerticalSeparators(row, columnXPositions, columnWidths, columnCount, windowWidth, state.SelectedColumn, ConsoleColor.DarkGray);
+            RenderVerticalSeparators(row, columnXPositions, columnWidths, columnCount, windowWidth, state.SelectedColumn, Theme.BoardBorder);
         }
 
         // Bottom body border (uses ┴ between columns to close them off)
-        RenderHorizontalLine(bottomBodyRow, windowWidth, columnWidths, LeftTee, BottomTee, RightTee, ConsoleColor.DarkGray);
+        RenderHorizontalLine(bottomBodyRow, windowWidth, columnWidths, LeftTee, BottomTee, RightTee, Theme.BoardBorder);
 
-        // Status bar
-        _statusBar.Render(statusBarRow, windowWidth, filterInfo);
+        // Status bar with position info
+        string? positionInfo = null;
+        if (columnCount > 0 && state.SelectedColumn < columnCount)
+        {
+            var selectedCol = board.Columns[state.SelectedColumn];
+            if (selectedCol.Tasks.Count > 0)
+            {
+                var taskIndex = Math.Min(state.SelectedTask, selectedCol.Tasks.Count - 1);
+                positionInfo = $"Task {taskIndex + 1}/{selectedCol.Tasks.Count}";
+            }
+        }
+        _statusBar.Render(statusBarRow, windowWidth, filterInfo, positionInfo);
 
         // Bottom border
-        RenderSimpleHorizontalLine(bottomBorderRow, windowWidth, BottomLeft, BottomRight, ConsoleColor.DarkGray);
+        RenderSimpleHorizontalLine(bottomBorderRow, windowWidth, BottomLeft, BottomRight, Theme.BoardBorder);
     }
 
     private static void RenderEmptyBoard(int windowWidth)
     {
         TuiHelpers.SafeSetCursorPosition(0, 0);
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = Theme.BoardBorder;
         Console.Write(TopLeft + new string(Horizontal, windowWidth - 2) + TopRight);
         TuiHelpers.SafeSetCursorPosition(0, 1);
         Console.Write(Vertical);
@@ -146,8 +156,8 @@ public class BoardView : IBoardRenderer
         Console.ForegroundColor = borderColor;
         Console.Write(Vertical);
 
-        Console.BackgroundColor = ConsoleColor.DarkBlue;
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.BackgroundColor = Theme.BoardTitleBg;
+        Console.ForegroundColor = Theme.BoardTitleFg;
         var title = " Kanban Board";
         var padded = title.PadRight(windowWidth - 2);
         Console.Write(padded);
@@ -189,13 +199,13 @@ public class BoardView : IBoardRenderer
 
         if (isSelected)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.ForegroundColor = Theme.ColumnHeaderSelectedFg;
+            Console.BackgroundColor = Theme.ColumnHeaderSelectedBg;
         }
         else
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = Theme.ColumnHeaderFg;
+            Console.BackgroundColor = Theme.ColumnHeaderBg;
         }
 
         var headerText = $" {column.Name} [{column.Tasks.Count}]";
@@ -208,7 +218,7 @@ public class BoardView : IBoardRenderer
     {
         // Left border
         TuiHelpers.SafeSetCursorPosition(0, row);
-        var leftBorderColor = selectedColumn == 0 ? ConsoleColor.Cyan : defaultColor;
+        var leftBorderColor = selectedColumn == 0 ? Theme.SelectedBorder : defaultColor;
         Console.ForegroundColor = leftBorderColor;
         Console.Write(Vertical);
         Console.ResetColor();
@@ -225,11 +235,11 @@ public class BoardView : IBoardRenderer
             ConsoleColor sepColor;
             if (isRightBorder)
             {
-                sepColor = selectedColumn == columnCount - 1 ? ConsoleColor.Cyan : defaultColor;
+                sepColor = selectedColumn == columnCount - 1 ? Theme.SelectedBorder : defaultColor;
             }
             else
             {
-                sepColor = isAdjacentToSelected ? ConsoleColor.Cyan : defaultColor;
+                sepColor = isAdjacentToSelected ? Theme.SelectedBorder : defaultColor;
             }
 
             Console.ForegroundColor = sepColor;

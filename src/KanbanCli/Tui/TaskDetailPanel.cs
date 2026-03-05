@@ -77,7 +77,7 @@ public class TaskDetailPanel
         Console.CursorVisible = false;
 
         var width = DialogHelper.GetBoxWidth();
-        var borderColor = ConsoleColor.DarkGray;
+        var borderColor = Theme.DetailBorder;
         var visibleHeight = Math.Max(Console.WindowHeight - 4, 10); // Reserve space for top border, edit hints, bottom border
 
         // Build all content lines into a list
@@ -173,7 +173,7 @@ public class TaskDetailPanel
     private static void RenderScrollStatus(int scrollOffset, int maxScroll, int width, ConsoleColor borderColor)
     {
         DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = Theme.DetailMuted;
         var scrollText = $"\u2191\u2193 Scroll  PgUp/PgDn  Home  ({scrollOffset + 1}/{maxScroll + 1})";
         Console.Write(scrollText);
         DialogHelper.RenderBoxRightBorder(scrollText.Length, width, borderColor);
@@ -183,21 +183,21 @@ public class TaskDetailPanel
     {
         DialogHelper.RenderBoxLeftBorder(borderColor);
 
-        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.ForegroundColor = Theme.HintKey;
         Console.Write("[T]");
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = Theme.HintText;
         Console.Write("itle  ");
-        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.ForegroundColor = Theme.HintKey;
         Console.Write("[L]");
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = Theme.HintText;
         Console.Write("abels  ");
-        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.ForegroundColor = Theme.HintKey;
         Console.Write("[P]");
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = Theme.HintText;
         Console.Write("riority  ");
-        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.ForegroundColor = Theme.HintKey;
         Console.Write("[Esc]");
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = Theme.HintText;
         Console.Write(" back");
 
         // "[T]itle  [L]abels  [P]riority  [Esc] back" = 42 chars
@@ -207,10 +207,10 @@ public class TaskDetailPanel
     private TaskItem HandleEditTitle(TaskItem task)
     {
         Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         Console.Write("  New title (empty to cancel): ");
         Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = Theme.DialogText;
         var newTitle = Console.ReadLine()?.Trim() ?? string.Empty;
         Console.ResetColor();
 
@@ -225,7 +225,7 @@ public class TaskDetailPanel
     private TaskItem HandleEditLabels(TaskItem task)
     {
         Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         Console.WriteLine("  Labels: [A]dd or [R]emove?");
         Console.ResetColor();
 
@@ -241,10 +241,10 @@ public class TaskDetailPanel
 
     private TaskItem HandleAddLabel(TaskItem task)
     {
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         Console.Write("  Label to add: ");
         Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = Theme.DialogText;
         var label = Console.ReadLine()?.Trim() ?? string.Empty;
         Console.ResetColor();
 
@@ -262,19 +262,19 @@ public class TaskDetailPanel
     {
         if (task.Labels.Count == 0)
         {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.ForegroundColor = Theme.DetailMuted;
             Console.WriteLine("  No labels to remove. Press any key...");
             Console.ResetColor();
             Console.ReadKey(intercept: true);
             return task;
         }
 
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         Console.WriteLine("  Select label to remove:");
         Console.ResetColor();
 
         var width = DialogHelper.GetBoxWidth();
-        DialogHelper.RenderNumberedListInBox(task.Labels, width, ConsoleColor.DarkGray);
+        DialogHelper.RenderNumberedListInBox(task.Labels, width, Theme.DialogBorder);
 
         var choice = DialogHelper.PromptNumericChoice(task.Labels.Count, allowZeroCancel: true);
         if (choice is null)
@@ -290,14 +290,14 @@ public class TaskDetailPanel
     private TaskItem HandleEditPriority(TaskItem task)
     {
         Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = Theme.DialogPrompt;
         Console.WriteLine($"  Change priority (current: {task.Priority}):");
         Console.ResetColor();
 
         var priorities = Enum.GetValues<Priority>();
         var priorityNames = priorities.Select(p => p.ToString()).ToList();
         var width = DialogHelper.GetBoxWidth();
-        DialogHelper.RenderNumberedListInBox(priorityNames, width, ConsoleColor.DarkGray);
+        DialogHelper.RenderNumberedListInBox(priorityNames, width, Theme.DialogBorder);
 
         var choice = DialogHelper.PromptNumericChoice(priorities.Length, allowZeroCancel: true);
         if (choice is null)
@@ -327,34 +327,46 @@ internal class ContentLine
         _renderAction = renderAction;
     }
 
-    public void Render() => _renderAction();
+    public void Render()
+    {
+        _renderAction();
+    }
 
-    public static ContentLine Empty(int width, ConsoleColor borderColor) =>
-        new(() => DialogHelper.RenderBoxEmptyLine(width, borderColor));
+    public static ContentLine Empty(int width, ConsoleColor borderColor)
+    {
+        return new ContentLine(() => DialogHelper.RenderBoxEmptyLine(width, borderColor));
+    }
 
-    public static ContentLine Separator(int width, ConsoleColor borderColor) =>
-        new(() => DialogHelper.RenderBoxSeparator(width, borderColor));
+    public static ContentLine Separator(int width, ConsoleColor borderColor)
+    {
+        return new ContentLine(() => DialogHelper.RenderBoxSeparator(width, borderColor));
+    }
 
-    public static ContentLine Text(string text, int width, ConsoleColor borderColor) =>
-        new(() => DialogHelper.RenderBoxLine(text, width, borderColor));
+    public static ContentLine Text(string text, int width, ConsoleColor borderColor)
+    {
+        return new ContentLine(() => DialogHelper.RenderBoxLine(text, width, borderColor));
+    }
 
-    public static ContentLine Heading(string heading, int width, ConsoleColor borderColor) =>
-        new(() =>
+    public static ContentLine Heading(string heading, int width, ConsoleColor borderColor)
+    {
+        return new ContentLine(() =>
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = Theme.DetailHeading;
             var text = $"\u2550\u2550 {heading}";
             Console.Write(text);
             DialogHelper.RenderBoxRightBorder(text.Length, width, borderColor);
         });
+    }
 
-    public static ContentLine Field(string label, string value, int width, ConsoleColor borderColor, ConsoleColor? valueColor = null) =>
-        new(() =>
+    public static ContentLine Field(string label, string value, int width, ConsoleColor borderColor, ConsoleColor? valueColor = null)
+    {
+        return new ContentLine(() =>
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.ForegroundColor = Theme.DetailFieldLabel;
             Console.Write($"{label,-12}");
-            Console.ForegroundColor = valueColor ?? ConsoleColor.White;
+            Console.ForegroundColor = valueColor ?? Theme.DetailFieldValue;
             var maxValueLen = width - 15; // 2 border + 12 label + 1 padding
             var truncatedValue = value.Length > maxValueLen
                 ? value[..Math.Max(0, maxValueLen - 1)] + "\u2026"
@@ -363,12 +375,14 @@ internal class ContentLine
             var contentLen = Math.Max(label.Length, 12) + truncatedValue.Length;
             DialogHelper.RenderBoxRightBorder(contentLen, width, borderColor);
         });
+    }
 
-    public static ContentLine StatusWorkflow(TaskStatus status, int width, ConsoleColor borderColor) =>
-        new(() =>
+    public static ContentLine StatusWorkflow(TaskStatus status, int width, ConsoleColor borderColor)
+    {
+        return new ContentLine(() =>
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.ForegroundColor = Theme.DetailFieldLabel;
             Console.Write($"{"Status",-12}");
 
             var statuses = new[]
@@ -385,21 +399,21 @@ internal class ContentLine
                 var (s, name) = statuses[i];
                 if (s == status)
                 {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.BackgroundColor = ConsoleColor.DarkBlue;
+                    Console.ForegroundColor = Theme.WorkflowActiveFg;
+                    Console.BackgroundColor = Theme.WorkflowActiveBg;
                     Console.Write($" {name} ");
                     Console.ResetColor();
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.ForegroundColor = Theme.WorkflowInactive;
                     Console.Write($" {name} ");
                 }
                 written += name.Length + 2;
 
                 if (i < statuses.Length - 1)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.ForegroundColor = Theme.WorkflowInactive;
                     Console.Write("\u2192");
                     written += 1;
                 }
@@ -407,19 +421,21 @@ internal class ContentLine
 
             DialogHelper.RenderBoxRightBorder(written, width, borderColor);
         });
+    }
 
-    public static ContentLine Labels(IReadOnlyList<string> labels, int width, ConsoleColor borderColor) =>
-        new(() =>
+    public static ContentLine Labels(IReadOnlyList<string> labels, int width, ConsoleColor borderColor)
+    {
+        return new ContentLine(() =>
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.ForegroundColor = Theme.DetailFieldLabel;
             Console.Write($"{"Labels",-12}");
 
             var written = 12;
 
             if (labels.Count == 0)
             {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.ForegroundColor = Theme.DetailMuted;
                 Console.Write("(none)");
                 written += 6;
             }
@@ -433,11 +449,11 @@ internal class ContentLine
                         written += 2;
                     }
 
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.ForegroundColor = Theme.LabelBracket;
                     Console.Write("[");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = Theme.LabelText;
                     Console.Write(labels[i]);
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.ForegroundColor = Theme.LabelBracket;
                     Console.Write("]");
                     written += labels[i].Length + 2;
                 }
@@ -445,4 +461,5 @@ internal class ContentLine
 
             DialogHelper.RenderBoxRightBorder(written, width, borderColor);
         });
+    }
 }

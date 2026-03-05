@@ -74,7 +74,7 @@ public class ColumnView : IColumnView
     private static void RenderBlankLine(int columnX, int columnWidth, int row)
     {
         TuiHelpers.SafeSetCursorPosition(columnX, row);
-        Console.BackgroundColor = ConsoleColor.Black;
+        Console.BackgroundColor = Theme.ColumnBg;
         Console.Write(new string(' ', columnWidth));
         Console.ResetColor();
     }
@@ -83,7 +83,7 @@ public class ColumnView : IColumnView
     {
         if (row < 0) return;
         TuiHelpers.SafeSetCursorPosition(columnX, row);
-        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.ForegroundColor = Theme.ScrollIndicator;
         var padded = text.Length > columnWidth
             ? text[..columnWidth]
             : text.PadRight(columnWidth);
@@ -94,7 +94,7 @@ public class ColumnView : IColumnView
     private static void RenderEmptyPlaceholder(int columnX, int columnWidth, int row, bool isFiltered)
     {
         TuiHelpers.SafeSetCursorPosition(columnX, row);
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = Theme.ColumnEmptyText;
         var placeholder = isFiltered ? " (no matching tasks)" : " (no tasks)";
         var padded = placeholder.Length > columnWidth
             ? placeholder[..columnWidth]
