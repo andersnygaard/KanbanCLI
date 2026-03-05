@@ -1,0 +1,51 @@
+# Build results
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.o
+*.so
+*.dylib
+
+# Visual Studio
+.vs/
+.vscode/
+*.sln.iml
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# Test Results
+TestResults/
+*.trx
+
+# NuGet
+.nuget/
+*.nupkg
+*.snupkg
+*.lock.json
+packages/
+
+# Local environment
+.env
+.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node dependencies (if any frontend in future)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE
+*.swp
+*.swo
+*~
