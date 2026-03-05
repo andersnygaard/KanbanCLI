@@ -22,15 +22,26 @@ public class ColumnView : IColumnView
         }
 
         var visibleCardCount = Math.Max(1, (maxRows + TuiHelpers.CardSeparatorLines) / TuiHelpers.CardTotalHeight);
+        var scrollOffset = CalculateScrollOffset(isSelectedColumn, state.SelectedTask, visibleCardCount);
+        var endIndex = Math.Min(column.Tasks.Count, scrollOffset + visibleCardCount);
 
-        // Calculate scroll offset to keep selected task visible
-        var scrollOffset = 0;
-        if (isSelectedColumn && state.SelectedTask >= visibleCardCount)
+        var lastRenderedRow = RenderVisibleCards(column, columnX, columnWidth, state, isSelectedColumn, startRow, maxRows, scrollOffset, endIndex);
+        ClearRemainingRows(columnX, columnWidth, lastRenderedRow, startRow + maxRows);
+        RenderScrollIndicators(column, columnX, columnWidth, startRow, maxRows, scrollOffset, endIndex);
+    }
+
+    private static int CalculateScrollOffset(bool isSelectedColumn, int selectedTask, int visibleCardCount)
+    {
+        if (isSelectedColumn && selectedTask >= visibleCardCount)
         {
-            scrollOffset = state.SelectedTask - visibleCardCount + 1;
+            return selectedTask - visibleCardCount + 1;
         }
 
-        var endIndex = Math.Min(column.Tasks.Count, scrollOffset + visibleCardCount);
+        return 0;
+    }
+
+    private int RenderVisibleCards(Column column, int columnX, int columnWidth, NavigationState state, bool isSelectedColumn, int startRow, int maxRows, int scrollOffset, int endIndex)
+    {
         var lastRenderedRow = startRow;
 
         for (var i = scrollOffset; i < endIndex; i++)
@@ -39,7 +50,9 @@ public class ColumnView : IColumnView
             var cardStartRow = startRow + (displayIndex * TuiHelpers.CardTotalHeight);
 
             if (cardStartRow + TuiHelpers.CardLineCount > startRow + maxRows)
+            {
                 break;
+            }
 
             var task = column.Tasks[i];
             var isSelectedTask = isSelectedColumn && state.SelectedTask == i;
@@ -55,22 +68,21 @@ public class ColumnView : IColumnView
             }
         }
 
-        // Clear any remaining rows below the last rendered card
-        ClearRemainingRows(columnX, columnWidth, lastRenderedRow, startRow + maxRows);
+        return lastRenderedRow;
+    }
 
-        // Show scroll indicators using the separator lines within the body area
+    private static void RenderScrollIndicators(Column column, int columnX, int columnWidth, int startRow, int maxRows, int scrollOffset, int endIndex)
+    {
         var lastUsedRow = startRow + ((endIndex - scrollOffset) * TuiHelpers.CardTotalHeight) - 1;
 
         if (scrollOffset > 0)
         {
-            // Use first row of the body to show "above" indicator
             RenderScrollIndicator(columnX, columnWidth, startRow, $" \u25B2 {scrollOffset} more");
         }
 
         var hiddenBelow = column.Tasks.Count - endIndex;
         if (hiddenBelow > 0)
         {
-            // Use last separator/blank row to show "below" indicator
             var indicatorRow = Math.Min(lastUsedRow, startRow + maxRows - 1);
             if (indicatorRow >= startRow)
             {

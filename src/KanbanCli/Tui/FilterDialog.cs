@@ -80,7 +80,31 @@ public class FilterDialog
     private static FilterCriteria? PromptByLabel(IReadOnlyList<string> availableLabels, int width, ConsoleColor borderColor)
     {
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        RenderLabelFilterHeader(availableLabels, width, borderColor);
 
+        Console.ForegroundColor = Theme.DialogListItem;
+        var input = Console.ReadLine()?.Trim() ?? string.Empty;
+        Console.ResetColor();
+        Console.CursorVisible = false;
+
+        if (string.IsNullOrWhiteSpace(input) || input == "0")
+        {
+            return null;
+        }
+
+        if (availableLabels.Count > 0
+            && int.TryParse(input, out var labelChoice)
+            && labelChoice >= 1
+            && labelChoice <= availableLabels.Count)
+        {
+            return new FilterCriteria(Label: availableLabels[labelChoice - 1]);
+        }
+
+        return new FilterCriteria(Label: input);
+    }
+
+    private static void RenderLabelFilterHeader(IReadOnlyList<string> availableLabels, int width, ConsoleColor borderColor)
+    {
         if (availableLabels.Count > 0)
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
@@ -89,17 +113,8 @@ public class FilterDialog
             Console.Write(headerText);
             DialogHelper.RenderBoxRightBorder(headerText.Length, width, borderColor);
 
-            for (var i = 0; i < availableLabels.Count; i++)
-            {
-                DialogHelper.RenderBoxLeftBorder(borderColor);
-                Console.ForegroundColor = Theme.DialogListNumber;
-                var numText = $"  {i + 1}. ";
-                Console.Write(numText);
-                Console.ForegroundColor = Theme.DialogListItem;
-                var labelText = availableLabels[i];
-                Console.Write(labelText);
-                DialogHelper.RenderBoxRightBorder(numText.Length + labelText.Length, width, borderColor);
-            }
+            var labelDisplayNames = availableLabels.Select(l => $"[{l}]").ToList();
+            DialogHelper.RenderNumberedListInBox(labelDisplayNames, width, borderColor);
 
             DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
@@ -115,25 +130,6 @@ public class FilterDialog
             Console.Write("Enter label name, or leave empty to cancel: ");
             Console.ResetColor();
         }
-
-        Console.ForegroundColor = Theme.DialogListItem;
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
-        Console.ResetColor();
-        Console.CursorVisible = false;
-
-        if (string.IsNullOrWhiteSpace(input) || input == "0")
-            return null;
-
-        // Check if the user entered a number that refers to a label from the list
-        if (availableLabels.Count > 0
-            && int.TryParse(input, out var labelChoice)
-            && labelChoice >= 1
-            && labelChoice <= availableLabels.Count)
-        {
-            return new FilterCriteria(Label: availableLabels[labelChoice - 1]);
-        }
-
-        return new FilterCriteria(Label: input);
     }
 
     private static FilterCriteria? PromptByPriority(int width, ConsoleColor borderColor)

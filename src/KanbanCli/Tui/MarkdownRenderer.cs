@@ -13,6 +13,8 @@ namespace KanbanCli.Tui;
 /// </summary>
 public static class MarkdownRenderer
 {
+    private const int BoxContentPadding = 6;
+
     private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
         .UseTaskLists()
         .Build();
@@ -30,7 +32,7 @@ public static class MarkdownRenderer
             return;
 
         var document = Markdown.Parse(content, Pipeline);
-        var maxContentWidth = boxWidth - 6;
+        var maxContentWidth = boxWidth - BoxContentPadding;
 
         DialogHelper.RenderBoxEmptyLine(boxWidth, borderColor);
 
@@ -163,6 +165,42 @@ public static class MarkdownRenderer
         return (false, false);
     }
 
+    private static int RenderInlineSequence(ContainerInline container, int maxWidth)
+    {
+        var written = 0;
+        foreach (var inline in container)
+        {
+            if (written >= maxWidth)
+                break;
+            written += RenderSingleInline(inline, maxWidth - written);
+        }
+        return written;
+    }
+
+    private static int RenderSingleInline(Inline inline, int remaining)
+    {
+        return inline switch
+        {
+            TaskList => 0,
+            EmphasisInline emphasis when emphasis.DelimiterChar == '*' && emphasis.DelimiterCount == 2
+                => WriteInlineText(ExtractPlainText(emphasis), remaining, Theme.MdLiteral),
+            CodeInline code
+                => WriteInlineText(code.Content, remaining, Theme.MdCode),
+            LiteralInline literal
+                => WriteInlineText(literal.Content.ToString(), remaining, Theme.MdLiteral),
+            LineBreakInline => 0,
+            _ => WriteInlineText(inline.ToString() ?? string.Empty, remaining, Theme.MdLiteral),
+        };
+    }
+
+    private static int WriteInlineText(string text, int remaining, ConsoleColor color)
+    {
+        var truncated = TruncateText(text, remaining);
+        Console.ForegroundColor = color;
+        Console.Write(truncated);
+        return truncated.Length;
+    }
+
     private static void RenderInlineContent(ListItemBlock listItem, int maxWidth, out int writtenLength)
     {
         writtenLength = 0;
@@ -172,54 +210,7 @@ public static class MarkdownRenderer
             if (subBlock is not ParagraphBlock paragraph || paragraph.Inline is null)
                 continue;
 
-            foreach (var inline in paragraph.Inline)
-            {
-                if (writtenLength >= maxWidth)
-                    break;
-
-                var remaining = maxWidth - writtenLength;
-
-                switch (inline)
-                {
-                    case TaskList:
-                        // Skip — already handled by the checkbox rendering
-                        break;
-
-                    case EmphasisInline emphasis when emphasis.DelimiterChar == '*' && emphasis.DelimiterCount == 2:
-                        var boldText = ExtractPlainText(emphasis);
-                        boldText = TruncateText(boldText, remaining);
-                        Console.ForegroundColor = Theme.MdLiteral;
-                        Console.Write(boldText);
-                        writtenLength += boldText.Length;
-                        break;
-
-                    case CodeInline code:
-                        var codeText = TruncateText(code.Content, remaining);
-                        Console.ForegroundColor = Theme.MdCode;
-                        Console.Write(codeText);
-                        writtenLength += codeText.Length;
-                        break;
-
-                    case LiteralInline literal:
-                        var literalText = literal.Content.ToString();
-                        literalText = TruncateText(literalText, remaining);
-                        Console.ForegroundColor = Theme.MdLiteral;
-                        Console.Write(literalText);
-                        writtenLength += literalText.Length;
-                        break;
-
-                    case LineBreakInline:
-                        break;
-
-                    default:
-                        var fallbackText = inline.ToString() ?? string.Empty;
-                        fallbackText = TruncateText(fallbackText, remaining);
-                        Console.ForegroundColor = Theme.MdLiteral;
-                        Console.Write(fallbackText);
-                        writtenLength += fallbackText.Length;
-                        break;
-                }
-            }
+            writtenLength += RenderInlineSequence(paragraph.Inline, maxWidth - writtenLength);
         }
     }
 
@@ -251,55 +242,11 @@ public static class MarkdownRenderer
 
         DialogHelper.RenderBoxLeftBorder(borderColor);
 
-        var writtenLength = 0;
         var prefix = "  ";
         Console.Write(prefix);
-        writtenLength += prefix.Length;
+        var writtenLength = prefix.Length;
 
-        foreach (var inline in paragraph.Inline)
-        {
-            if (writtenLength >= maxContentWidth)
-                break;
-
-            var remaining = maxContentWidth - writtenLength;
-
-            switch (inline)
-            {
-                case EmphasisInline emphasis when emphasis.DelimiterChar == '*' && emphasis.DelimiterCount == 2:
-                    var boldText = ExtractPlainText(emphasis);
-                    boldText = TruncateText(boldText, remaining);
-                    Console.ForegroundColor = Theme.MdLiteral;
-                    Console.Write(boldText);
-                    writtenLength += boldText.Length;
-                    break;
-
-                case CodeInline code:
-                    var codeText = TruncateText(code.Content, remaining);
-                    Console.ForegroundColor = Theme.MdCode;
-                    Console.Write(codeText);
-                    writtenLength += codeText.Length;
-                    break;
-
-                case LiteralInline literal:
-                    var literalText = literal.Content.ToString();
-                    literalText = TruncateText(literalText, remaining);
-                    Console.ForegroundColor = Theme.MdLiteral;
-                    Console.Write(literalText);
-                    writtenLength += literalText.Length;
-                    break;
-
-                case LineBreakInline:
-                    break;
-
-                default:
-                    var fallbackText = inline.ToString() ?? string.Empty;
-                    fallbackText = TruncateText(fallbackText, remaining);
-                    Console.ForegroundColor = Theme.MdLiteral;
-                    Console.Write(fallbackText);
-                    writtenLength += fallbackText.Length;
-                    break;
-            }
-        }
+        writtenLength += RenderInlineSequence(paragraph.Inline, maxContentWidth - writtenLength);
 
         Console.ResetColor();
         DialogHelper.RenderBoxRightBorder(writtenLength, boxWidth, borderColor);
