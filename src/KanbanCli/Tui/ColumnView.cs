@@ -13,7 +13,7 @@ public class ColumnView
 
         var taskStartRow = startRow + 2;
 
-        if (column.Tasks.Count == 0)
+        if (column.IsEmpty)
         {
             RenderEmptyPlaceholder(columnX, columnWidth, taskStartRow, isFiltered);
             return;

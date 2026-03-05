@@ -191,7 +191,7 @@ public class KanbanApp
         if (_displayBoard.Columns.Count == 0) return;
         var columnIndex = Math.Clamp(_state.SelectedColumn, 0, _displayBoard.Columns.Count - 1);
         var col = _displayBoard.Columns[columnIndex];
-        if (col.Tasks.Count == 0 || _state.SelectedTask >= col.Tasks.Count)
+        if (col.IsEmpty || _state.SelectedTask >= col.Tasks.Count)
             return;
 
         var taskIndex = Math.Clamp(_state.SelectedTask, 0, col.Tasks.Count - 1);

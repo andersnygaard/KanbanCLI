@@ -55,7 +55,21 @@ public class TaskDetailPanel
 
         TuiHelpers.RenderHeader("Task Details", windowWidth, ConsoleColor.DarkBlue);
 
-        var row = 2;
+        var row = RenderMetadataFields(task, startRow: 2);
+
+        row++;
+        RenderSeparator(row, windowWidth);
+        row++;
+
+        row = RenderSections(task.Sections, row);
+
+        row++;
+        RenderEditHints(row);
+    }
+
+    private static int RenderMetadataFields(TaskItem task, int startRow)
+    {
+        var row = startRow;
         row = RenderField("ID", $"#{task.Id:D3}", row);
         row = RenderField("Title", task.Title, row);
         row = RenderField("Type", task.Type.ToString(), row);
@@ -67,18 +81,18 @@ public class TaskDetailPanel
         if (task.CompletedDate.HasValue)
             row = RenderField("Completed", task.CompletedDate.Value.ToString("yyyy-MM-dd HH:mm"), row);
 
-        row++;
-        RenderSeparator(row, windowWidth);
-        row++;
+        return row;
+    }
 
-        foreach (var section in task.Sections)
+    private static int RenderSections(IReadOnlyDictionary<string, string> sections, int row)
+    {
+        foreach (var section in sections)
         {
             row = RenderSectionHeading(section.Key, row);
             row = RenderSectionContent(section.Value, row);
         }
 
-        row++;
-        RenderEditHints(row);
+        return row;
     }
 
     private static void RenderEditHints(int row)
@@ -173,25 +187,13 @@ public class TaskDetailPanel
         Console.WriteLine("  Select label to remove:");
         Console.ResetColor();
 
-        for (var i = 0; i < task.Labels.Count; i++)
-        {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"    {i + 1}. ");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(task.Labels[i]);
-        }
+        RenderNumberedList(task.Labels);
 
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write($"  Enter number (1-{task.Labels.Count}), or 0 to cancel: ");
-        Console.ResetColor();
-
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
-
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > task.Labels.Count)
+        var choice = PromptForChoice(task.Labels.Count);
+        if (choice is null)
             return task;
 
-        var updated = task.RemoveLabel(task.Labels[choice - 1]);
+        var updated = task.RemoveLabel(task.Labels[choice.Value - 1]);
         if (updated != task)
             _taskService.UpdateTask(updated);
 
@@ -206,31 +208,47 @@ public class TaskDetailPanel
         Console.ResetColor();
 
         var priorities = Enum.GetValues<Priority>();
-        for (var i = 0; i < priorities.Length; i++)
-        {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"    {i + 1}. ");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(priorities[i].ToString());
-        }
+        var priorityNames = priorities.Select(p => p.ToString()).ToList();
+        RenderNumberedList(priorityNames);
 
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write($"  Enter number (1-{priorities.Length}), or 0 to cancel: ");
-        Console.ResetColor();
-
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
-
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > priorities.Length)
+        var choice = PromptForChoice(priorities.Length);
+        if (choice is null)
             return task;
 
-        var newPriority = priorities[choice - 1];
+        var newPriority = priorities[choice.Value - 1];
         if (newPriority == task.Priority)
             return task;
 
         var updated = task.SetPriority(newPriority);
         _taskService.UpdateTask(updated);
         return updated;
+    }
+
+    private static void RenderNumberedList(IReadOnlyList<string> items)
+    {
+        for (var i = 0; i < items.Count; i++)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write($"    {i + 1}. ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(items[i]);
+        }
+
+        Console.ResetColor();
+    }
+
+    private static int? PromptForChoice(int maxValue)
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.Write($"  Enter number (1-{maxValue}), or 0 to cancel: ");
+        Console.ResetColor();
+
+        var input = Console.ReadLine()?.Trim() ?? string.Empty;
+
+        if (!int.TryParse(input, out var choice) || choice < 1 || choice > maxValue)
+            return null;
+
+        return choice;
     }
 
     private static int RenderField(string label, string value, int row, ConsoleColor? valueColor = null)

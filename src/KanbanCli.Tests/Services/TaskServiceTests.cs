@@ -175,8 +175,8 @@ public class TaskServiceTests
         var board = boardService.GetBoard();
 
         board.Columns.Should().HaveCount(4);
-        board.Columns.First(c => c.Name == "Backlog").Tasks.Should().ContainSingle(t => t.Id == 1);
-        board.Columns.First(c => c.Name == "In Progress").Tasks.Should().ContainSingle(t => t.Id == 2);
+        board.GetColumn(TaskStatus.Backlog)!.Tasks.Should().ContainSingle(t => t.Id == 1);
+        board.GetColumn(TaskStatus.InProgress)!.Tasks.Should().ContainSingle(t => t.Id == 2);
     }
 
     [Fact]
@@ -280,5 +280,74 @@ public class TaskServiceTests
         var act = () => sut.GetAllByColumn(TaskStatus.Backlog);
 
         act.Should().Throw<IOException>().WithMessage("Cannot read directory");
+    }
+
+    [Fact]
+    public void UpdateTask_TitleChange_PersistsViaRepository()
+    {
+        var original = CreateTask(1, TaskStatus.InProgress);
+        var updated = original with { Title = "Updated title" };
+        var sut = CreateSut();
+
+        sut.UpdateTask(updated);
+
+        _repository.Received(1).Update(Arg.Is<TaskItem>(t => t.Title == "Updated title" && t.Id == 1));
+    }
+
+    [Fact]
+    public void UpdateTask_LabelsChange_PersistsViaRepository()
+    {
+        var original = CreateTask(1, TaskStatus.InProgress);
+        var updated = original with { Labels = new List<string> { "frontend", "urgent" } };
+        var sut = CreateSut();
+
+        sut.UpdateTask(updated);
+
+        _repository.Received(1).Update(Arg.Is<TaskItem>(t =>
+            t.Labels.Count == 2 &&
+            t.Labels.Contains("frontend") &&
+            t.Labels.Contains("urgent")));
+    }
+
+    [Fact]
+    public void GetAll_ReturnsExactItemsFromRepository()
+    {
+        var task1 = CreateTask(1, TaskStatus.Backlog);
+        var task2 = CreateTask(2, TaskStatus.InProgress);
+        var task3 = CreateTask(3, TaskStatus.Done);
+        var allTasks = new List<TaskItem> { task1, task2, task3 };
+        _repository.GetAll().Returns(allTasks);
+
+        var sut = CreateSut();
+        var result = sut.GetAll();
+
+        result.Should().BeEquivalentTo(allTasks);
+        _repository.Received(1).GetAll();
+    }
+
+    [Fact]
+    public void MoveTask_ToSameStatus_StillCallsRepository()
+    {
+        var task = CreateTask(1, TaskStatus.InProgress);
+        var sut = CreateSut();
+
+        sut.MoveTask(task, TaskStatus.InProgress);
+
+        _repository.Received(1).Move(
+            Arg.Is<TaskItem>(t => t.Status == TaskStatus.InProgress && t.Id == 1),
+            TaskStatus.InProgress);
+    }
+
+    [Fact]
+    public void MoveTask_ToSameStatus_DoesNotChangeCompletedDate()
+    {
+        var task = CreateTask(1, TaskStatus.Backlog);
+        var sut = CreateSut();
+
+        sut.MoveTask(task, TaskStatus.Backlog);
+
+        _repository.Received(1).Move(
+            Arg.Is<TaskItem>(t => t.CompletedDate == null),
+            TaskStatus.Backlog);
     }
 }

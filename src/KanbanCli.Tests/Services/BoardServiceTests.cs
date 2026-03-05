@@ -247,7 +247,74 @@ public class BoardServiceTests
         var board = sut.GetBoard();
 
         board.Columns.Should().HaveCount(4);
-        board.Columns.Should().AllSatisfy(c => c.Tasks.Should().BeEmpty());
+        board.Columns.Should().AllSatisfy(c => c.IsEmpty.Should().BeTrue());
+    }
+
+    [Fact]
+    public void GetBoard_AllColumnsPopulated_AssemblesCorrectly()
+    {
+        var backlogTask = CreateTask(1, "Backlog item", TaskType.Feature, TaskStatus.Backlog);
+        var inProgressTask = CreateTask(2, "WIP item", TaskType.Bug, TaskStatus.InProgress);
+        var doneTask = CreateTask(3, "Completed item", TaskType.Feature, TaskStatus.Done,
+            completedDate: new DateTime(2026, 3, 3, 0, 0, 0, DateTimeKind.Utc));
+        var onHoldTask = CreateTask(4, "Paused item", TaskType.Bug, TaskStatus.OnHold);
+
+        _repository.GetAllByColumn(TaskStatus.Backlog).Returns([backlogTask]);
+        _repository.GetAllByColumn(TaskStatus.InProgress).Returns([inProgressTask]);
+        _repository.GetAllByColumn(TaskStatus.Done).Returns([doneTask]);
+        _repository.GetAllByColumn(TaskStatus.OnHold).Returns([onHoldTask]);
+
+        var sut = CreateSut();
+        var board = sut.GetBoard();
+
+        board.Columns.Should().HaveCount(4);
+        board.TotalTaskCount.Should().Be(4);
+
+        board.GetColumn(TaskStatus.Backlog)!.Tasks.Should().ContainSingle(t => t.Id == 1);
+        board.GetColumn(TaskStatus.Backlog)!.Name.Should().Be("Backlog");
+
+        board.GetColumn(TaskStatus.InProgress)!.Tasks.Should().ContainSingle(t => t.Id == 2);
+        board.GetColumn(TaskStatus.InProgress)!.Name.Should().Be("In Progress");
+
+        board.GetColumn(TaskStatus.Done)!.Tasks.Should().ContainSingle(t => t.Id == 3);
+        board.GetColumn(TaskStatus.Done)!.Name.Should().Be("Done");
+
+        board.GetColumn(TaskStatus.OnHold)!.Tasks.Should().ContainSingle(t => t.Id == 4);
+        board.GetColumn(TaskStatus.OnHold)!.Name.Should().Be("On Hold");
+    }
+
+    [Fact]
+    public void GetBoard_SomeColumnsEmpty_EmptyColumnsStillPresent()
+    {
+        var backlogTask = CreateTask(1, "Only backlog", TaskType.Feature, TaskStatus.Backlog);
+
+        _repository.GetAllByColumn(TaskStatus.Backlog).Returns([backlogTask]);
+        _repository.GetAllByColumn(TaskStatus.InProgress).Returns([]);
+        _repository.GetAllByColumn(TaskStatus.Done).Returns([]);
+        _repository.GetAllByColumn(TaskStatus.OnHold).Returns([]);
+
+        var sut = CreateSut();
+        var board = sut.GetBoard();
+
+        board.Columns.Should().HaveCount(4);
+        board.GetColumn(TaskStatus.Backlog)!.Tasks.Should().HaveCount(1);
+        board.GetColumn(TaskStatus.InProgress)!.IsEmpty.Should().BeTrue();
+        board.GetColumn(TaskStatus.Done)!.IsEmpty.Should().BeTrue();
+        board.GetColumn(TaskStatus.OnHold)!.IsEmpty.Should().BeTrue();
+    }
+
+    [Fact]
+    public void GetBoard_ColumnsFollowDefinedOrder()
+    {
+        _repository.GetAllByColumn(Arg.Any<TaskStatus>()).Returns([]);
+
+        var sut = CreateSut();
+        var board = sut.GetBoard();
+
+        board.Columns[0].Status.Should().Be(TaskStatus.Backlog);
+        board.Columns[1].Status.Should().Be(TaskStatus.InProgress);
+        board.Columns[2].Status.Should().Be(TaskStatus.Done);
+        board.Columns[3].Status.Should().Be(TaskStatus.OnHold);
     }
 
     [Fact]

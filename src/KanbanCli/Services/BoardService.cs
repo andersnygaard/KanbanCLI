@@ -22,6 +22,7 @@ public class BoardService : IBoardService
             .Select(status => new Column
             {
                 Name = BoardConstants.ColumnDisplayNames[status],
+                Status = status,
                 Tasks = _repository.GetAllByColumn(status)
             })
             .ToArray();
