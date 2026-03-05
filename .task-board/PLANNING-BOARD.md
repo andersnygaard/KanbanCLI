@@ -1,18 +1,16 @@
 # Planning Board
 
-**Current Focus**: Final refinement and model enrichment
+**Current Focus**: Spec alignment and file format review
 
 ## Top Priorities
 
-1. **#025** REFACTOR: Extract Long Methods in TaskDetailPanel - Backlog
-2. **#026** QUALITY: Enhance Board and Column Models with Utility Methods - Backlog
-3. **#027** QUALITY: Complete Service Layer Test Coverage - Backlog
+1. **#030** QUALITY: Review Task File Format Against Spec and Fix Discrepancies - Backlog
+2. **#028** QUALITY: Add FileExists to IFileSystem and XML Doc Comments - Backlog
+3. **#029** FEATURE: Add TaskType Color Coding in Task Cards - Backlog
 
 ## Recently Completed
 
+- **#027** QUALITY: Complete Service Layer Test Coverage - Done 2026-03-05
+- **#026** QUALITY: Enhance Board and Column Models with Utility Methods - Done 2026-03-05
+- **#025** REFACTOR: Extract Long Methods in TaskDetailPanel - Done 2026-03-05
 - **#024** QUALITY: Parser Robustness for Malformed Input - Done 2026-03-05
-- **#023** QUALITY: Comprehensive Model and Storage Edge Case Tests - Done 2026-03-05
-- **#022** CLEANUP: Remove Dead Code and Polish TUI Edge Cases - Done 2026-03-05
-- **#021** QUALITY: Integration Tests for File I/O Operations - Done 2026-03-05
-- **#020** QUALITY: Fix Status Serialization Consistency - Done 2026-03-05
-- **#019** REFACTOR: Extract KanbanApp.Run() Command Dispatcher - Done 2026-03-05

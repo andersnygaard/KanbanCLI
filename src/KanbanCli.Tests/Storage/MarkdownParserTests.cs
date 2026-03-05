@@ -761,6 +761,103 @@ public class MarkdownParserTests
     }
 
     [Fact]
+    public void Serialize_WithCompletedDate_IncludesCompletedField()
+    {
+        var task = new TaskItem
+        {
+            Id = 1,
+            Title = "Done task",
+            Type = TaskType.Feature,
+            Status = TaskStatus.Done,
+            Priority = Priority.Medium,
+            Labels = [],
+            CreatedDate = new DateTime(2026, 3, 1),
+            CompletedDate = new DateTime(2026, 3, 5)
+        };
+
+        var result = _parser.Serialize(task);
+
+        result.Should().Contain("**Completed**: 2026-03-05");
+    }
+
+    [Fact]
+    public void Serialize_WithoutCompletedDate_OmitsCompletedField()
+    {
+        var task = new TaskItem
+        {
+            Id = 1,
+            Title = "Pending task",
+            Type = TaskType.Feature,
+            Status = TaskStatus.Backlog,
+            Priority = Priority.Medium,
+            Labels = [],
+            CreatedDate = new DateTime(2026, 3, 1)
+        };
+
+        var result = _parser.Serialize(task);
+
+        result.Should().NotContain("**Completed**");
+    }
+
+    [Fact]
+    public void Parse_WithCompletedDate_SetsCompletedDate()
+    {
+        var markdown = """
+            # FEATURE: Completed task
+
+            **Status**: Done
+            **Created**: 2026-03-01
+            **Completed**: 2026-03-05
+            **Priority**: Medium
+            **Labels**:
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.CompletedDate.Should().Be(new DateTime(2026, 3, 5));
+    }
+
+    [Fact]
+    public void Parse_CompletedDate_NotInExtraMetadata()
+    {
+        var markdown = """
+            # FEATURE: Completed task
+
+            **Status**: Done
+            **Created**: 2026-03-01
+            **Completed**: 2026-03-05
+            **Priority**: Medium
+            **Labels**:
+            """;
+
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        result.ExtraMetadata.Should().NotContainKey("Completed");
+    }
+
+    [Fact]
+    public void Roundtrip_CompletedDate_PreservesValue()
+    {
+        var original = new TaskItem
+        {
+            Id = 1,
+            Title = "Roundtrip completed",
+            Type = TaskType.Feature,
+            Status = TaskStatus.Done,
+            Priority = Priority.High,
+            Labels = new[] { "core" }.ToList().AsReadOnly(),
+            CreatedDate = new DateTime(2026, 3, 1),
+            CompletedDate = new DateTime(2026, 3, 5)
+        };
+
+        var serialized = _parser.Serialize(original);
+        var reparsed = _parser.Parse(serialized, original.Id, original.Type);
+
+        reparsed.CompletedDate.Should().NotBeNull();
+        reparsed.CompletedDate!.Value.Date.Should().Be(new DateTime(2026, 3, 5));
+    }
+
+    [Fact]
     public void ParseFileName_EmptyString_ReturnsSensibleDefaults()
     {
         var (id, type, description) = _parser.ParseFileName("");

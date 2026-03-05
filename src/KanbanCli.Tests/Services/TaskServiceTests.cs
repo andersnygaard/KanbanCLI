@@ -55,7 +55,7 @@ public class TaskServiceTests
     }
 
     [Fact]
-    public void MoveTask_UpdatesStatusAndMovesFile()
+    public void MoveTask_PassesOriginalTaskToRepository()
     {
         var task = CreateTask(1, TaskStatus.Backlog);
         var sut = CreateSut();
@@ -63,12 +63,12 @@ public class TaskServiceTests
         sut.MoveTask(task, TaskStatus.InProgress);
 
         _repository.Received(1).Move(
-            Arg.Is<TaskItem>(t => t.Status == TaskStatus.InProgress && t.Id == 1),
+            Arg.Is<TaskItem>(t => t.Status == TaskStatus.Backlog && t.Id == 1),
             TaskStatus.InProgress);
     }
 
     [Fact]
-    public void MoveTask_ToDone_SetsCompletedDate()
+    public void MoveTask_ToDone_PassesOriginalTaskToRepository()
     {
         var task = CreateTask(1, TaskStatus.InProgress);
         var sut = CreateSut();
@@ -76,7 +76,7 @@ public class TaskServiceTests
         sut.MoveTask(task, TaskStatus.Done);
 
         _repository.Received(1).Move(
-            Arg.Is<TaskItem>(t => t.Status == TaskStatus.Done && t.CompletedDate.HasValue),
+            Arg.Is<TaskItem>(t => t.Status == TaskStatus.InProgress && !t.CompletedDate.HasValue),
             TaskStatus.Done);
     }
 
@@ -347,7 +347,58 @@ public class TaskServiceTests
         sut.MoveTask(task, TaskStatus.Backlog);
 
         _repository.Received(1).Move(
-            Arg.Is<TaskItem>(t => t.CompletedDate == null),
+            Arg.Is<TaskItem>(t => t.Status == TaskStatus.Backlog && t.CompletedDate == null),
             TaskStatus.Backlog);
+    }
+
+    [Fact]
+    public void MoveTask_DoesNotCallChangeStatus_RepositoryReceivesOriginalStatus()
+    {
+        var task = CreateTask(1, TaskStatus.Backlog);
+        var sut = CreateSut();
+
+        sut.MoveTask(task, TaskStatus.Done);
+
+        _repository.Received(1).Move(
+            Arg.Is<TaskItem>(t => t.Status == TaskStatus.Backlog),
+            TaskStatus.Done);
+    }
+
+    [Fact]
+    public void CreateTask_HasDefaultSections()
+    {
+        _repository.GetNextId().Returns(1);
+        var sut = CreateSut();
+
+        var task = sut.CreateTask("Test task", TaskType.Feature, Priority.Medium, []);
+
+        task.Sections.Should().ContainKey("Context & Motivation");
+        task.Sections.Should().ContainKey("Acceptance Criteria");
+        task.Sections.Should().ContainKey("Progress Log");
+    }
+
+    [Fact]
+    public void CreateTask_DefaultSections_HaveExpectedContent()
+    {
+        _repository.GetNextId().Returns(1);
+        var sut = CreateSut();
+
+        var task = sut.CreateTask("Test task", TaskType.Feature, Priority.Medium, []);
+
+        task.Sections["Context & Motivation"].Should().Be("(No description provided)");
+        task.Sections["Acceptance Criteria"].Should().Be("- [ ] (To be defined)");
+        task.Sections["Progress Log"].Should().Contain("Task created");
+    }
+
+    [Fact]
+    public void CreateTask_ProgressLog_ContainsCreatedDate()
+    {
+        _repository.GetNextId().Returns(1);
+        var sut = CreateSut();
+
+        var task = sut.CreateTask("Test task", TaskType.Feature, Priority.Medium, []);
+
+        var dateString = task.CreatedDate!.Value.ToString(BoardConstants.DateFormat);
+        task.Sections["Progress Log"].Should().Contain(dateString);
     }
 }

@@ -17,6 +17,9 @@ public class FileSystem : IFileSystem
     public void DeleteFile(string path)
         => File.Delete(path);
 
+    public bool FileExists(string path)
+        => File.Exists(path);
+
     public bool DirectoryExists(string path)
         => Directory.Exists(path);
 

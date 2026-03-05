@@ -15,10 +15,11 @@ public class TaskCard
         Console.ForegroundColor = defaultFg;
         Console.Write($"#{task.Id.ToString(BoardConstants.IdFormat)} ");
 
-        // Type part
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        // Type part (color-coded by task type)
+        Console.ForegroundColor = TuiHelpers.GetTypeColor(task.Type);
         Console.BackgroundColor = bgColor;
         Console.Write(task.Type.ToString().ToUpperInvariant());
+        Console.ForegroundColor = defaultFg;
         Console.Write(": ");
 
         // Calculate remaining width for title

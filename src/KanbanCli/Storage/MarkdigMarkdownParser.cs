@@ -15,7 +15,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
 
     private static readonly HashSet<string> KnownMetadataKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Status", "Created", "Priority", "Labels"
+        "Status", "Created", "Completed", "Priority", "Labels"
     };
 
     public TaskItem Parse(string markdown, int id, TaskType type)
@@ -31,6 +31,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
         var priority = ParsePriority(metadata.GetValueOrDefault("Priority"));
         var labels = ParseLabels(metadata.GetValueOrDefault("Labels"));
         var createdDate = ParseCreatedDate(metadata.GetValueOrDefault("Created"));
+        var completedDate = ParseCreatedDate(metadata.GetValueOrDefault("Completed"));
 
         return new TaskItem
         {
@@ -41,6 +42,7 @@ public class MarkdigMarkdownParser : IMarkdownParser
             Priority = priority,
             Labels = labels,
             CreatedDate = createdDate,
+            CompletedDate = completedDate,
             ExtraMetadata = extraMetadata,
             Sections = sections
         };
@@ -55,6 +57,8 @@ public class MarkdigMarkdownParser : IMarkdownParser
         sb.AppendLine();
         sb.AppendLine($"**Status**: {FormatStatus(task.Status)}");
         sb.AppendLine($"**Created**: {task.CreatedDate?.ToString(BoardConstants.DateFormat)}");
+        if (task.CompletedDate.HasValue)
+            sb.AppendLine($"**Completed**: {task.CompletedDate.Value.ToString(BoardConstants.DateFormat)}");
         sb.AppendLine($"**Priority**: {task.Priority}");
 
         var labelsValue = task.Labels.Count > 0

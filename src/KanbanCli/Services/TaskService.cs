@@ -22,6 +22,7 @@ public class TaskService : ITaskService
         ValidateTitle(title);
 
         var id = _repository.GetNextId();
+        var createdDate = DateTime.UtcNow;
         var task = new TaskItem
         {
             Id = id,
@@ -30,7 +31,13 @@ public class TaskService : ITaskService
             Priority = priority,
             Status = TaskStatus.Backlog,
             Labels = labels,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = createdDate,
+            Sections = new Dictionary<string, string>
+            {
+                ["Context & Motivation"] = "(No description provided)",
+                ["Acceptance Criteria"] = "- [ ] (To be defined)",
+                ["Progress Log"] = $"- {createdDate.ToString(BoardConstants.DateFormat)} - Task created"
+            }
         };
 
         _repository.Save(task);
@@ -44,8 +51,7 @@ public class TaskService : ITaskService
 
     public void MoveTask(TaskItem task, TaskStatus targetColumn)
     {
-        var updatedTask = task.ChangeStatus(targetColumn);
-        _repository.Move(updatedTask, targetColumn);
+        _repository.Move(task, targetColumn);
     }
 
     public void DeleteTask(TaskItem task)
