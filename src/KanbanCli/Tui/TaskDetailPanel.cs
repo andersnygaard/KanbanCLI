@@ -26,7 +26,7 @@ public class TaskDetailPanel
         while (true)
         {
             RenderDetailView(current, scrollOffset);
-            Console.Out.Flush();
+
             var key = Console.ReadKey(intercept: true);
             var (updatedTask, updatedScroll, shouldExit) = HandleKeyPress(current, scrollOffset, key);
             current = updatedTask;
@@ -188,7 +188,7 @@ public class TaskDetailPanel
         Console.Write("  New title (empty to cancel): ");
         Console.ResetColor();
         Console.ForegroundColor = Theme.DialogText;
-        Console.Out.Flush();
+
         var newTitle = Console.ReadLine()?.Trim() ?? string.Empty;
         Console.ResetColor();
 
@@ -207,7 +207,7 @@ public class TaskDetailPanel
         Console.WriteLine("  Labels: [A]dd or [R]emove?");
         Console.ResetColor();
 
-        Console.Out.Flush();
+
         var key = Console.ReadKey(intercept: true);
 
         return key.Key switch
@@ -224,7 +224,7 @@ public class TaskDetailPanel
         Console.Write("  Label to add: ");
         Console.ResetColor();
         Console.ForegroundColor = Theme.DialogText;
-        Console.Out.Flush();
+
         var label = Console.ReadLine()?.Trim() ?? string.Empty;
         Console.ResetColor();
 
@@ -245,7 +245,7 @@ public class TaskDetailPanel
             Console.ForegroundColor = Theme.DetailMuted;
             Console.WriteLine("  No labels to remove. Press any key...");
             Console.ResetColor();
-            Console.Out.Flush();
+
             Console.ReadKey(intercept: true);
             return task;
         }

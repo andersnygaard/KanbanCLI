@@ -1,5 +1,4 @@
 namespace KanbanCli.Tui;
-using System.Text;
 using KanbanCli.Models;
 using KanbanCli.Services;
 using TaskStatus = KanbanCli.Models.TaskStatus;
@@ -26,8 +25,6 @@ public class KanbanApp
     private bool _running;
     private bool _needsFullRedraw;
     private bool _boardDirty = true;
-
-    private const int BufferSize = 65536; // 64 KB
 
     public KanbanApp(
         ITaskService taskService,
@@ -82,47 +79,30 @@ public class KanbanApp
         _running = true;
 
         Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.Clear();
 
-        var originalOut = Console.Out;
-        var bufferedStream = new BufferedStream(Console.OpenStandardOutput(), BufferSize);
-        var bufferedWriter = new StreamWriter(bufferedStream) { AutoFlush = false };
-        Console.SetOut(bufferedWriter);
-
-        try
+        while (_running)
         {
-            Console.Clear();
-            bufferedWriter.Flush();
-
-            while (_running)
+            if (_needsFullRedraw)
             {
-                if (_needsFullRedraw)
-                {
-                    Console.Clear();
-                    _needsFullRedraw = false;
-                }
-
-                if (_boardDirty)
-                {
-                    _board = _boardService.GetBoard();
-                    _boardDirty = false;
-                }
-                _displayBoard = _activeFilter is not null ? ApplyFilter(_board, _activeFilter) : _board;
-                var filterInfo = BuildFilterInfo(_activeFilter);
-
-                _boardRenderer.Render(_displayBoard, _state, filterInfo);
-                Console.Out.Flush();
-
-                var command = _inputHandler.ReadCommand();
-
-                if (_commandDispatch.TryGetValue(command, out var handler))
-                    handler();
+                Console.Clear();
+                _needsFullRedraw = false;
             }
-        }
-        finally
-        {
-            Console.SetOut(originalOut);
-            bufferedWriter.Dispose();
-            bufferedStream.Dispose();
+
+            if (_boardDirty)
+            {
+                _board = _boardService.GetBoard();
+                _boardDirty = false;
+            }
+            _displayBoard = _activeFilter is not null ? ApplyFilter(_board, _activeFilter) : _board;
+            var filterInfo = BuildFilterInfo(_activeFilter);
+
+            _boardRenderer.Render(_displayBoard, _state, filterInfo);
+
+            var command = _inputHandler.ReadCommand();
+
+            if (_commandDispatch.TryGetValue(command, out var handler))
+                handler();
         }
 
         Console.Clear();

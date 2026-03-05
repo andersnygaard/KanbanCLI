@@ -33,7 +33,7 @@ public class FilterDialog
         Console.Write("Enter number (1-3), or 0 to cancel: ");
         Console.ResetColor();
 
-        Console.Out.Flush();
+
         var modeInput = Console.ReadLine()?.Trim() ?? string.Empty;
 
         if (!int.TryParse(modeInput, out var modeChoice) || modeChoice == 0)
@@ -84,7 +84,7 @@ public class FilterDialog
         RenderLabelFilterHeader(availableLabels, width, borderColor);
 
         Console.ForegroundColor = Theme.DialogListItem;
-        Console.Out.Flush();
+
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
         Console.ResetColor();
         Console.CursorVisible = false;

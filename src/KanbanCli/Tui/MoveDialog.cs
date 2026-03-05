@@ -42,7 +42,7 @@ public class MoveDialog
         Console.Write(promptText);
         Console.ResetColor();
 
-        Console.Out.Flush();
+
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
 
         DialogHelper.RenderBoxEmptyLine(width, borderColor);

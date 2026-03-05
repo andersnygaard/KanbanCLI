@@ -22,7 +22,7 @@ public class NewTaskDialog
             DialogHelper.RenderBoxEmptyLine(width, borderColor);
             DialogHelper.RenderBoxBottom(width, borderColor);
             DialogHelper.ShowError("Title cannot be empty. Press any key to cancel.");
-            Console.Out.Flush();
+
             Console.ReadKey(intercept: true);
             return null;
         }
