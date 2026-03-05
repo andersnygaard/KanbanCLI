@@ -40,12 +40,14 @@ public class BoardService : IBoardService
         var topPriorities = allTasks
             .Where(t => t.Status == TaskStatus.InProgress)
             .Concat(allTasks.Where(t => t.Status == TaskStatus.Backlog && t.Priority == Priority.High))
+            .Concat(allTasks.Where(t => t.Status == TaskStatus.Backlog && t.Priority == Priority.Medium))
             .Take(BoardConstants.MaxTopPriorities)
             .ToList();
 
         var recentlyCompleted = allTasks
             .Where(t => t.Status == TaskStatus.Done)
             .OrderByDescending(t => t.CompletedDate ?? DateTime.MinValue)
+            .Take(BoardConstants.MaxRecentlyCompleted)
             .ToList();
 
         var sb = new StringBuilder();

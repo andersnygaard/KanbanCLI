@@ -24,13 +24,24 @@ public class BoardView : IBoardRenderer
         _columnView = columnView;
     }
 
+    private record BoardLayout(
+        int WindowWidth,
+        int WindowHeight,
+        int[] ColumnWidths,
+        int[] ColumnXPositions,
+        int BodyStartRow,
+        int BodyHeight,
+        int BottomBodyRow,
+        int StatusBarRow,
+        int BottomBorderRow);
+
     public void Render(Board board, NavigationState state, string? filterInfo = null)
     {
         Console.CursorVisible = false;
         TuiHelpers.SafeSetCursorPosition(0, 0);
 
-        var windowWidth = Math.Max(Console.WindowWidth, BoardConstants.MinWindowWidth);
-        var windowHeight = Math.Max(Console.WindowHeight, BoardConstants.MinWindowHeight);
+        var windowWidth = TuiHelpers.GetEffectiveWidth();
+        var windowHeight = TuiHelpers.GetEffectiveHeight();
 
         var columnCount = board.Columns.Count;
         if (columnCount == 0)
@@ -39,10 +50,16 @@ public class BoardView : IBoardRenderer
             return;
         }
 
-        // Calculate column layout
+        var layout = CalculateLayout(windowWidth, windowHeight, columnCount);
+        RenderFrameAndHeaders(board, state, layout);
+        RenderColumnContent(board, state, layout, filterInfo);
+        RenderFooter(state, board, layout, filterInfo);
+    }
+
+    private static BoardLayout CalculateLayout(int windowWidth, int windowHeight, int columnCount)
+    {
         // Total width: │ col1 │ col2 │ col3 │ col4 │
         // We need (columnCount + 1) vertical bars, each takes 1 char
-        // Usable content width per column = (windowWidth - columnCount - 1) / columnCount
         var separatorCount = columnCount + 1;
         var totalContentWidth = windowWidth - separatorCount;
         var baseColumnWidth = totalContentWidth / columnCount;
@@ -57,67 +74,71 @@ public class BoardView : IBoardRenderer
         }
 
         // Calculate X positions for content (after the left border │)
-        var currentX = 1; // Start after left border │
+        var currentX = 1;
         for (var i = 0; i < columnCount; i++)
         {
             columnXPositions[i] = currentX;
-            currentX += columnWidths[i] + 1; // +1 for the separator after this column
+            currentX += columnWidths[i] + 1;
         }
 
-        // Row layout:
-        // Row 0: Top border       ┌───────┬───────┐
-        // Row 1: Title bar        │ ◼ Kanban Board │
-        // Row 2: Header separator ├───────┼───────┤
-        // Row 3: Column headers   │ Backlog [3] │ ...
-        // Row 4: Body separator   ├───────┼───────┤
-        // Row 5..N-3: Task cards  │ task  │ task  │
-        // Row N-2: Bottom body    ├───────┴───────┤
-        // Row N-1: Status bar     │ keybindings   │
-        // Row N:   Bottom border  └───────────────┘
-
-        var topBorderRow = 0;
-        var titleRow = 1;
-        var headerSepRow = 2;
-        var headerRow = 3;
-        var bodySepRow = 4;
+        // Rows 0-4: top border, title, header sep, column headers, body sep
+        // Rows 5..N-3: task cards | N-2: bottom body | N-1: status bar | N: bottom border
         var bodyStartRow = 5;
         var statusBarRow = windowHeight - 2;
         var bottomBorderRow = windowHeight - 1;
         var bottomBodyRow = statusBarRow - 1;
         var bodyHeight = bottomBodyRow - bodyStartRow;
 
-        // Render frame
-        RenderHorizontalLine(topBorderRow, windowWidth, columnWidths, TopLeft, TopTee, TopRight, Theme.BoardBorder);
-        RenderTitleBar(titleRow, windowWidth, Theme.BoardBorder);
-        RenderHorizontalLine(headerSepRow, windowWidth, columnWidths, LeftTee, Cross, RightTee, Theme.BoardBorder);
+        return new BoardLayout(
+            windowWidth, windowHeight, columnWidths, columnXPositions,
+            bodyStartRow, bodyHeight, bottomBodyRow, statusBarRow, bottomBorderRow);
+    }
+
+    private void RenderFrameAndHeaders(Board board, NavigationState state, BoardLayout layout)
+    {
+        var columnCount = board.Columns.Count;
+
+        RenderHorizontalLine(0, layout.WindowWidth, layout.ColumnWidths, TopLeft, TopTee, TopRight, Theme.BoardBorder);
+        RenderTitleBar(1, layout.WindowWidth, Theme.BoardBorder);
+        RenderHorizontalLine(2, layout.WindowWidth, layout.ColumnWidths, LeftTee, Cross, RightTee, Theme.BoardBorder);
 
         // Render column headers
         for (var i = 0; i < columnCount; i++)
         {
             var column = board.Columns[i];
             var isSelected = state.SelectedColumn == i;
-            RenderColumnHeader(column, columnXPositions[i], columnWidths[i], headerRow, isSelected);
+            RenderColumnHeader(column, layout.ColumnXPositions[i], layout.ColumnWidths[i], 3, isSelected);
         }
+
         // Draw vertical separators for header row
-        RenderVerticalSeparators(headerRow, columnXPositions, columnWidths, columnCount, windowWidth, state.SelectedColumn, Theme.BoardBorder);
+        RenderVerticalSeparators(3, layout.ColumnXPositions, layout.ColumnWidths, columnCount, layout.WindowWidth, state.SelectedColumn, Theme.BoardBorder);
 
-        RenderHorizontalLine(bodySepRow, windowWidth, columnWidths, LeftTee, Cross, RightTee, Theme.BoardBorder);
+        RenderHorizontalLine(4, layout.WindowWidth, layout.ColumnWidths, LeftTee, Cross, RightTee, Theme.BoardBorder);
+    }
 
-        // Render column body content (tasks)
+    private void RenderColumnContent(Board board, NavigationState state, BoardLayout layout, string? filterInfo)
+    {
+        var columnCount = board.Columns.Count;
         var isFiltered = filterInfo is not null;
+
         for (var i = 0; i < columnCount; i++)
         {
-            _columnView.Render(board.Columns[i], i, columnXPositions[i], columnWidths[i], state, bodyStartRow, bodyHeight, isFiltered);
+            _columnView.Render(board.Columns[i], i, layout.ColumnXPositions[i], layout.ColumnWidths[i], state, layout.BodyStartRow, layout.BodyHeight, isFiltered);
         }
 
         // Draw vertical separators for all body rows
-        for (var row = bodyStartRow; row < bottomBodyRow; row++)
+        for (var row = layout.BodyStartRow; row < layout.BottomBodyRow; row++)
         {
-            RenderVerticalSeparators(row, columnXPositions, columnWidths, columnCount, windowWidth, state.SelectedColumn, Theme.BoardBorder);
+            RenderVerticalSeparators(row, layout.ColumnXPositions, layout.ColumnWidths, columnCount, layout.WindowWidth, state.SelectedColumn, Theme.BoardBorder);
         }
+    }
+
+    private void RenderFooter(NavigationState state, Board board, BoardLayout layout, string? filterInfo)
+    {
+        var columnCount = board.Columns.Count;
 
         // Bottom body border (uses ┴ between columns to close them off)
-        RenderHorizontalLine(bottomBodyRow, windowWidth, columnWidths, LeftTee, BottomTee, RightTee, Theme.BoardBorder);
+        RenderHorizontalLine(layout.BottomBodyRow, layout.WindowWidth, layout.ColumnWidths, LeftTee, BottomTee, RightTee, Theme.BoardBorder);
 
         // Status bar with position info
         string? positionInfo = null;
@@ -130,10 +151,10 @@ public class BoardView : IBoardRenderer
                 positionInfo = $"Task {taskIndex + 1}/{selectedCol.Tasks.Count}";
             }
         }
-        _statusBar.Render(statusBarRow, windowWidth, filterInfo, positionInfo);
+        _statusBar.Render(layout.StatusBarRow, layout.WindowWidth, filterInfo, positionInfo);
 
         // Bottom border
-        RenderSimpleHorizontalLine(bottomBorderRow, windowWidth, BottomLeft, BottomRight, Theme.BoardBorder);
+        RenderSimpleHorizontalLine(layout.BottomBorderRow, layout.WindowWidth, BottomLeft, BottomRight, Theme.BoardBorder);
     }
 
     private static void RenderEmptyBoard(int windowWidth)

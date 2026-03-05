@@ -276,7 +276,7 @@ public class MarkdownParserTests
         reparsed.Status.Should().Be(original.Status);
         reparsed.Priority.Should().Be(original.Priority);
         reparsed.Labels.Should().BeEquivalentTo(original.Labels);
-        reparsed.CreatedDate!.Value.Date.Should().Be(original.CreatedDate!.Value.Date);
+        reparsed.CreatedDate.Date.Should().Be(original.CreatedDate.Date);
     }
 
     [Fact]
@@ -372,7 +372,7 @@ public class MarkdownParserTests
     }
 
     [Fact]
-    public void Parse_InvalidDateFormat_ReturnsNullCreatedDate()
+    public void Parse_InvalidDateFormat_DefaultsToUtcNow()
     {
         var markdown = """
             # FEATURE: Test task
@@ -385,11 +385,11 @@ public class MarkdownParserTests
 
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
-    public void Parse_MissingCreatedDate_ReturnsNullCreatedDate()
+    public void Parse_MissingCreatedDate_DefaultsToUtcNow()
     {
         var markdown = """
             # FEATURE: Test task
@@ -401,7 +401,7 @@ public class MarkdownParserTests
 
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -416,6 +416,7 @@ public class MarkdownParserTests
         result.Status.Should().Be(TaskStatus.Backlog);
         result.Priority.Should().Be(Priority.Medium);
         result.Labels.Should().BeEmpty();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -470,7 +471,7 @@ public class MarkdownParserTests
         secondParse.Status.Should().Be(firstParse.Status);
         secondParse.Priority.Should().Be(firstParse.Priority);
         secondParse.Labels.Should().BeEquivalentTo(firstParse.Labels);
-        secondParse.CreatedDate!.Value.Date.Should().Be(firstParse.CreatedDate!.Value.Date);
+        secondParse.CreatedDate.Date.Should().Be(firstParse.CreatedDate.Date);
         secondParse.ExtraMetadata.Should().BeEquivalentTo(firstParse.ExtraMetadata);
         secondParse.Sections.Keys.Should().BeEquivalentTo(firstParse.Sections.Keys);
 
@@ -573,7 +574,7 @@ public class MarkdownParserTests
     }
 
     [Fact]
-    public void Parse_InvalidDate_ReturnsNullInsteadOfSilentDefault()
+    public void Parse_InvalidDate_DefaultsToUtcNow()
     {
         var markdown = """
             # FEATURE: Task with bad date
@@ -586,11 +587,11 @@ public class MarkdownParserTests
 
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
-    public void Parse_GarbageDate_ReturnsNullInsteadOfSilentDefault()
+    public void Parse_GarbageDate_DefaultsToUtcNow()
     {
         var markdown = """
             # FEATURE: Task with garbage date
@@ -603,7 +604,7 @@ public class MarkdownParserTests
 
         var result = _parser.Parse(markdown, 1, TaskType.Feature);
 
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -647,7 +648,7 @@ public class MarkdownParserTests
         result.Status.Should().Be(TaskStatus.Backlog);
         result.Priority.Should().Be(Priority.Medium);
         result.Labels.Should().BeEmpty();
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
         result.ExtraMetadata.Should().BeEmpty();
         result.Sections.Should().BeEmpty();
     }
@@ -692,7 +693,7 @@ public class MarkdownParserTests
         result.Status.Should().Be(TaskStatus.Backlog);
         result.Priority.Should().Be(Priority.Medium);
         result.Labels.Should().BeEmpty();
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
         result.ExtraMetadata.Should().BeEmpty();
         result.Sections.Should().BeEmpty();
     }
@@ -745,7 +746,7 @@ public class MarkdownParserTests
         result.Status.Should().Be(TaskStatus.Backlog);
         result.Priority.Should().Be(Priority.Medium);
         result.Labels.Should().BeEmpty();
-        result.CreatedDate.Should().BeNull();
+        result.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
         result.ExtraMetadata.Should().BeEmpty();
         result.Sections.Should().BeEmpty();
     }
@@ -886,5 +887,48 @@ public class MarkdownParserTests
         id.Should().Be(0);
         type.Should().Be(TaskType.Feature);
         description.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Parse_CrlfLineEndings_HandlesCorrectly()
+    {
+        // Arrange
+        var markdown = "# FEATURE: CRLF task\r\n\r\n**Status**: InProgress\r\n**Created**: 2026-03-04\r\n**Priority**: High\r\n**Labels**: frontend, api\r\n\r\n## Context & Motivation\r\nSome context here.\r\n\r\n## Progress Log\r\n- 2026-03-04 - Created\r\n";
+
+        // Act
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        // Assert
+        result.Title.Should().Be("CRLF task");
+        result.Status.Should().Be(TaskStatus.InProgress);
+        result.Priority.Should().Be(Priority.High);
+        result.Labels.Should().BeEquivalentTo(new[] { "frontend", "api" });
+        result.CreatedDate.Should().Be(new DateTime(2026, 3, 4));
+        result.Sections.Should().ContainKey("Context & Motivation");
+        result.Sections.Should().ContainKey("Progress Log");
+    }
+
+    [Fact]
+    public void Parse_UnicodeTitle_PreservesContent()
+    {
+        // Arrange
+        var markdown = """
+            # FEATURE: Implémenter la résolution des données — café ☕
+
+            **Status**: Backlog
+            **Created**: 2026-03-04
+            **Priority**: Medium
+            **Labels**: i18n
+            """;
+
+        // Act
+        var result = _parser.Parse(markdown, 1, TaskType.Feature);
+
+        // Assert
+        result.Title.Should().Contain("Implémenter");
+        result.Title.Should().Contain("résolution");
+        result.Title.Should().Contain("données");
+        result.Title.Should().Contain("café");
+        result.Labels.Should().Contain("i18n");
     }
 }

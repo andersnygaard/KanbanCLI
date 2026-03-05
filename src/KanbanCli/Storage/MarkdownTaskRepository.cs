@@ -136,6 +136,9 @@ public class MarkdownTaskRepository : ITaskRepository
         return Path.Combine(_boardPath, FolderNames[status]);
     }
 
+    // Exceptions are intentionally swallowed here. Malformed or inaccessible task files
+    // should not crash the entire board. Returning null lets the caller skip the bad file
+    // and continue loading the remaining tasks gracefully.
     private TaskItem? TryParseFile(string filePath)
     {
         try
@@ -162,6 +165,9 @@ public class MarkdownTaskRepository : ITaskRepository
         }
     }
 
+    // Exceptions are intentionally swallowed here. A file with an unparseable name should
+    // not prevent ID generation from completing. Returning 0 means this file is simply
+    // ignored when calculating the next available ID.
     private int TryExtractId(string filePath)
     {
         try

@@ -42,6 +42,7 @@ public class MoveDialog
         Console.Write(promptText);
         Console.ResetColor();
 
+
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
 
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
@@ -56,6 +57,6 @@ public class MoveDialog
         if (choice - 1 == currentColumnIndex)
             return null; // Already in this column
 
-        return BoardConstants.ColumnOrder[choice - 1];
+        return board.Columns[choice - 1].Status;
     }
 }

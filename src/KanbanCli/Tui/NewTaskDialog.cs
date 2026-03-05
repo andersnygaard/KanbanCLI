@@ -22,20 +22,21 @@ public class NewTaskDialog
             DialogHelper.RenderBoxEmptyLine(width, borderColor);
             DialogHelper.RenderBoxBottom(width, borderColor);
             DialogHelper.ShowError("Title cannot be empty. Press any key to cancel.");
+
             Console.ReadKey(intercept: true);
             return null;
         }
 
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
-        var type = PromptEnumInBox<TaskType>("Type", width, borderColor);
+        var type = DialogHelper.PromptEnumInBox<TaskType>("Type", width, borderColor);
         if (type is null)
         {
             DialogHelper.RenderBoxBottom(width, borderColor);
             return null;
         }
 
-        var priority = PromptEnumInBox<Priority>("Priority", width, borderColor);
+        var priority = DialogHelper.PromptEnumInBox<Priority>("Priority", width, borderColor);
         if (priority is null)
         {
             DialogHelper.RenderBoxBottom(width, borderColor);
@@ -54,41 +55,6 @@ public class NewTaskDialog
         Console.ResetColor();
 
         return new NewTaskInputs(title.Trim(), type.Value, priority.Value, labels);
-    }
-
-    private static T? PromptEnumInBox<T>(string label, int width, ConsoleColor borderColor) where T : struct, Enum
-    {
-        var values = Enum.GetValues<T>();
-        var valueNames = values.Select(v => v.ToString()).ToList();
-
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
-
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = Theme.DialogPrompt;
-        var labelText = $"{label}:";
-        Console.Write(labelText);
-        DialogHelper.RenderBoxRightBorder(labelText.Length, width, borderColor);
-
-        DialogHelper.RenderNumberedListInBox(valueNames, width, borderColor);
-
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
-
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = Theme.DialogPrompt;
-        var promptText = $"Enter number (1-{values.Length}): ";
-        Console.Write(promptText);
-        Console.ResetColor();
-
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
-
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > values.Length)
-        {
-            DialogHelper.ShowError("Invalid selection. Press any key to cancel.");
-            Console.ReadKey(intercept: true);
-            return null;
-        }
-
-        return values[choice - 1];
     }
 
     private static IReadOnlyList<string> ParseLabels(string input)

@@ -12,7 +12,7 @@ public static class DialogHelper
 
         if (header is not null)
         {
-            var windowWidth = Math.Max(Console.WindowWidth, 40);
+            var windowWidth = TuiHelpers.GetEffectiveWidth();
             TuiHelpers.RenderHeader(header, windowWidth, headerColor ?? Theme.DialogHeader);
             Console.WriteLine();
         }
@@ -46,16 +46,31 @@ public static class DialogHelper
         Console.Write($"  Enter number (1-{values.Length}{cancelHint}): ");
         Console.ResetColor();
 
+
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
 
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > values.Length)
+        if (!int.TryParse(input, out var choice))
         {
             if (!allowZeroCancel)
             {
                 ShowError("Invalid selection. Press any key to cancel.");
+        
                 Console.ReadKey(intercept: true);
             }
 
+            return null;
+        }
+
+        if (allowZeroCancel && choice == 0)
+        {
+            return null;
+        }
+
+        if (choice < 1 || choice > values.Length)
+        {
+            ShowError("Invalid selection. Press any key to cancel.");
+    
+            Console.ReadKey(intercept: true);
             return null;
         }
 
@@ -197,6 +212,7 @@ public static class DialogHelper
         Console.Write(prompt);
         Console.ResetColor();
         Console.ForegroundColor = Theme.DialogText;
+
         var input = Console.ReadLine() ?? string.Empty;
         Console.ResetColor();
         return input;
@@ -231,11 +247,63 @@ public static class DialogHelper
         Console.Write($"  Enter number (1-{maxValue}{cancelHint}): ");
         Console.ResetColor();
 
+
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > maxValue)
+        if (!int.TryParse(input, out var choice))
+        {
             return null;
+        }
+
+        if (allowZeroCancel && choice == 0)
+        {
+            return null;
+        }
+
+        if (choice < 1 || choice > maxValue)
+        {
+            return null;
+        }
 
         return choice;
+    }
+
+    /// <summary>
+    /// Displays an enum's values as a numbered list inside a box and prompts the user to select one.
+    /// Returns null if the user cancels or enters an invalid selection.
+    /// When allowZeroCancel is false, shows an error message on invalid input.
+    /// </summary>
+    public static T? PromptEnumInBox<T>(string label, int width, ConsoleColor borderColor, bool allowZeroCancel = false) where T : struct, Enum
+    {
+        var values = Enum.GetValues<T>();
+
+        RenderBoxEmptyLine(width, borderColor);
+
+        RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = Theme.DialogPrompt;
+        var labelText = $"{label}:";
+        Console.Write(labelText);
+        RenderBoxRightBorder(labelText.Length, width, borderColor);
+
+        var names = values.Select(v => v.ToString()).ToList();
+        RenderNumberedListInBox(names, width, borderColor);
+
+        RenderBoxEmptyLine(width, borderColor);
+
+        RenderBoxLeftBorder(borderColor);
+        var choice = PromptNumericChoice(values.Length, allowZeroCancel: allowZeroCancel);
+        if (choice is null)
+        {
+            if (!allowZeroCancel)
+            {
+                ShowError("Invalid selection. Press any key to cancel.");
+        
+                Console.ReadKey(intercept: true);
+            }
+
+            return null;
+        }
+
+        return values[choice.Value - 1];
     }
 
     /// <summary>
@@ -243,6 +311,6 @@ public static class DialogHelper
     /// </summary>
     public static int GetBoxWidth()
     {
-        return Math.Min(Math.Max(Console.WindowWidth, 40), 80);
+        return Math.Min(TuiHelpers.GetEffectiveWidth(), 80);
     }
 }

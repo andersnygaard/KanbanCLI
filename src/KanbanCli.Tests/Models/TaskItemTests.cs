@@ -14,18 +14,19 @@ public class TaskItemTests
         TaskStatus status = TaskStatus.Backlog,
         IReadOnlyList<string>? labels = null,
         DateTime? createdDate = null,
-        DateTime? completedDate = null) =>
-        new()
-        {
-            Id = id,
-            Title = title,
-            Type = type,
-            Priority = priority,
-            Status = status,
-            Labels = labels ?? [],
-            CreatedDate = createdDate ?? DateTime.UtcNow,
-            CompletedDate = completedDate
-        };
+        DateTime? completedDate = null)
+    {
+        return new TestTaskBuilder()
+            .WithId(id)
+            .WithTitle(title)
+            .WithType(type)
+            .WithPriority(priority)
+            .WithStatus(status)
+            .WithLabels(labels?.ToArray() ?? [])
+            .WithCreatedDate(createdDate ?? DateTime.UtcNow)
+            .WithCompletedDate(completedDate)
+            .Build();
+    }
 
     [Fact]
     public void ChangeStatus_ToDone_SetsCompletedDate()
@@ -502,5 +503,26 @@ public class TaskItemTests
 
         // Assert
         fileName.Should().Be("016-FEATURE-add-oauth2-support-v3.md");
+    }
+
+    [Fact]
+    public void GenerateFileName_SpecialCharacters_SanitizesCorrectly()
+    {
+        // Arrange
+        var task = CreateSampleTask(id: 20, title: "Fix: login/signup [broken] & auth?");
+
+        // Act
+        var fileName = task.GenerateFileName();
+
+        // Assert
+        fileName.Should().StartWith("020-FEATURE-");
+        fileName.Should().EndWith(".md");
+        fileName.Should().NotContain(":");
+        fileName.Should().NotContain("/");
+        fileName.Should().NotContain("[");
+        fileName.Should().NotContain("]");
+        fileName.Should().NotContain("&");
+        fileName.Should().NotContain("?");
+        fileName.Should().NotContain("--");
     }
 }

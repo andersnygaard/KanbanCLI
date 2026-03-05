@@ -30,10 +30,10 @@ public static class TuiHelpers
     {
         return priority switch
         {
-            Priority.High => ConsoleColor.Red,
-            Priority.Medium => ConsoleColor.Yellow,
-            Priority.Low => ConsoleColor.Green,
-            _ => ConsoleColor.Gray
+            Priority.High => Theme.PriorityHigh,
+            Priority.Medium => Theme.PriorityMedium,
+            Priority.Low => Theme.PriorityLow,
+            _ => Theme.PriorityDefault
         };
     }
 
@@ -42,27 +42,21 @@ public static class TuiHelpers
     {
         return type switch
         {
-            TaskType.Feature => ConsoleColor.Cyan,
-            TaskType.Bug => ConsoleColor.Red,
-            TaskType.Security => ConsoleColor.DarkYellow,
-            TaskType.Refactor => ConsoleColor.Green,
-            TaskType.Test => ConsoleColor.Magenta,
-            TaskType.Perf => ConsoleColor.DarkCyan,
-            TaskType.Docs => ConsoleColor.Blue,
-            TaskType.Design => ConsoleColor.DarkMagenta,
-            TaskType.Epic => ConsoleColor.White,
-            TaskType.Explore => ConsoleColor.DarkGreen,
-            TaskType.Cleanup => ConsoleColor.DarkGray,
-            TaskType.A11y => ConsoleColor.DarkYellow,
-            TaskType.Quality => ConsoleColor.Yellow,
-            _ => ConsoleColor.Gray
+            TaskType.Feature => Theme.TypeFeature,
+            TaskType.Bug => Theme.TypeBug,
+            TaskType.Security => Theme.TypeSecurity,
+            TaskType.Refactor => Theme.TypeRefactor,
+            TaskType.Test => Theme.TypeTest,
+            TaskType.Perf => Theme.TypePerf,
+            TaskType.Docs => Theme.TypeDocs,
+            TaskType.Design => Theme.TypeDesign,
+            TaskType.Epic => Theme.TypeEpic,
+            TaskType.Explore => Theme.TypeExplore,
+            TaskType.Cleanup => Theme.TypeCleanup,
+            TaskType.A11y => Theme.TypeA11y,
+            TaskType.Quality => Theme.TypeQuality,
+            _ => Theme.TypeDefault
         };
-    }
-
-    /// <summary>Formats a <paramref name="status"/> value as a human-readable display string.</summary>
-    public static string FormatStatus(TaskStatus status)
-    {
-        return status.ToDisplayString();
     }
 
     /// <summary>
@@ -73,13 +67,69 @@ public static class TuiHelpers
     {
         try
         {
-            var safeX = Math.Clamp(x, 0, Math.Max(Console.WindowWidth - 1, 0));
-            var safeY = Math.Clamp(y, 0, Math.Max(Console.WindowHeight - 1, 0));
+            var safeX = Math.Clamp(x, 0, Math.Max(GetEffectiveWidth() - 1, 0));
+            var safeY = Math.Clamp(y, 0, Math.Max(GetEffectiveHeight() - 1, 0));
             Console.SetCursorPosition(safeX, safeY);
         }
         catch (IOException)
         {
             // Terminal may have been resized between check and set
+        }
+    }
+
+    /// <summary>
+    /// Returns the effective board width by reading the actual terminal width,
+    /// capping it to BoardConstants.MaxBoardWidth, and respecting the KANBAN_WIDTH
+    /// environment variable if set.
+    /// </summary>
+    public static int GetEffectiveWidth()
+    {
+        var envValue = Environment.GetEnvironmentVariable(BoardConstants.WidthEnvVar);
+        if (!string.IsNullOrEmpty(envValue) && int.TryParse(envValue, out var envWidth) && envWidth >= BoardConstants.MinWindowWidth)
+        {
+            return envWidth;
+        }
+
+        var consoleWidth = TryGetConsoleWidth();
+        return Math.Clamp(consoleWidth, BoardConstants.MinWindowWidth, BoardConstants.MaxBoardWidth);
+    }
+
+    /// <summary>
+    /// Returns the effective board height from the terminal.
+    /// </summary>
+    public static int GetEffectiveHeight()
+    {
+        var envValue = Environment.GetEnvironmentVariable(BoardConstants.HeightEnvVar);
+        if (!string.IsNullOrEmpty(envValue) && int.TryParse(envValue, out var envHeight) && envHeight >= BoardConstants.MinWindowHeight)
+        {
+            return envHeight;
+        }
+
+        var consoleHeight = TryGetConsoleHeight();
+        return Math.Clamp(consoleHeight, BoardConstants.MinWindowHeight, BoardConstants.MaxBoardHeight);
+    }
+
+    private static int TryGetConsoleWidth()
+    {
+        try
+        {
+            return Console.WindowWidth;
+        }
+        catch (IOException)
+        {
+            return BoardConstants.MaxBoardWidth;
+        }
+    }
+
+    private static int TryGetConsoleHeight()
+    {
+        try
+        {
+            return Console.WindowHeight;
+        }
+        catch (IOException)
+        {
+            return BoardConstants.MaxBoardHeight;
         }
     }
 

@@ -33,6 +33,7 @@ public class FilterDialog
         Console.Write("Enter number (1-3), or 0 to cancel: ");
         Console.ResetColor();
 
+
         var modeInput = Console.ReadLine()?.Trim() ?? string.Empty;
 
         if (!int.TryParse(modeInput, out var modeChoice) || modeChoice == 0)
@@ -70,7 +71,7 @@ public class FilterDialog
 
     private static FilterCriteria? PromptByType(int width, ConsoleColor borderColor)
     {
-        var selected = PromptEnumInBox<TaskType>("Task type", width, borderColor);
+        var selected = DialogHelper.PromptEnumInBox<TaskType>("Task type", width, borderColor, allowZeroCancel: true);
 
         Console.CursorVisible = false;
 
@@ -80,7 +81,32 @@ public class FilterDialog
     private static FilterCriteria? PromptByLabel(IReadOnlyList<string> availableLabels, int width, ConsoleColor borderColor)
     {
         DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        RenderLabelFilterHeader(availableLabels, width, borderColor);
 
+        Console.ForegroundColor = Theme.DialogListItem;
+
+        var input = Console.ReadLine()?.Trim() ?? string.Empty;
+        Console.ResetColor();
+        Console.CursorVisible = false;
+
+        if (string.IsNullOrWhiteSpace(input) || input == "0")
+        {
+            return null;
+        }
+
+        if (availableLabels.Count > 0
+            && int.TryParse(input, out var labelChoice)
+            && labelChoice >= 1
+            && labelChoice <= availableLabels.Count)
+        {
+            return new FilterCriteria(Label: availableLabels[labelChoice - 1]);
+        }
+
+        return new FilterCriteria(Label: input);
+    }
+
+    private static void RenderLabelFilterHeader(IReadOnlyList<string> availableLabels, int width, ConsoleColor borderColor)
+    {
         if (availableLabels.Count > 0)
         {
             DialogHelper.RenderBoxLeftBorder(borderColor);
@@ -89,17 +115,8 @@ public class FilterDialog
             Console.Write(headerText);
             DialogHelper.RenderBoxRightBorder(headerText.Length, width, borderColor);
 
-            for (var i = 0; i < availableLabels.Count; i++)
-            {
-                DialogHelper.RenderBoxLeftBorder(borderColor);
-                Console.ForegroundColor = Theme.DialogListNumber;
-                var numText = $"  {i + 1}. ";
-                Console.Write(numText);
-                Console.ForegroundColor = Theme.DialogListItem;
-                var labelText = availableLabels[i];
-                Console.Write(labelText);
-                DialogHelper.RenderBoxRightBorder(numText.Length + labelText.Length, width, borderColor);
-            }
+            var labelDisplayNames = availableLabels.Select(l => $"[{l}]").ToList();
+            DialogHelper.RenderNumberedListInBox(labelDisplayNames, width, borderColor);
 
             DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
@@ -115,73 +132,15 @@ public class FilterDialog
             Console.Write("Enter label name, or leave empty to cancel: ");
             Console.ResetColor();
         }
-
-        Console.ForegroundColor = Theme.DialogListItem;
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
-        Console.ResetColor();
-        Console.CursorVisible = false;
-
-        if (string.IsNullOrWhiteSpace(input) || input == "0")
-            return null;
-
-        // Check if the user entered a number that refers to a label from the list
-        if (availableLabels.Count > 0
-            && int.TryParse(input, out var labelChoice)
-            && labelChoice >= 1
-            && labelChoice <= availableLabels.Count)
-        {
-            return new FilterCriteria(Label: availableLabels[labelChoice - 1]);
-        }
-
-        return new FilterCriteria(Label: input);
     }
 
     private static FilterCriteria? PromptByPriority(int width, ConsoleColor borderColor)
     {
-        var selected = PromptEnumInBox<Priority>("Priority", width, borderColor);
+        var selected = DialogHelper.PromptEnumInBox<Priority>("Priority", width, borderColor, allowZeroCancel: true);
 
         Console.CursorVisible = false;
 
         return selected.HasValue ? new FilterCriteria(Priority: selected.Value) : null;
     }
 
-    private static T? PromptEnumInBox<T>(string label, int width, ConsoleColor borderColor) where T : struct, Enum
-    {
-        var values = Enum.GetValues<T>();
-
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
-
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = Theme.DialogPrompt;
-        var labelText = $"{label}:";
-        Console.Write(labelText);
-        DialogHelper.RenderBoxRightBorder(labelText.Length, width, borderColor);
-
-        for (var i = 0; i < values.Length; i++)
-        {
-            DialogHelper.RenderBoxLeftBorder(borderColor);
-            Console.ForegroundColor = Theme.DialogListNumber;
-            var numText = $"  {i + 1}. ";
-            Console.Write(numText);
-            Console.ForegroundColor = Theme.DialogListItem;
-            var valText = values[i].ToString();
-            Console.Write(valText);
-            DialogHelper.RenderBoxRightBorder(numText.Length + valText.Length, width, borderColor);
-        }
-
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
-
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = Theme.DialogPrompt;
-        var promptText = $"Enter number (1-{values.Length}), or 0 to cancel: ";
-        Console.Write(promptText);
-        Console.ResetColor();
-
-        var input = Console.ReadLine()?.Trim() ?? string.Empty;
-
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > values.Length)
-            return null;
-
-        return values[choice - 1];
-    }
 }

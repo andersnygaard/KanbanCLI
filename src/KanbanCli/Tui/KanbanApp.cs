@@ -1,5 +1,4 @@
 namespace KanbanCli.Tui;
-using System.Text;
 using KanbanCli.Models;
 using KanbanCli.Services;
 using TaskStatus = KanbanCli.Models.TaskStatus;
@@ -98,8 +97,7 @@ public class KanbanApp
             _displayBoard = _activeFilter is not null ? ApplyFilter(_board, _activeFilter) : _board;
             var filterInfo = BuildFilterInfo(_activeFilter);
 
-            // Buffer all console output during rendering to reduce system calls
-            RenderBuffered(_displayBoard, _state, filterInfo);
+            _boardRenderer.Render(_displayBoard, _state, filterInfo);
 
             var command = _inputHandler.ReadCommand();
 
@@ -264,20 +262,6 @@ public class KanbanApp
             _activeFilter = newFilter;
             _state = _state with { SelectedTask = 0 };
         }
-    }
-
-    private void RenderBuffered(Board board, NavigationState state, string? filterInfo)
-    {
-        var originalOut = Console.Out;
-        using (var bufferStream = new BufferedStream(Console.OpenStandardOutput(), 64 * 1024))
-        using (var bufferWriter = new StreamWriter(bufferStream, Console.OutputEncoding) { AutoFlush = false })
-        {
-            Console.SetOut(bufferWriter);
-            _boardRenderer.Render(board, state, filterInfo);
-            bufferWriter.Flush();
-            bufferStream.Flush();
-        }
-        Console.SetOut(originalOut);
     }
 
     private static Board ApplyFilter(Board board, FilterCriteria filter)

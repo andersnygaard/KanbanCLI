@@ -26,6 +26,7 @@ public class ConfirmDialog
         Console.ResetColor();
         Console.Write("Type 'yes' to confirm: ");
 
+
         var input = Console.ReadLine()?.Trim() ?? string.Empty;
 
         DialogHelper.RenderBoxEmptyLine(width, borderColor);

@@ -11,19 +11,19 @@ public class TaskServiceTests
 {
     private readonly ITaskRepository _repository = Substitute.For<ITaskRepository>();
 
-    private TaskService CreateSut() => new(_repository);
+    private TaskService CreateSut()
+    {
+        return new(_repository);
+    }
 
     private static TaskItem CreateTask(int id = 1, TaskStatus status = TaskStatus.Backlog, Priority priority = Priority.Medium)
-        => new()
-        {
-            Id = id,
-            Title = "Test task",
-            Type = TaskType.Feature,
-            Status = status,
-            Priority = priority,
-            Labels = [],
-            CreatedDate = new DateTime(2026, 3, 4, 0, 0, 0, DateTimeKind.Utc)
-        };
+    {
+        return new TestTaskBuilder()
+            .WithId(id)
+            .WithStatus(status)
+            .WithPriority(priority)
+            .Build();
+    }
 
     [Fact]
     public void CreateTask_ValidInput_SavesAndReturnsTask()
@@ -424,7 +424,7 @@ public class TaskServiceTests
 
         var task = sut.CreateTask("Test task", TaskType.Feature, Priority.Medium, []);
 
-        var dateString = task.CreatedDate!.Value.ToString(BoardConstants.DateFormat);
+        var dateString = task.CreatedDate.ToString(BoardConstants.DateFormat);
         task.Sections["Progress Log"].Should().Contain(dateString);
     }
 }

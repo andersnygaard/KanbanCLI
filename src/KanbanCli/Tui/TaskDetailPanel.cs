@@ -5,6 +5,9 @@ using TaskStatus = KanbanCli.Models.TaskStatus;
 
 public class TaskDetailPanel
 {
+    private const int PageScrollSize = 10;
+    private const int DetailHeightReserve = 4;
+
     private readonly ITaskService _taskService;
 
     public TaskDetailPanel(ITaskService taskService)
@@ -23,52 +26,35 @@ public class TaskDetailPanel
         while (true)
         {
             RenderDetailView(current, scrollOffset);
+
             var key = Console.ReadKey(intercept: true);
+            var (updatedTask, updatedScroll, shouldExit) = HandleKeyPress(current, scrollOffset, key);
+            current = updatedTask;
+            scrollOffset = updatedScroll;
 
-            switch (key.Key)
+            if (shouldExit)
             {
-                case ConsoleKey.T:
-                    current = HandleEditTitle(current);
-                    scrollOffset = 0;
-                    break;
-
-                case ConsoleKey.L:
-                    current = HandleEditLabels(current);
-                    scrollOffset = 0;
-                    break;
-
-                case ConsoleKey.P:
-                    current = HandleEditPriority(current);
-                    scrollOffset = 0;
-                    break;
-
-                case ConsoleKey.UpArrow:
-                    scrollOffset = Math.Max(0, scrollOffset - 1);
-                    break;
-
-                case ConsoleKey.DownArrow:
-                    scrollOffset++;
-                    break;
-
-                case ConsoleKey.PageUp:
-                    scrollOffset = Math.Max(0, scrollOffset - 10);
-                    break;
-
-                case ConsoleKey.PageDown:
-                    scrollOffset += 10;
-                    break;
-
-                case ConsoleKey.Home:
-                    scrollOffset = 0;
-                    break;
-
-                case ConsoleKey.Escape:
-                    return current;
-
-                default:
-                    break; // Ignore unrecognized keys — only Escape exits
+                return current;
             }
         }
+    }
+
+    private (TaskItem Task, int ScrollOffset, bool ShouldExit) HandleKeyPress(
+        TaskItem current, int scrollOffset, ConsoleKeyInfo key)
+    {
+        return key.Key switch
+        {
+            ConsoleKey.T => (HandleEditTitle(current), 0, false),
+            ConsoleKey.L => (HandleEditLabels(current), 0, false),
+            ConsoleKey.P => (HandleEditPriority(current), 0, false),
+            ConsoleKey.UpArrow => (current, Math.Max(0, scrollOffset - 1), false),
+            ConsoleKey.DownArrow => (current, scrollOffset + 1, false),
+            ConsoleKey.PageUp => (current, Math.Max(0, scrollOffset - PageScrollSize), false),
+            ConsoleKey.PageDown => (current, scrollOffset + PageScrollSize, false),
+            ConsoleKey.Home => (current, 0, false),
+            ConsoleKey.Escape => (current, scrollOffset, true),
+            _ => (current, scrollOffset, false)
+        };
     }
 
     private void RenderDetailView(TaskItem task, int scrollOffset)
@@ -78,7 +64,7 @@ public class TaskDetailPanel
 
         var width = DialogHelper.GetBoxWidth();
         var borderColor = Theme.DetailBorder;
-        var visibleHeight = Math.Max(Console.WindowHeight - 4, 10); // Reserve space for top border, edit hints, bottom border
+        var visibleHeight = Math.Max(TuiHelpers.GetEffectiveHeight() - DetailHeightReserve, BoardConstants.MinWindowHeight); // Reserve space for top border, edit hints, bottom border
 
         // Build all content lines into a list
         var contentLines = BuildContentLines(task, width, borderColor);
@@ -133,7 +119,7 @@ public class TaskDetailPanel
         lines.Add(ContentLine.StatusWorkflow(task.Status, width, borderColor));
 
         lines.Add(ContentLine.Labels(task.Labels, width, borderColor));
-        lines.Add(ContentLine.Field("Created", task.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "(unknown)", width, borderColor));
+        lines.Add(ContentLine.Field("Created", task.CreatedDate.ToString("yyyy-MM-dd HH:mm"), width, borderColor));
         if (task.CompletedDate.HasValue)
             lines.Add(ContentLine.Field("Completed", task.CompletedDate.Value.ToString("yyyy-MM-dd HH:mm"), width, borderColor));
 
@@ -152,16 +138,7 @@ public class TaskDetailPanel
 
             if (!string.IsNullOrWhiteSpace(section.Value))
             {
-                var maxContentWidth = width - 6;
-                var sectionLines = section.Value.Split('\n');
-                foreach (var line in sectionLines)
-                {
-                    var trimmed = line.TrimEnd('\r');
-                    var displayLine = $"  {trimmed}";
-                    if (displayLine.Length > maxContentWidth)
-                        displayLine = displayLine[..maxContentWidth];
-                    lines.Add(ContentLine.Text(displayLine, width, borderColor));
-                }
+                lines.Add(ContentLine.Markdown(section.Value, width, borderColor));
             }
 
             lines.Add(ContentLine.Empty(width, borderColor));
@@ -211,6 +188,7 @@ public class TaskDetailPanel
         Console.Write("  New title (empty to cancel): ");
         Console.ResetColor();
         Console.ForegroundColor = Theme.DialogText;
+
         var newTitle = Console.ReadLine()?.Trim() ?? string.Empty;
         Console.ResetColor();
 
@@ -229,6 +207,7 @@ public class TaskDetailPanel
         Console.WriteLine("  Labels: [A]dd or [R]emove?");
         Console.ResetColor();
 
+
         var key = Console.ReadKey(intercept: true);
 
         return key.Key switch
@@ -245,6 +224,7 @@ public class TaskDetailPanel
         Console.Write("  Label to add: ");
         Console.ResetColor();
         Console.ForegroundColor = Theme.DialogText;
+
         var label = Console.ReadLine()?.Trim() ?? string.Empty;
         Console.ResetColor();
 
@@ -265,6 +245,7 @@ public class TaskDetailPanel
             Console.ForegroundColor = Theme.DetailMuted;
             Console.WriteLine("  No labels to remove. Press any key...");
             Console.ResetColor();
+
             Console.ReadKey(intercept: true);
             return task;
         }
@@ -345,6 +326,14 @@ internal class ContentLine
     public static ContentLine Text(string text, int width, ConsoleColor borderColor)
     {
         return new ContentLine(() => DialogHelper.RenderBoxLine(text, width, borderColor));
+    }
+
+    public static ContentLine Markdown(string markdownContent, int width, ConsoleColor borderColor)
+    {
+        return new ContentLine(() =>
+        {
+            MarkdownRenderer.RenderMarkdownContent(markdownContent, width, borderColor);
+        });
     }
 
     public static ContentLine Heading(string heading, int width, ConsoleColor borderColor)

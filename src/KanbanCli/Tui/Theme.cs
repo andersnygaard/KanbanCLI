@@ -99,4 +99,26 @@ public static class Theme
     public static readonly ConsoleColor MdCheckboxChecked = ConsoleColor.Green;       // nord14
     public static readonly ConsoleColor MdCheckboxUnchecked = ConsoleColor.DarkGray;  // nord3
     public static readonly ConsoleColor MdBullet = ConsoleColor.DarkYellow;           // nord7
+
+    // ── Priority Colors ────────────────────────────────────────────
+    public static readonly ConsoleColor PriorityHigh = ConsoleColor.Red;
+    public static readonly ConsoleColor PriorityMedium = ConsoleColor.Yellow;
+    public static readonly ConsoleColor PriorityLow = ConsoleColor.Green;
+    public static readonly ConsoleColor PriorityDefault = ConsoleColor.Gray;
+
+    // ── Task Type Colors ───────────────────────────────────────────
+    public static readonly ConsoleColor TypeFeature = ConsoleColor.Cyan;
+    public static readonly ConsoleColor TypeBug = ConsoleColor.Red;
+    public static readonly ConsoleColor TypeSecurity = ConsoleColor.DarkYellow;
+    public static readonly ConsoleColor TypeRefactor = ConsoleColor.Green;
+    public static readonly ConsoleColor TypeTest = ConsoleColor.Magenta;
+    public static readonly ConsoleColor TypePerf = ConsoleColor.DarkCyan;
+    public static readonly ConsoleColor TypeDocs = ConsoleColor.Blue;
+    public static readonly ConsoleColor TypeDesign = ConsoleColor.DarkMagenta;
+    public static readonly ConsoleColor TypeEpic = ConsoleColor.White;
+    public static readonly ConsoleColor TypeExplore = ConsoleColor.DarkGreen;
+    public static readonly ConsoleColor TypeCleanup = ConsoleColor.DarkGray;
+    public static readonly ConsoleColor TypeA11y = ConsoleColor.DarkYellow;
+    public static readonly ConsoleColor TypeQuality = ConsoleColor.Yellow;
+    public static readonly ConsoleColor TypeDefault = ConsoleColor.Gray;
 }
