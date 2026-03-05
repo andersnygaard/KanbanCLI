@@ -1,4 +1,5 @@
 namespace KanbanCli.Tui;
+using System.Text;
 using KanbanCli.Models;
 using KanbanCli.Services;
 using TaskStatus = KanbanCli.Models.TaskStatus;
@@ -24,6 +25,7 @@ public class KanbanApp
     private Board _displayBoard = default!;
     private bool _running;
     private bool _needsFullRedraw;
+    private bool _boardDirty = true;
 
     public KanbanApp(
         ITaskService taskService,
@@ -88,10 +90,16 @@ public class KanbanApp
                 _needsFullRedraw = false;
             }
 
-            _board = _boardService.GetBoard();
+            if (_boardDirty)
+            {
+                _board = _boardService.GetBoard();
+                _boardDirty = false;
+            }
             _displayBoard = _activeFilter is not null ? ApplyFilter(_board, _activeFilter) : _board;
             var filterInfo = BuildFilterInfo(_activeFilter);
-            _boardRenderer.Render(_displayBoard, _state, filterInfo);
+
+            // Buffer all console output during rendering to reduce system calls
+            RenderBuffered(_displayBoard, _state, filterInfo);
 
             var command = _inputHandler.ReadCommand();
 
@@ -149,6 +157,7 @@ public class KanbanApp
                 _taskDetailPanel.Show(col.Tasks[taskIndex]);
             }
         }
+        _boardDirty = true;
         _needsFullRedraw = true;
         _boardService.SavePlanningBoard(_boardPath);
     }
@@ -160,6 +169,7 @@ public class KanbanApp
         {
             _taskService.CreateTask(inputs.Title, inputs.Type, inputs.Priority, inputs.Labels);
             _state = _state.MoveToColumn(0, _displayBoard.Columns.Count);
+            _boardDirty = true;
         }
         _needsFullRedraw = true;
         _boardService.SavePlanningBoard(_boardPath);
@@ -180,6 +190,7 @@ public class KanbanApp
                 {
                     _taskService.MoveTask(task, targetStatus.Value);
                     _state = _state with { SelectedTask = 0 };
+                    _boardDirty = true;
                 }
             }
         }
@@ -201,6 +212,7 @@ public class KanbanApp
                 {
                     _taskService.DeleteTask(task);
                     _state = _state with { SelectedTask = Math.Max(0, _state.SelectedTask - 1) };
+                    _boardDirty = true;
                 }
             }
         }
@@ -224,6 +236,7 @@ public class KanbanApp
 
         var updatedTask = task.SetPriority(newPriority);
         _taskService.UpdateTask(updatedTask);
+        _boardDirty = true;
         _needsFullRedraw = true;
     }
 
@@ -251,6 +264,20 @@ public class KanbanApp
             _activeFilter = newFilter;
             _state = _state with { SelectedTask = 0 };
         }
+    }
+
+    private void RenderBuffered(Board board, NavigationState state, string? filterInfo)
+    {
+        var originalOut = Console.Out;
+        using (var bufferStream = new BufferedStream(Console.OpenStandardOutput(), 64 * 1024))
+        using (var bufferWriter = new StreamWriter(bufferStream, Console.OutputEncoding) { AutoFlush = false })
+        {
+            Console.SetOut(bufferWriter);
+            _boardRenderer.Render(board, state, filterInfo);
+            bufferWriter.Flush();
+            bufferStream.Flush();
+        }
+        Console.SetOut(originalOut);
     }
 
     private static Board ApplyFilter(Board board, FilterCriteria filter)

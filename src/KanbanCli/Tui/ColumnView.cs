@@ -17,6 +17,7 @@ public class ColumnView : IColumnView
         if (column.IsEmpty)
         {
             RenderEmptyPlaceholder(columnX, columnWidth, startRow, isFiltered);
+            ClearRemainingRows(columnX, columnWidth, startRow + 1, startRow + maxRows);
             return;
         }
 
@@ -30,6 +31,7 @@ public class ColumnView : IColumnView
         }
 
         var endIndex = Math.Min(column.Tasks.Count, scrollOffset + visibleCardCount);
+        var lastRenderedRow = startRow;
 
         for (var i = scrollOffset; i < endIndex; i++)
         {
@@ -43,12 +45,18 @@ public class ColumnView : IColumnView
             var isSelectedTask = isSelectedColumn && state.SelectedTask == i;
             _taskCard.RenderWithColors(task, columnX, cardStartRow, columnWidth, isSelectedTask);
 
+            lastRenderedRow = cardStartRow + TuiHelpers.CardLineCount;
+
             var separatorRow = cardStartRow + TuiHelpers.CardLineCount;
             if (separatorRow < startRow + maxRows)
             {
                 RenderBlankLine(columnX, columnWidth, separatorRow);
+                lastRenderedRow = separatorRow + 1;
             }
         }
+
+        // Clear any remaining rows below the last rendered card
+        ClearRemainingRows(columnX, columnWidth, lastRenderedRow, startRow + maxRows);
 
         // Show scroll indicators using the separator lines within the body area
         var lastUsedRow = startRow + ((endIndex - scrollOffset) * TuiHelpers.CardTotalHeight) - 1;
@@ -68,6 +76,16 @@ public class ColumnView : IColumnView
             {
                 RenderScrollIndicator(columnX, columnWidth, indicatorRow, $" \u25BC {hiddenBelow} more");
             }
+        }
+    }
+
+    private static void ClearRemainingRows(int columnX, int columnWidth, int fromRow, int toRow)
+    {
+        var blank = new string(' ', columnWidth);
+        for (var row = fromRow; row < toRow; row++)
+        {
+            TuiHelpers.SafeSetCursorPosition(columnX, row);
+            Console.Write(blank);
         }
     }
 
