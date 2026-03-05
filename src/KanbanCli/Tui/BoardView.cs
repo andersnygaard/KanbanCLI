@@ -26,8 +26,8 @@ public class BoardView : IBoardRenderer
 
     public void Render(Board board, NavigationState state, string? filterInfo = null)
     {
-        Console.Clear();
         Console.CursorVisible = false;
+        Console.SetCursorPosition(0, 0);
 
         var windowWidth = Math.Max(Console.WindowWidth, BoardConstants.MinWindowWidth);
         var windowHeight = Math.Max(Console.WindowHeight, BoardConstants.MinWindowHeight);

@@ -17,24 +17,48 @@ public class TaskDetailPanel
     public TaskItem Show(TaskItem task)
     {
         var current = task;
+        var scrollOffset = 0;
 
         while (true)
         {
-            RenderDetailView(current);
+            RenderDetailView(current, scrollOffset);
             var key = Console.ReadKey(intercept: true);
 
             switch (key.Key)
             {
                 case ConsoleKey.T:
                     current = HandleEditTitle(current);
+                    scrollOffset = 0;
                     break;
 
                 case ConsoleKey.L:
                     current = HandleEditLabels(current);
+                    scrollOffset = 0;
                     break;
 
                 case ConsoleKey.P:
                     current = HandleEditPriority(current);
+                    scrollOffset = 0;
+                    break;
+
+                case ConsoleKey.UpArrow:
+                    scrollOffset = Math.Max(0, scrollOffset - 1);
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    scrollOffset++;
+                    break;
+
+                case ConsoleKey.PageUp:
+                    scrollOffset = Math.Max(0, scrollOffset - 10);
+                    break;
+
+                case ConsoleKey.PageDown:
+                    scrollOffset += 10;
+                    break;
+
+                case ConsoleKey.Home:
+                    scrollOffset = 0;
                     break;
 
                 case ConsoleKey.Escape:
@@ -46,56 +70,111 @@ public class TaskDetailPanel
         }
     }
 
-    private void RenderDetailView(TaskItem task)
+    private void RenderDetailView(TaskItem task, int scrollOffset)
     {
         Console.Clear();
-        Console.CursorVisible = true;
+        Console.CursorVisible = false;
 
         var width = DialogHelper.GetBoxWidth();
         var borderColor = ConsoleColor.DarkGray;
+        var visibleHeight = Math.Max(Console.WindowHeight - 4, 10); // Reserve space for top border, edit hints, bottom border
 
+        // Build all content lines into a list
+        var contentLines = BuildContentLines(task, width, borderColor);
+
+        // Clamp scroll offset
+        var maxScroll = Math.Max(0, contentLines.Count - visibleHeight);
+        if (scrollOffset > maxScroll) scrollOffset = maxScroll;
+
+        // Render top border
         DialogHelper.RenderBoxTop($"Task #{task.Id:D3}", width, borderColor);
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
 
-        RenderMetadataFields(task, width, borderColor);
+        // Render visible content lines
+        var endLine = Math.Min(scrollOffset + visibleHeight, contentLines.Count);
+        for (var i = scrollOffset; i < endLine; i++)
+        {
+            contentLines[i].Render();
+        }
 
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        // Fill remaining space with empty lines
+        var rendered = endLine - scrollOffset;
+        for (var i = rendered; i < visibleHeight; i++)
+        {
+            DialogHelper.RenderBoxEmptyLine(width, borderColor);
+        }
+
+        // Scroll indicator
         DialogHelper.RenderBoxSeparator(width, borderColor);
+        if (contentLines.Count > visibleHeight)
+        {
+            RenderScrollStatus(scrollOffset, maxScroll, width, borderColor);
+        }
 
-        RenderSections(task.Sections, width, borderColor);
-
-        DialogHelper.RenderBoxSeparator(width, borderColor);
         RenderEditHints(width, borderColor);
         DialogHelper.RenderBoxBottom(width, borderColor);
     }
 
-    private static void RenderMetadataFields(TaskItem task, int width, ConsoleColor borderColor)
+    private static List<ContentLine> BuildContentLines(TaskItem task, int width, ConsoleColor borderColor)
     {
-        RenderField("ID", $"#{task.Id:D3}", width, borderColor);
-        RenderField("Title", task.Title, width, borderColor);
-        RenderField("Type", task.Type.ToString(), width, borderColor);
-        RenderField("Priority", task.Priority.ToString(), width, borderColor, TuiHelpers.GetPriorityColor(task.Priority));
-        RenderField("Status", TuiHelpers.FormatStatus(task.Status), width, borderColor);
+        var lines = new List<ContentLine>();
+
+        // Empty line
+        lines.Add(ContentLine.Empty(width, borderColor));
+
+        // Metadata fields
+        lines.Add(ContentLine.Field("ID", $"#{task.Id:D3}", width, borderColor));
+        lines.Add(ContentLine.Field("Title", task.Title, width, borderColor));
+        lines.Add(ContentLine.Field("Type", task.Type.ToString(), width, borderColor));
+        lines.Add(ContentLine.Field("Priority", task.Priority.ToString(), width, borderColor, TuiHelpers.GetPriorityColor(task.Priority)));
+        lines.Add(ContentLine.Field("Status", TuiHelpers.FormatStatus(task.Status), width, borderColor));
 
         var labelsText = task.Labels.Count > 0
             ? string.Join("  ", task.Labels.Select(l => $"[{l}]"))
             : "(none)";
-        RenderField("Labels", labelsText, width, borderColor);
-
-        RenderField("Created", task.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "(unknown)", width, borderColor);
-
+        lines.Add(ContentLine.Field("Labels", labelsText, width, borderColor));
+        lines.Add(ContentLine.Field("Created", task.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "(unknown)", width, borderColor));
         if (task.CompletedDate.HasValue)
-            RenderField("Completed", task.CompletedDate.Value.ToString("yyyy-MM-dd HH:mm"), width, borderColor);
+            lines.Add(ContentLine.Field("Completed", task.CompletedDate.Value.ToString("yyyy-MM-dd HH:mm"), width, borderColor));
+
+        lines.Add(ContentLine.Empty(width, borderColor));
+        lines.Add(ContentLine.Separator(width, borderColor));
+
+        // Sections
+        foreach (var section in task.Sections)
+        {
+            lines.Add(ContentLine.Heading(section.Key, width, borderColor));
+            lines.Add(ContentLine.Empty(width, borderColor));
+
+            if (!string.IsNullOrWhiteSpace(section.Value))
+            {
+                var maxContentWidth = width - 6;
+                var sectionLines = section.Value.Split('\n');
+                foreach (var line in sectionLines)
+                {
+                    var trimmed = line.TrimEnd('\r');
+                    var displayLine = $"  {trimmed}";
+                    if (displayLine.Length > maxContentWidth)
+                        displayLine = displayLine[..maxContentWidth];
+                    lines.Add(ContentLine.Text(displayLine, width, borderColor));
+                }
+            }
+
+            lines.Add(ContentLine.Empty(width, borderColor));
+        }
+
+        return lines;
     }
 
-    private static void RenderSections(IReadOnlyDictionary<string, string> sections, int width, ConsoleColor borderColor)
+    private static void RenderScrollStatus(int scrollOffset, int maxScroll, int width, ConsoleColor borderColor)
     {
-        foreach (var section in sections)
-        {
-            RenderSectionHeading(section.Key, width, borderColor);
-            RenderSectionContent(section.Value, width, borderColor);
-        }
+        DialogHelper.RenderBoxLeftBorder(borderColor);
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        var scrollText = $"\u2191\u2193 Scroll  PgUp/PgDn  Home  ({scrollOffset + 1}/{maxScroll + 1})";
+        Console.Write(scrollText);
+        DialogHelper.RenderBoxRightBorder(scrollText.Length, width, borderColor);
     }
+
+    // RenderMetadataFields and RenderSections replaced by BuildContentLines above
 
     private static void RenderEditHints(int width, ConsoleColor borderColor)
     {
@@ -255,51 +334,51 @@ public class TaskDetailPanel
         return choice;
     }
 
-    private static void RenderField(string label, string value, int width, ConsoleColor borderColor, ConsoleColor? valueColor = null)
+}
+
+/// <summary>
+/// Represents a single renderable line in the detail panel content buffer.
+/// Used for scroll support — all content is pre-built as ContentLines, then only visible lines are rendered.
+/// </summary>
+internal class ContentLine
+{
+    private readonly Action _renderAction;
+
+    private ContentLine(Action renderAction)
     {
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-
-        Console.ForegroundColor = ConsoleColor.DarkCyan;
-        Console.Write($"{label,-12}");
-
-        Console.ForegroundColor = valueColor ?? ConsoleColor.White;
-        Console.Write(value);
-
-        var contentLen = label.Length + value.Length;
-        if (label.Length < 12)
-            contentLen = 12 + value.Length;
-
-        DialogHelper.RenderBoxRightBorder(contentLen, width, borderColor);
+        _renderAction = renderAction;
     }
 
-    private static void RenderSectionHeading(string heading, int width, ConsoleColor borderColor)
-    {
-        DialogHelper.RenderBoxLeftBorder(borderColor);
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        var text = $"## {heading}";
-        Console.Write(text);
-        DialogHelper.RenderBoxRightBorder(text.Length, width, borderColor);
-    }
+    public void Render() => _renderAction();
 
-    private static void RenderSectionContent(string content, int width, ConsoleColor borderColor)
-    {
-        if (string.IsNullOrWhiteSpace(content))
-            return;
+    public static ContentLine Empty(int width, ConsoleColor borderColor) =>
+        new(() => DialogHelper.RenderBoxEmptyLine(width, borderColor));
 
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
+    public static ContentLine Separator(int width, ConsoleColor borderColor) =>
+        new(() => DialogHelper.RenderBoxSeparator(width, borderColor));
 
-        var maxContentWidth = width - 6;
-        var lines = content.Split('\n');
-        foreach (var line in lines)
+    public static ContentLine Text(string text, int width, ConsoleColor borderColor) =>
+        new(() => DialogHelper.RenderBoxLine(text, width, borderColor));
+
+    public static ContentLine Heading(string heading, int width, ConsoleColor borderColor) =>
+        new(() =>
         {
-            var trimmed = line.TrimEnd('\r');
-            var displayLine = $"  {trimmed}";
-            if (displayLine.Length > maxContentWidth)
-                displayLine = displayLine[..maxContentWidth];
+            DialogHelper.RenderBoxLeftBorder(borderColor);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            var text = $"\u2550\u2550 {heading}";
+            Console.Write(text);
+            DialogHelper.RenderBoxRightBorder(text.Length, width, borderColor);
+        });
 
-            DialogHelper.RenderBoxLine(displayLine, width, borderColor);
-        }
-
-        DialogHelper.RenderBoxEmptyLine(width, borderColor);
-    }
+    public static ContentLine Field(string label, string value, int width, ConsoleColor borderColor, ConsoleColor? valueColor = null) =>
+        new(() =>
+        {
+            DialogHelper.RenderBoxLeftBorder(borderColor);
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.Write($"{label,-12}");
+            Console.ForegroundColor = valueColor ?? ConsoleColor.White;
+            Console.Write(value);
+            var contentLen = Math.Max(label.Length, 12) + value.Length;
+            DialogHelper.RenderBoxRightBorder(contentLen, width, borderColor);
+        });
 }

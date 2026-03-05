@@ -74,6 +74,7 @@ public class KanbanApp
         _running = true;
 
         Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.Clear();
 
         while (_running)
         {

@@ -20,15 +20,22 @@ public class ColumnView : IColumnView
             return;
         }
 
-        // Each card takes CardLineCount lines + CardSeparatorLines blank line
-        // Last card doesn't need a separator, but we keep the math simple
         var visibleCardCount = Math.Max(1, (maxRows + TuiHelpers.CardSeparatorLines) / TuiHelpers.CardTotalHeight);
 
-        for (var i = 0; i < column.Tasks.Count && i < visibleCardCount; i++)
+        // Calculate scroll offset to keep selected task visible
+        var scrollOffset = 0;
+        if (isSelectedColumn && state.SelectedTask >= visibleCardCount)
         {
-            var cardStartRow = startRow + (i * TuiHelpers.CardTotalHeight);
+            scrollOffset = state.SelectedTask - visibleCardCount + 1;
+        }
 
-            // Don't render if the card would overflow the available space
+        var endIndex = Math.Min(column.Tasks.Count, scrollOffset + visibleCardCount);
+
+        for (var i = scrollOffset; i < endIndex; i++)
+        {
+            var displayIndex = i - scrollOffset;
+            var cardStartRow = startRow + (displayIndex * TuiHelpers.CardTotalHeight);
+
             if (cardStartRow + TuiHelpers.CardLineCount > startRow + maxRows)
                 break;
 
@@ -36,11 +43,30 @@ public class ColumnView : IColumnView
             var isSelectedTask = isSelectedColumn && state.SelectedTask == i;
             _taskCard.RenderWithColors(task, columnX, cardStartRow, columnWidth, isSelectedTask);
 
-            // Render blank separator line between cards (not after the last visible card)
             var separatorRow = cardStartRow + TuiHelpers.CardLineCount;
             if (separatorRow < startRow + maxRows)
             {
                 RenderBlankLine(columnX, columnWidth, separatorRow);
+            }
+        }
+
+        // Show scroll indicators using the separator lines within the body area
+        var lastUsedRow = startRow + ((endIndex - scrollOffset) * TuiHelpers.CardTotalHeight) - 1;
+
+        if (scrollOffset > 0)
+        {
+            // Use first row of the body to show "above" indicator
+            RenderScrollIndicator(columnX, columnWidth, startRow, $" \u25B2 {scrollOffset} more");
+        }
+
+        var hiddenBelow = column.Tasks.Count - endIndex;
+        if (hiddenBelow > 0)
+        {
+            // Use last separator/blank row to show "below" indicator
+            var indicatorRow = Math.Min(lastUsedRow, startRow + maxRows - 1);
+            if (indicatorRow >= startRow)
+            {
+                RenderScrollIndicator(columnX, columnWidth, indicatorRow, $" \u25BC {hiddenBelow} more");
             }
         }
     }
@@ -50,6 +76,18 @@ public class ColumnView : IColumnView
         Console.SetCursorPosition(columnX, row);
         Console.BackgroundColor = ConsoleColor.Black;
         Console.Write(new string(' ', columnWidth));
+        Console.ResetColor();
+    }
+
+    private static void RenderScrollIndicator(int columnX, int columnWidth, int row, string text)
+    {
+        if (row < 0) return;
+        Console.SetCursorPosition(columnX, row);
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        var padded = text.Length > columnWidth
+            ? text[..columnWidth]
+            : text.PadRight(columnWidth);
+        Console.Write(padded);
         Console.ResetColor();
     }
 
