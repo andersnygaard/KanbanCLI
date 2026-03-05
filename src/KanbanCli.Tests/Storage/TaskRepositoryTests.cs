@@ -266,4 +266,23 @@ public class TaskRepositoryTests
 
         result.Should().Be(1);
     }
+
+    [Fact]
+    public void Move_ToSameColumn_DoesNotDeleteFile()
+    {
+        var task = CreateTask(1, TaskStatus.Backlog);
+        var folder = BoardFolder("backlog");
+        var filePath = BoardFile("backlog", "001-FEATURE-test-task.md");
+        var updatedContent = "# FEATURE: Test task (Backlog)\n";
+
+        _fileSystem.DirectoryExists(folder).Returns(true);
+        _parser.Serialize(Arg.Is<TaskItem>(t => t.Status == TaskStatus.Backlog))
+               .Returns(updatedContent);
+
+        var sut = CreateSut();
+        sut.Move(task, TaskStatus.Backlog);
+
+        _fileSystem.Received(1).WriteAllText(filePath, updatedContent);
+        _fileSystem.DidNotReceive().DeleteFile(Arg.Any<string>());
+    }
 }

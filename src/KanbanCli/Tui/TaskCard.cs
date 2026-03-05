@@ -48,7 +48,7 @@ public class TaskCard : ITaskCard
         const string indent = "   ";
         var titleMaxLen = Math.Max(1, columnWidth - indent.Length - 1);
         var truncatedTitle = task.Title.Length > titleMaxLen
-            ? task.Title[..titleMaxLen]
+            ? task.Title[..Math.Max(0, titleMaxLen - 1)] + "\u2026" // … ellipsis
             : task.Title;
 
         var lineText = indent + truncatedTitle;

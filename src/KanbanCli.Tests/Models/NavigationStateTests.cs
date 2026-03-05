@@ -95,4 +95,18 @@ public class NavigationStateTests
         // Assert
         result.SelectedTask.Should().Be(2);
     }
+
+    [Fact]
+    public void MoveToColumn_WithZeroColumns_ReturnsUnchanged()
+    {
+        // Arrange
+        var state = new NavigationState { SelectedColumn = 0, SelectedTask = 2 };
+
+        // Act
+        var result = state.MoveToColumn(1, 0);
+
+        // Assert
+        result.SelectedColumn.Should().Be(state.SelectedColumn);
+        result.SelectedTask.Should().Be(state.SelectedTask);
+    }
 }

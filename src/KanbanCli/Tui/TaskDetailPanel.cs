@@ -179,8 +179,6 @@ public class TaskDetailPanel
         DialogHelper.RenderBoxRightBorder(scrollText.Length, width, borderColor);
     }
 
-    // RenderMetadataFields and RenderSections replaced by BuildContentLines above
-
     private static void RenderEditHints(int width, ConsoleColor borderColor)
     {
         DialogHelper.RenderBoxLeftBorder(borderColor);
@@ -358,7 +356,9 @@ internal class ContentLine
             Console.Write($"{label,-12}");
             Console.ForegroundColor = valueColor ?? ConsoleColor.White;
             var maxValueLen = width - 15; // 2 border + 12 label + 1 padding
-            var truncatedValue = value.Length > maxValueLen ? value[..maxValueLen] : value;
+            var truncatedValue = value.Length > maxValueLen
+                ? value[..Math.Max(0, maxValueLen - 1)] + "\u2026"
+                : value;
             Console.Write(truncatedValue);
             var contentLen = Math.Max(label.Length, 12) + truncatedValue.Length;
             DialogHelper.RenderBoxRightBorder(contentLen, width, borderColor);

@@ -23,6 +23,7 @@ public class KanbanApp
     private Board _board = default!;
     private Board _displayBoard = default!;
     private bool _running;
+    private bool _needsFullRedraw;
 
     public KanbanApp(
         ITaskService taskService,
@@ -78,6 +79,12 @@ public class KanbanApp
 
         while (_running)
         {
+            if (_needsFullRedraw)
+            {
+                Console.Clear();
+                _needsFullRedraw = false;
+            }
+
             _board = _boardService.GetBoard();
             _displayBoard = _activeFilter is not null ? ApplyFilter(_board, _activeFilter) : _board;
             var filterInfo = BuildFilterInfo(_activeFilter);
@@ -132,6 +139,7 @@ public class KanbanApp
                 _taskDetailPanel.Show(col.Tasks[taskIndex]);
             }
         }
+        _needsFullRedraw = true;
         _boardService.SavePlanningBoard(_boardPath);
     }
 
@@ -143,6 +151,7 @@ public class KanbanApp
             _taskService.CreateTask(inputs.Title, inputs.Type, inputs.Priority, inputs.Labels);
             _state = _state.MoveToColumn(0, _displayBoard.Columns.Count);
         }
+        _needsFullRedraw = true;
         _boardService.SavePlanningBoard(_boardPath);
     }
 
@@ -164,6 +173,7 @@ public class KanbanApp
                 }
             }
         }
+        _needsFullRedraw = true;
         _boardService.SavePlanningBoard(_boardPath);
     }
 
@@ -184,6 +194,7 @@ public class KanbanApp
                 }
             }
         }
+        _needsFullRedraw = true;
         _boardService.SavePlanningBoard(_boardPath);
     }
 
@@ -203,6 +214,7 @@ public class KanbanApp
 
         var updatedTask = task.SetPriority(newPriority);
         _taskService.UpdateTask(updatedTask);
+        _needsFullRedraw = true;
     }
 
     private void HandleToggleFilter()
@@ -223,6 +235,7 @@ public class KanbanApp
             .AsReadOnly();
 
         var newFilter = _filterDialog.Show(allLabels);
+        _needsFullRedraw = true;
         if (newFilter is not null)
         {
             _activeFilter = newFilter;
