@@ -143,15 +143,6 @@ Console.Out.Flush();
 var input = Console.ReadLine() ?? string.Empty;
 ```
 
-## Acceptance Criteria
-
-- [x] `KanbanApp.Run()` wraps `Console.Out` in a 64 KB `BufferedStream`
-- [x] Buffer is flushed exactly once per render cycle (after `_boardRenderer.Render()`)
-- [x] Buffer is flushed before every `Console.ReadLine()` and `Console.ReadKey()` call across all dialogs
-- [x] Original `Console.Out` is restored on exit (in both normal exit and error paths)
-- [x] Navigation (arrow keys) produces no visible flicker
-- [x] All dialogs (new task, move, filter, delete, priority, detail panel) display prompts correctly before user input
-
 ## Dependencies
 
 None -- this is a standalone performance improvement that does not change any rendering logic.
@@ -164,3 +155,12 @@ None -- this is a standalone performance improvement that does not change any re
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan
+
+## Acceptance Criteria
+
+- [x] `KanbanApp.Run()` wraps `Console.Out` in a 64 KB `BufferedStream`
+- [x] Buffer is flushed exactly once per render cycle (after `_boardRenderer.Render()`)
+- [x] Buffer is flushed before every `Console.ReadLine()` and `Console.ReadKey()` call across all dialogs
+- [x] Original `Console.Out` is restored on exit (in both normal exit and error paths)
+- [x] Navigation (arrow keys) produces no visible flicker
+- [x] All dialogs (new task, move, filter, delete, priority, detail panel) display prompts correctly before user input

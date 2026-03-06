@@ -55,6 +55,10 @@ New private methods:
 - `RenderVisibleCards(...)` — renders cards in range, returns last rendered row
 - `RenderScrollIndicators(...)` — renders up/down indicators
 
+## Progress Log
+
+- 2026-03-05 - Task created
+
 ## Acceptance Criteria
 
 - [x] ColumnView.Render() is under 30 lines (orchestrator)
@@ -64,7 +68,3 @@ New private methods:
 - [x] All new methods are under 30 lines
 - [x] No functional changes — rendering is identical
 - [ ] All existing tests pass (dotnet not available in environment; no logic changes made)
-
-## Progress Log
-
-- 2026-03-05 - Task created

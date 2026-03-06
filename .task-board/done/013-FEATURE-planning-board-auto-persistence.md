@@ -13,14 +13,6 @@
 
 PLANNING-BOARD.md is automatically persisted to disk whenever the board state changes (task created, moved, or deleted).
 
-## Acceptance Criteria
-
-- [x] Add SavePlanningBoard() method to IBoardService and BoardService
-- [x] SavePlanningBoard writes GeneratePlanningBoard() output to .task-board/PLANNING-BOARD.md via IFileSystem
-- [x] KanbanApp calls SavePlanningBoard() after create, move, and delete operations
-- [x] Add tests for SavePlanningBoard in BoardServiceTests
-- [x] Add integration-style test verifying file is written correctly
-
 ## Technical Approach
 
 - Add `void SavePlanningBoard(string boardPath)` to `IBoardService`
@@ -30,3 +22,11 @@ PLANNING-BOARD.md is automatically persisted to disk whenever the board state ch
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan round 2
+
+## Acceptance Criteria
+
+- [x] Add SavePlanningBoard() method to IBoardService and BoardService
+- [x] SavePlanningBoard writes GeneratePlanningBoard() output to .task-board/PLANNING-BOARD.md via IFileSystem
+- [x] KanbanApp calls SavePlanningBoard() after create, move, and delete operations
+- [x] Add tests for SavePlanningBoard in BoardServiceTests
+- [x] Add integration-style test verifying file is written correctly

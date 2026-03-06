@@ -39,17 +39,6 @@ Or for selected card (with highlight background):
    ⬤ High  [ui] [frontend]
 ```
 
-## Acceptance Criteria
-
-- [x] Task cards render as 3 lines: (1) ID + Type, (2) Title, (3) Priority + Labels
-- [x] Priority shown with Unicode indicators: ● High, ◐ Medium, ○ Low
-- [x] Selected card uses ▶ arrow prefix and highlighted background
-- [x] Unselected cards use space prefix (or ● dot)
-- [x] Blank line between cards for visual separation
-- [x] Labels displayed as individual [bracketed] items in DarkYellow
-- [x] Card content properly truncated to column width
-- [x] All tests pass
-
 ## Technical Approach
 
 ### TaskCard.RenderWithColors() changes:
@@ -92,3 +81,14 @@ Console.Write($"   {prioritySymbol} {task.Priority}");
 ## Progress Log
 
 - 2026-03-05 - Task created from visual audit round 9
+
+## Acceptance Criteria
+
+- [x] Task cards render as 3 lines: (1) ID + Type, (2) Title, (3) Priority + Labels
+- [x] Priority shown with Unicode indicators: ● High, ◐ Medium, ○ Low
+- [x] Selected card uses ▶ arrow prefix and highlighted background
+- [x] Unselected cards use space prefix (or ● dot)
+- [x] Blank line between cards for visual separation
+- [x] Labels displayed as individual [bracketed] items in DarkYellow
+- [x] Card content properly truncated to column width
+- [x] All tests pass

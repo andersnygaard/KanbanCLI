@@ -15,6 +15,10 @@ The audit identified missing test coverage for:
 - Repository Move where source and target paths are the same
 - NavigationState edge cases (negative maxColumns, zero tasks)
 
+## Progress Log
+
+- 2026-03-05 - Task created from audit findings
+
 ## Acceptance Criteria
 
 - [x] Add test: CreateTask_EmptyTitle_ThrowsArgumentException
@@ -24,7 +28,3 @@ The audit identified missing test coverage for:
 - [x] Add test: Move_ToSameColumn_DoesNotDeleteFile
 - [x] Add test: NavigationState_MoveToColumn_WithZeroColumns_ReturnsUnchanged
 - [x] All existing tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created from audit findings

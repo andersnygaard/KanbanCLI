@@ -13,16 +13,6 @@ The markdown parser handles most edge cases gracefully but lacks tests for truly
 
 Parser gracefully handles all forms of malformed markdown input without throwing exceptions.
 
-## Acceptance Criteria
-
-- [x] Test: Parse file with no # heading returns sensible defaults
-- [x] Test: Parse file with only whitespace returns defaults
-- [x] Test: Parse file with duplicate metadata keys uses last value
-- [x] Test: Parse file with markdown formatting in metadata values handles correctly
-- [x] Test: Parse completely empty file returns defaults
-- [x] Test: ParseFileName with malformed filename returns sensible defaults
-- [x] All tests pass
-
 ## Technical Approach
 
 - Add tests to MarkdownParserTests.cs
@@ -32,3 +22,13 @@ Parser gracefully handles all forms of malformed markdown input without throwing
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan round 5
+
+## Acceptance Criteria
+
+- [x] Test: Parse file with no # heading returns sensible defaults
+- [x] Test: Parse file with only whitespace returns defaults
+- [x] Test: Parse file with duplicate metadata keys uses last value
+- [x] Test: Parse file with markdown formatting in metadata values handles correctly
+- [x] Test: Parse completely empty file returns defaults
+- [x] Test: ParseFileName with malformed filename returns sensible defaults
+- [x] All tests pass

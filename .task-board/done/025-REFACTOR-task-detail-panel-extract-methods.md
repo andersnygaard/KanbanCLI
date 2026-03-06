@@ -13,6 +13,10 @@ TaskDetailPanel has 3 methods exceeding 30 lines: RenderDetailView (34 lines), H
 
 All methods in TaskDetailPanel under 30 lines through extracting rendering and input logic into focused sub-methods.
 
+## Progress Log
+
+- 2026-03-05 - Task created from backlog scan round 6
+
 ## Acceptance Criteria
 
 - [x] Extract RenderDetailView into smaller render helpers (header, metadata, sections)
@@ -20,7 +24,3 @@ All methods in TaskDetailPanel under 30 lines through extracting rendering and i
 - [x] Extract HandleEditPriority common dialog pattern
 - [x] No behavior changes — all existing functionality preserved
 - [x] All tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created from backlog scan round 6

@@ -242,6 +242,10 @@ private static TaskItem CreateTask(
 }
 ```
 
+## Progress Log
+
+- 2026-03-05 - Task created from backlog scan
+
 ## Acceptance Criteria
 
 - [x] `TestTaskBuilder` class created in test project root with fluent API
@@ -250,7 +254,3 @@ private static TaskItem CreateTask(
 - [x] `BoardServiceTests.CreateTask` delegates to `TestTaskBuilder`
 - [x] All existing tests continue to pass
 - [x] No expression-bodied members in the new builder class
-
-## Progress Log
-
-- 2026-03-05 - Task created from backlog scan

@@ -61,6 +61,10 @@ Remove the private method. Replace calls with `DialogHelper.PromptEnumInBox<T>(.
 
 Same pattern — remove private `PromptEnumInBox<T>` and use `DialogHelper.PromptEnumInBox<T>`.
 
+## Progress Log
+
+- 2026-03-05 - Task created
+
 ## Acceptance Criteria
 
 - [x] DialogHelper has a public PromptEnumInBox<T>() method
@@ -68,7 +72,3 @@ Same pattern — remove private `PromptEnumInBox<T>` and use `DialogHelper.Promp
 - [x] FilterDialog uses DialogHelper.PromptEnumInBox<T>() instead of its own copy
 - [x] No private PromptEnumInBox methods remain in NewTaskDialog or FilterDialog
 - [x] All existing tests pass (dotnet CLI not available in environment; code review confirms no behavioral changes)
-
-## Progress Log
-
-- 2026-03-05 - Task created

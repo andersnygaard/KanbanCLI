@@ -15,14 +15,6 @@ The `Serialize()` method in `MarkdigMarkdownParser` injects template sections (C
 - Dead code is removed
 - Priority changes use a dedicated update path, not `MoveTask()`
 
-## Acceptance Criteria
-
-- [x] Fix Serialize() to only write sections present in TaskItem.Sections
-- [x] Remove dead TaskCard.Render() method
-- [x] Fix HandleChangePriority() to not use MoveTask() — add UpdateTask to service/repo
-- [x] Add roundtrip test: parse → serialize → parse produces identical TaskItem
-- [x] Add test that Serialize does not inject sections not in the original
-
 ## Technical Approach
 
 - In `MarkdigMarkdownParser.Serialize()`, iterate only over `task.Sections` instead of hardcoded section names
@@ -34,3 +26,11 @@ The `Serialize()` method in `MarkdigMarkdownParser` injects template sections (C
 
 - 2026-03-05 - Task created from backlog scan round 1
 - 2026-03-05 - All acceptance criteria verified complete: Serialize() already only writes sections from TaskItem.Sections, TaskCard.Render() already removed (only RenderWithColors exists), HandleChangePriority() already uses UpdateTask (with Update in repo/service), added 3 new tests for roundtrip identity and no-section-injection
+
+## Acceptance Criteria
+
+- [x] Fix Serialize() to only write sections present in TaskItem.Sections
+- [x] Remove dead TaskCard.Render() method
+- [x] Fix HandleChangePriority() to not use MoveTask() — add UpdateTask to service/repo
+- [x] Add roundtrip test: parse → serialize → parse produces identical TaskItem
+- [x] Add test that Serialize does not inject sections not in the original

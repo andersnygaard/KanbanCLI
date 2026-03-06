@@ -95,6 +95,10 @@ Add tests:
 - `GeneratePlanningBoard_ManyCompletedTasks_LimitsToMaxRecentlyCompleted`
 - `GeneratePlanningBoard_FewHighPriority_FallsBackToMediumPriority`
 
+## Progress Log
+
+- 2026-03-05 - Task created from backlog scan
+
 ## Acceptance Criteria
 
 - [x] Recently Completed section is limited to `BoardConstants.MaxRecentlyCompleted` items
@@ -103,7 +107,3 @@ Add tests:
 - [x] Existing tests continue to pass
 - [x] New tests verify the limit on recently completed items
 - [x] New test verifies medium-priority fallback behavior
-
-## Progress Log
-
-- 2026-03-05 - Task created from backlog scan

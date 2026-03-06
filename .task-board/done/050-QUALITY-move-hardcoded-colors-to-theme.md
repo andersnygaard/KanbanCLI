@@ -73,6 +73,10 @@ public static ConsoleColor GetPriorityColor(Priority priority)
 
 Same pattern for `GetTypeColor()` — replace all 13 `ConsoleColor.Xxx` with `Theme.TypeXxx`.
 
+## Progress Log
+
+- 2026-03-05 - Task created
+
 ## Acceptance Criteria
 
 - [x] Theme.cs has new constants for all priority colors (4 values)
@@ -81,7 +85,3 @@ Same pattern for `GetTypeColor()` — replace all 13 `ConsoleColor.Xxx` with `Th
 - [x] TuiHelpers.GetTypeColor() references Theme constants instead of hardcoded values
 - [x] No hardcoded ConsoleColor values remain in any TUI file except Theme.cs
 - [ ] All existing tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created

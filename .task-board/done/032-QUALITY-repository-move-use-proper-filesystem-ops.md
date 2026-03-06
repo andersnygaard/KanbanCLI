@@ -15,13 +15,6 @@ The current approach is correct but should be documented with a comment explaini
 
 Clear documentation of why Move uses write+delete instead of MoveFile.
 
-## Acceptance Criteria
-
-- [x] Add XML doc comment on ITaskRepository.Move explaining the write+delete pattern
-- [x] Add inline comment in MarkdownTaskRepository.Move explaining why MoveFile isn't used
-- [x] Verify Move correctly handles: serializes updated status, writes to target, deletes source
-- [x] All tests pass
-
 ## Technical Approach
 
 **BEFORE** — `MarkdownTaskRepository.Move()`:
@@ -51,3 +44,10 @@ public void Move(TaskItem task, TaskStatus targetColumn)
 ## Progress Log
 
 - 2026-03-05 - Task created from spec review round 8
+
+## Acceptance Criteria
+
+- [x] Add XML doc comment on ITaskRepository.Move explaining the write+delete pattern
+- [x] Add inline comment in MarkdownTaskRepository.Move explaining why MoveFile isn't used
+- [x] Verify Move correctly handles: serializes updated status, writes to target, deletes source
+- [x] All tests pass

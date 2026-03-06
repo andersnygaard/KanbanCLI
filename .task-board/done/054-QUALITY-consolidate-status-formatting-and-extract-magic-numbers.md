@@ -82,6 +82,10 @@ And for the height calculation:
 var visibleHeight = Math.Max(TuiHelpers.GetEffectiveHeight() - DetailHeightReserve, BoardConstants.MinWindowHeight);
 ```
 
+## Progress Log
+
+- 2026-03-05 - Task created
+
 ## Acceptance Criteria
 
 - [x] MarkdigMarkdownParser.FormatStatus() delegates to TaskStatusExtensions.ToDisplayString()
@@ -89,7 +93,3 @@ var visibleHeight = Math.Max(TuiHelpers.GetEffectiveHeight() - DetailHeightReser
 - [x] TaskDetailPanel scroll size uses named constant PageScrollSize
 - [x] TaskDetailPanel height reserve uses named constant DetailHeightReserve
 - [ ] All existing tests pass (dotnet SDK not available in environment; changes are straightforward delegations)
-
-## Progress Log
-
-- 2026-03-05 - Task created

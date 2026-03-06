@@ -44,6 +44,10 @@ Add tests verifying:
 - `KANBAN_WIDTH` values below MinWindowWidth are rejected (falls back to console)
 - `GetEffectiveHeight()` returns at least MinWindowHeight
 
+## Progress Log
+
+- 2026-03-05 - Task created
+
 ## Acceptance Criteria
 
 - [x] `ParseTaskType` method removed from MarkdigMarkdownParser.cs
@@ -52,7 +56,3 @@ Add tests verifying:
 - [x] Test added: GetEffectiveWidth respects KANBAN_WIDTH environment variable
 - [x] Test added: GetEffectiveHeight returns at least MinWindowHeight
 - [ ] All existing tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created

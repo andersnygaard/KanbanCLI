@@ -11,14 +11,6 @@ Multiple TUI components call `Console.SetCursorPosition()` without verifying the
 
 The audit identified this in BoardView, ColumnView, TaskCard, and StatusBar.
 
-## Acceptance Criteria
-
-- [ ] Add a safe wrapper `TuiHelpers.SafeSetCursorPosition(int x, int y)` that clamps to valid bounds
-- [ ] Replace direct `Console.SetCursorPosition` calls in BoardView, ColumnView, TaskCard with the safe wrapper
-- [ ] Add minimum terminal size check in KanbanApp.Run() — show friendly message if too small
-- [ ] BoardView gracefully handles windows narrower than 40 chars
-- [ ] All existing tests pass
-
 ## Technical Approach
 
 Add to `TuiHelpers`:
@@ -38,3 +30,11 @@ Add a minimum size check at the start of `KanbanApp.Run()`.
 ## Progress Log
 
 - 2026-03-05 - Task created from audit findings
+
+## Acceptance Criteria
+
+- [ ] Add a safe wrapper `TuiHelpers.SafeSetCursorPosition(int x, int y)` that clamps to valid bounds
+- [ ] Replace direct `Console.SetCursorPosition` calls in BoardView, ColumnView, TaskCard with the safe wrapper
+- [ ] Add minimum terminal size check in KanbanApp.Run() — show friendly message if too small
+- [ ] BoardView gracefully handles windows narrower than 40 chars
+- [ ] All existing tests pass

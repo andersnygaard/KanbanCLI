@@ -81,6 +81,10 @@ private (TaskItem Task, int ScrollOffset, bool ShouldExit) HandleKeyPress(
 }
 ```
 
+## Progress Log
+
+- 2026-03-05 - Task created
+
 ## Acceptance Criteria
 
 - [x] Show() is under 30 lines
@@ -88,7 +92,3 @@ private (TaskItem Task, int ScrollOffset, bool ShouldExit) HandleKeyPress(
 - [x] HandleKeyPress() is under 30 lines
 - [x] No functional changes — all key bindings work identically
 - [ ] All existing tests pass (dotnet not available in environment to verify)
-
-## Progress Log
-
-- 2026-03-05 - Task created

@@ -142,15 +142,6 @@ public void EnsureBoardDirectories_MissingRoot_CreatesAllFolders()
 }
 ```
 
-## Acceptance Criteria
-
-- [x] On first run with no `.task-board/` directory, the app creates the root directory and all 4 column folders (`backlog/`, `in-progress/`, `done/`, `on-hold/`)
-- [x] On subsequent runs with existing directories, no errors occur and no duplicate creation attempts
-- [x] If the file system throws an `IOException` or `UnauthorizedAccessException`, the user sees a clean error message (not a stack trace)
-- [x] The app exits cleanly with a non-zero exit code on fatal file system errors
-- [x] Console colors are reset before printing error messages (no garbled output)
-- [x] Unit tests verify the bootstrapping logic creates all expected directories
-
 ## Dependencies
 
 None.
@@ -163,3 +154,12 @@ None.
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan
+
+## Acceptance Criteria
+
+- [x] On first run with no `.task-board/` directory, the app creates the root directory and all 4 column folders (`backlog/`, `in-progress/`, `done/`, `on-hold/`)
+- [x] On subsequent runs with existing directories, no errors occur and no duplicate creation attempts
+- [x] If the file system throws an `IOException` or `UnauthorizedAccessException`, the user sees a clean error message (not a stack trace)
+- [x] The app exits cleanly with a non-zero exit code on fatal file system errors
+- [x] Console colors are reset before printing error messages (no garbled output)
+- [x] Unit tests verify the bootstrapping logic creates all expected directories

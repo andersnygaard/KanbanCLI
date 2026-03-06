@@ -17,15 +17,6 @@ The audit revealed bare `catch` blocks in `MarkdownTaskRepository.cs` and `Markd
 - `ToKebabCase()` handles edge cases (empty/all-special-char titles)
 - Status parsing logs or throws on unknown values instead of silently defaulting
 
-## Acceptance Criteria
-
-- [x] Replace bare `catch` blocks with specific exception types in MarkdownTaskRepository
-- [x] Replace bare `catch` blocks with specific exception types in MarkdigMarkdownParser
-- [x] Add title validation in TaskService (non-empty, max length, valid chars)
-- [x] Add guard for ToKebabCase returning empty string
-- [x] Add tests for all validation scenarios
-- [x] Add tests for error handling edge cases in parser
-
 ## Technical Approach
 
 - In `MarkdownTaskRepository.cs`, catch `IOException` and `UnauthorizedAccessException` specifically
@@ -36,3 +27,12 @@ The audit revealed bare `catch` blocks in `MarkdownTaskRepository.cs` and `Markd
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan round 1
+
+## Acceptance Criteria
+
+- [x] Replace bare `catch` blocks with specific exception types in MarkdownTaskRepository
+- [x] Replace bare `catch` blocks with specific exception types in MarkdigMarkdownParser
+- [x] Add title validation in TaskService (non-empty, max length, valid chars)
+- [x] Add guard for ToKebabCase returning empty string
+- [x] Add tests for all validation scenarios
+- [x] Add tests for error handling edge cases in parser

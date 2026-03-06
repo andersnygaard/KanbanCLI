@@ -63,6 +63,11 @@ private static int RenderSingleInline(Inline inline, int remaining, ConsoleColor
 
 **Step 3: Simplify RenderInlineContent and RenderParagraph to use shared helper**
 
+## Progress Log
+
+- 2026-03-05 - Task created
+- 2026-03-05 - Refactoring completed: BoxContentPadding constant added, RenderInlineSequence/RenderSingleInline/WriteInlineText helpers extracted, both RenderInlineContent and RenderParagraph simplified
+
 ## Acceptance Criteria
 
 - [x] BoxContentPadding constant replaces all `boxWidth - 6` occurrences
@@ -72,8 +77,3 @@ private static int RenderSingleInline(Inline inline, int remaining, ConsoleColor
 - [x] All new methods are under 30 lines
 - [x] No functional changes — rendering is identical
 - [x] All existing tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created
-- 2026-03-05 - Refactoring completed: BoxContentPadding constant added, RenderInlineSequence/RenderSingleInline/WriteInlineText helpers extracted, both RenderInlineContent and RenderParagraph simplified

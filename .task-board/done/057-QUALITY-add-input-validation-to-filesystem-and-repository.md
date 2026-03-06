@@ -58,16 +58,16 @@ public void ReadAllText_NullPath_ThrowsArgumentException()
 }
 ```
 
-## Acceptance Criteria
-
-- [x] All FileSystem methods validate string parameters with ArgumentException.ThrowIfNullOrWhiteSpace
-- [x] New test file FileSystemValidationTests.cs with tests for null/empty path inputs
-- [x] Repository TryParseFile/TryExtractId have clear comments explaining silent swallowing rationale
-- [ ] All existing tests pass
-
 ## Progress Log
 
 - 2026-03-05 - Task created
 - 2026-03-05 - Added ArgumentException.ThrowIfNullOrWhiteSpace guards to all FileSystem methods
 - 2026-03-05 - Added explanatory comments to TryParseFile and TryExtractId
 - 2026-03-05 - Created FileSystemValidationTests.cs with Theory/InlineData tests for all methods
+
+## Acceptance Criteria
+
+- [x] All FileSystem methods validate string parameters with ArgumentException.ThrowIfNullOrWhiteSpace
+- [x] New test file FileSystemValidationTests.cs with tests for null/empty path inputs
+- [x] Repository TryParseFile/TryExtractId have clear comments explaining silent swallowing rationale
+- [ ] All existing tests pass

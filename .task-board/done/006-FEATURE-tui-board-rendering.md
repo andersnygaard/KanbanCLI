@@ -28,23 +28,6 @@ No TUI rendering code exists. The spec defines:
 
 A fully rendered terminal board with columns side by side, task cards with priority colors and labels, a detail panel for selected tasks, and a status bar showing available keybindings. Combined with the input handler (task 005), this completes the interactive TUI.
 
-## Acceptance Criteria
-
-- [x] `IBoardRenderer` interface defined
-- [x] `BoardView` renders columns side by side in the terminal
-- [x] `ColumnView` renders column header + task list
-- [x] `TaskCard` renders one task row: ID, type prefix, title, priority color, labels
-- [x] Priority color coding: High = red, Medium = yellow, Low = green (or similar)
-- [x] Labels displayed with distinct styling (brackets, different color)
-- [x] Selected task/column visually highlighted
-- [x] `TaskDetailPanel` shows full task content when Enter is pressed
-- [x] `StatusBar` displays available keybindings at the bottom
-- [x] `NewTaskDialog` prompts for type, title, priority, labels
-- [x] Board refreshes after operations (move, create, delete)
-- [x] Handles varying terminal sizes gracefully
-- [x] Column widths distribute evenly across available terminal width
-- [x] Empty columns show a placeholder message
-
 ## Affected Components
 
 ### Files to Create
@@ -162,6 +145,23 @@ Tui/
 ## Progress Log
 
 - 2026-03-04 - Task created via backlog-scan
+
+## Acceptance Criteria
+
+- [x] `IBoardRenderer` interface defined
+- [x] `BoardView` renders columns side by side in the terminal
+- [x] `ColumnView` renders column header + task list
+- [x] `TaskCard` renders one task row: ID, type prefix, title, priority color, labels
+- [x] Priority color coding: High = red, Medium = yellow, Low = green (or similar)
+- [x] Labels displayed with distinct styling (brackets, different color)
+- [x] Selected task/column visually highlighted
+- [x] `TaskDetailPanel` shows full task content when Enter is pressed
+- [x] `StatusBar` displays available keybindings at the bottom
+- [x] `NewTaskDialog` prompts for type, title, priority, labels
+- [x] Board refreshes after operations (move, create, delete)
+- [x] Handles varying terminal sizes gracefully
+- [x] Column widths distribute evenly across available terminal width
+- [x] Empty columns show a placeholder message
 
 ---
 

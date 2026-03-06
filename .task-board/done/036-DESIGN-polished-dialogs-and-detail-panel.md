@@ -77,18 +77,6 @@ New Task
 └───────────────────────────────────────────────────────────┘
 ```
 
-## Acceptance Criteria
-
-- [x] Add box-drawing frame to TaskDetailPanel (┌─┐ │ └─┘)
-- [x] Add box-drawing frame to NewTaskDialog
-- [x] Add box-drawing frame to MoveDialog
-- [x] Add box-drawing frame to FilterDialog
-- [x] Add box-drawing frame to ConfirmDialog (with red border color)
-- [x] Replace dash separators with box-drawing lines (─) in detail panel
-- [x] Highlight keyboard shortcut letters in edit hints: [T] in yellow
-- [x] Add success/error symbols: ✓ for success, ✗ for error
-- [x] All tests pass
-
 ## Technical Approach
 
 ### Add RenderBox helper to DialogHelper:

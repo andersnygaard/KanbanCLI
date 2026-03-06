@@ -15,15 +15,6 @@ Hard-coded magic values are scattered across the codebase: folder names in `Mark
 - Bounds-safe indexing in all TUI navigation code
 - `MoveDialog` uses actual column count
 
-## Acceptance Criteria
-
-- [x] Create a Constants or BoardConstants class with folder names, column names, format strings
-- [x] Replace all magic strings/values in MarkdownTaskRepository with constants
-- [x] Replace all magic strings/values in BoardService with constants
-- [x] Add bounds checks before indexing Columns and Tasks in KanbanApp
-- [x] Fix MoveDialog to use board.Columns.Count
-- [x] Add tests verifying constants are used consistently
-
 ## Technical Approach
 
 - Create `Models/BoardConstants.cs` with `static class` holding column folder names, default widths, date formats
@@ -35,3 +26,12 @@ Hard-coded magic values are scattered across the codebase: folder names in `Mark
 
 - 2026-03-05 - Task created from backlog scan round 1
 - 2026-03-05 - Implemented: replaced magic strings with BoardConstants, added bounds checks in KanbanApp, fixed MoveDialog, added 20 new tests
+
+## Acceptance Criteria
+
+- [x] Create a Constants or BoardConstants class with folder names, column names, format strings
+- [x] Replace all magic strings/values in MarkdownTaskRepository with constants
+- [x] Replace all magic strings/values in BoardService with constants
+- [x] Add bounds checks before indexing Columns and Tasks in KanbanApp
+- [x] Fix MoveDialog to use board.Columns.Count
+- [x] Add tests verifying constants are used consistently

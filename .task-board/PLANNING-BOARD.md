@@ -1,20 +1,23 @@
 # Planning Board
 
-**Current Focus**: Backlog empty — ready for next scan
+**Current Focus**: Feature development
 
 ## Top Priorities
 
-_(empty — run backlog-scan to discover next tasks)_
+1. **#008** FEATURE: Filter Board by Label and Type - In Progress
+2. **#030** QUALITY: Review Task File Format Against Spec and Fix Discrepancies - In Progress
+3. **#004** FEATURE: Service Layer (TaskService & BoardService) - Backlog
+4. **#006** FEATURE: TUI Board Rendering (BoardView, ColumnView, TaskCard) - Backlog
+5. **#010** QUALITY: Fix Exception Handling and Add Input Validation - Backlog
 
 ## Recently Completed
 
-- **#067** BUG: CreatedDate Is Nullable Allowing Tasks Without Creation Timestamps - Done 2026-03-05
-- **#066** QUALITY: Extract Shared Test Task Builder and Fix Convention Violations - Done 2026-03-05
-- **#065** BUG: Planning Board Recently Completed Section Is Unbounded - Done 2026-03-05
-- **#064** BUG: First-Run Directory Bootstrapping and Graceful Error Handling - Done 2026-03-05
-- **#063** FEATURE: Use MarkdownRenderer for Rich Section Content in Detail Panel - Done 2026-03-05
-- **#062** BUG: Add Buffered Output to Eliminate TUI Flicker - Done 2026-03-05
-- **#061** BUG: Fix Board Rendering — Triple Display and Missing Colors - Done 2026-03-05
-- **#060** REFACTOR: Extract FilterDialog Methods and Use Shared Helpers - Done 2026-03-05
-- **#059** REFACTOR: Extract ColumnView.Render() Into Smaller Methods - Done 2026-03-05
-- **#058** REFACTOR: Extract MarkdownRenderer Inline Rendering and Add Constants - Done 2026-03-05
+- **#001** FEATURE: .NET Solution Scaffolding - Done 
+- **#002** FEATURE: Rich Domain Models - Done 
+- **#003** FEATURE: Markdown Storage Layer - Done 
+- **#007** FEATURE: Roundtrip-Safe Markdown Parsing (ExtraMetadata & Sections) - Done 
+- **#016** FEATURE: Task Edit Dialog for Enter Key - Done 
+- **#019** REFACTOR: Extract KanbanApp.Run() into Command Dispatcher Pattern - Done 
+- **#026** QUALITY: Enhance Board and Column Models with Utility Methods - Done 
+- **#033** QUALITY: Verify All Spec Test Scenarios Are Covered and Well-Named - Done 
+- **#058** REFACTOR: Extract MarkdownRenderer Inline Rendering and Add Constants - Done 

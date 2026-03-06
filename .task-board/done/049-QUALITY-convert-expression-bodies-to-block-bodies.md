@@ -61,6 +61,11 @@ public bool IsEmpty
 }
 ```
 
+## Progress Log
+
+- 2026-03-05 - Task created
+- 2026-03-05 - Converted all expression-bodied members to block bodies in FileSystem.cs, Column.cs, and 3 test files
+
 ## Acceptance Criteria
 
 - [x] All 8 methods in FileSystem.cs converted from expression bodies to block bodies
@@ -68,8 +73,3 @@ public bool IsEmpty
 - [x] No expression-bodied members remain in the codebase (verify with grep for `=> ` outside switch expressions)
 - [x] All existing tests pass (dotnet SDK not available in environment; changes are purely mechanical with no functional impact)
 - [x] No functional changes — purely stylistic
-
-## Progress Log
-
-- 2026-03-05 - Task created
-- 2026-03-05 - Converted all expression-bodied members to block bodies in FileSystem.cs, Column.cs, and 3 test files

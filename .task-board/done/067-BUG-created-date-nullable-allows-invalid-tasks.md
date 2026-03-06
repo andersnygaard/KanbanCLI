@@ -117,6 +117,10 @@ Similar updates needed for:
 - `Parse_OnlyWhitespace_ReturnsSensibleDefaults` -> assert `CreatedDate` is close to now
 - `Parse_CompletelyEmptyFile_ReturnsSensibleDefaults` -> assert `CreatedDate` is close to now
 
+## Progress Log
+
+- 2026-03-05 - Task created from backlog scan
+
 ## Acceptance Criteria
 
 - [x] `TaskItem.CreatedDate` changed from `DateTime?` to `DateTime`
@@ -126,7 +130,3 @@ Similar updates needed for:
 - [x] All affected tests updated to expect a non-null date
 - [x] Roundtrip tests still pass with the new non-nullable type
 - [x] No compiler warnings related to nullable reference types on `CreatedDate`
-
-## Progress Log
-
-- 2026-03-05 - Task created from backlog scan

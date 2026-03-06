@@ -13,16 +13,6 @@ Current tests mock IFileSystem. We need integration-style tests that verify actu
 
 Integration tests using a temporary directory that verify end-to-end file operations for task CRUD and moves.
 
-## Acceptance Criteria
-
-- [x] Create integration test class for MarkdownTaskRepository using real temp directory
-- [x] Test: Create a task file, verify it exists on disk with correct content
-- [x] Test: Move a task file between folders, verify source removed and target exists
-- [x] Test: Delete a task file, verify it's removed from disk
-- [x] Test: GetNextId with real files returns correct next ID
-- [x] Test: Roundtrip — create task, read it back, verify all fields preserved
-- [x] Tests clean up temp directories after execution
-
 ## Technical Approach
 
 - Use `Path.GetTempPath()` and unique subdirectory for each test
@@ -33,3 +23,13 @@ Integration tests using a temporary directory that verify end-to-end file operat
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan round 4
+
+## Acceptance Criteria
+
+- [x] Create integration test class for MarkdownTaskRepository using real temp directory
+- [x] Test: Create a task file, verify it exists on disk with correct content
+- [x] Test: Move a task file between folders, verify source removed and target exists
+- [x] Test: Delete a task file, verify it's removed from disk
+- [x] Test: GetNextId with real files returns correct next ID
+- [x] Test: Roundtrip — create task, read it back, verify all fields preserved
+- [x] Tests clean up temp directories after execution

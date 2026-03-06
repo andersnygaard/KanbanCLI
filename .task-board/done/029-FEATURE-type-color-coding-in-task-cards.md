@@ -13,13 +13,6 @@ Task cards currently only color-code by priority (High=Red, Medium=Yellow, Low=G
 
 Task type prefix in card view is color-coded by type, complementing the existing priority colors.
 
-## Acceptance Criteria
-
-- [x] Add GetTypeColor(TaskType) method to TuiHelpers
-- [x] Apply type color to the type prefix in TaskCard.RenderWithColors()
-- [x] Ensure type colors don't clash with priority colors
-- [x] All tests pass
-
 ## Technical Approach
 
 ### TuiHelpers — BEFORE (src/KanbanCli/Tui/TuiHelpers.cs):
@@ -68,3 +61,10 @@ Console.Write(": ");
 
 - 2026-03-05 - Task created from backlog scan round 7
 - 2026-03-05 - Added before/after code examples with color mapping
+
+## Acceptance Criteria
+
+- [x] Add GetTypeColor(TaskType) method to TuiHelpers
+- [x] Apply type color to the type prefix in TaskCard.RenderWithColors()
+- [x] Ensure type colors don't clash with priority colors
+- [x] All tests pass

@@ -13,16 +13,6 @@ Enum list rendering code is duplicated across NewTaskDialog, PriorityDialog, and
 
 A shared DialogHelper utility class that consolidates common dialog patterns, reducing duplication across all dialog classes.
 
-## Acceptance Criteria
-
-- [x] Create Tui/DialogHelper.cs with shared dialog utilities
-- [x] Extract PromptEnum<T> generic method for enum selection used by multiple dialogs
-- [x] Extract dialog setup/teardown pattern (Clear, CursorVisible, header)
-- [x] Refactor NewTaskDialog to use DialogHelper
-- [x] Refactor PriorityDialog to use DialogHelper
-- [x] Refactor FilterDialog to use DialogHelper
-- [x] All existing tests still pass, build succeeds
-
 ## Technical Approach
 
 - Create `static class DialogHelper` in Tui/ folder
@@ -33,3 +23,13 @@ A shared DialogHelper utility class that consolidates common dialog patterns, re
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan round 3
+
+## Acceptance Criteria
+
+- [x] Create Tui/DialogHelper.cs with shared dialog utilities
+- [x] Extract PromptEnum<T> generic method for enum selection used by multiple dialogs
+- [x] Extract dialog setup/teardown pattern (Clear, CursorVisible, header)
+- [x] Refactor NewTaskDialog to use DialogHelper
+- [x] Refactor PriorityDialog to use DialogHelper
+- [x] Refactor FilterDialog to use DialogHelper
+- [x] All existing tests still pass, build succeeds

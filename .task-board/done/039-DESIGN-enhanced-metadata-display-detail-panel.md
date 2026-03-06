@@ -41,16 +41,6 @@ A richer metadata display:
 - **Labels**: Each label in its own `[bracket]` with DarkYellow color (matching task cards)
 - **ExtraMetadata**: Any extra fields (Estimated Effort, etc.) rendered below the standard fields
 
-## Acceptance Criteria
-
-- [x] Type field uses `TuiHelpers.GetTypeColor()` for color coding
-- [x] Priority field shows priority symbol (●/◐/○) from `TuiHelpers.GetPrioritySymbol()`
-- [x] Status shows visual workflow indicator with current status highlighted
-- [x] Labels rendered with individual colored brackets matching task card style
-- [x] ExtraMetadata fields rendered after standard metadata
-- [x] Long field values properly truncated to fit box width
-- [x] All existing tests pass (`dotnet build src/` and `dotnet test src/`)
-
 ## Technical Approach
 
 ### Update RenderMetadataFields
@@ -131,3 +121,13 @@ private static void RenderStatusWorkflow(TaskStatus status, int width, ConsoleCo
 ## Progress Log
 
 - 2026-03-05 - Task created
+
+## Acceptance Criteria
+
+- [x] Type field uses `TuiHelpers.GetTypeColor()` for color coding
+- [x] Priority field shows priority symbol (●/◐/○) from `TuiHelpers.GetPrioritySymbol()`
+- [x] Status shows visual workflow indicator with current status highlighted
+- [x] Labels rendered with individual colored brackets matching task card style
+- [x] ExtraMetadata fields rendered after standard metadata
+- [x] Long field values properly truncated to fit box width
+- [x] All existing tests pass (`dotnet build src/` and `dotnet test src/`)

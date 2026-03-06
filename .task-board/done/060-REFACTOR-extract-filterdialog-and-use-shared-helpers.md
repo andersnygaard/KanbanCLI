@@ -50,13 +50,13 @@ Split the method into:
 - `RenderLabelFilterHeader()` — renders the header/prompt
 - Selection logic stays in PromptByLabel (now short enough)
 
+## Progress Log
+
+- 2026-03-05 - Task created
+
 ## Acceptance Criteria
 
 - [x] PromptByLabel() is under 30 lines
 - [x] Manual label list rendering replaced with DialogHelper.RenderNumberedListInBox()
 - [x] No functional changes — filter dialog works identically
 - [ ] All existing tests pass (dotnet not available in environment to verify)
-
-## Progress Log
-
-- 2026-03-05 - Task created

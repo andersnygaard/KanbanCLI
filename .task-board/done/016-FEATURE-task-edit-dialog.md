@@ -13,15 +13,6 @@ The spec says Enter should "View/edit task details" but the current implementati
 
 When pressing Enter on a task, users see the task detail and can edit its fields (title, priority, labels). Changes are persisted via the service layer.
 
-## Acceptance Criteria
-
-- [x] Add edit options to TaskDetailPanel or create a TaskEditDialog
-- [x] Allow editing task title from the detail view
-- [x] Allow editing labels (add/remove) from the detail view
-- [x] Allow editing priority from the detail view
-- [x] Changes persist via ITaskService.UpdateTask()
-- [x] Updated task is reflected on the board immediately
-
 ## Technical Approach
 
 - Modify TaskDetailPanel to show edit options at the bottom (e.g., [T]itle, [L]abels, [P]riority, [Esc] back)
@@ -33,3 +24,12 @@ When pressing Enter on a task, users see the task detail and can edit its fields
 
 - 2026-03-05 - Task created from backlog scan round 3
 - 2026-03-05 - All acceptance criteria verified as already implemented. Build and 131 tests pass.
+
+## Acceptance Criteria
+
+- [x] Add edit options to TaskDetailPanel or create a TaskEditDialog
+- [x] Allow editing task title from the detail view
+- [x] Allow editing labels (add/remove) from the detail view
+- [x] Allow editing priority from the detail view
+- [x] Changes persist via ITaskService.UpdateTask()
+- [x] Updated task is reflected on the board immediately

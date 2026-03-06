@@ -104,17 +104,6 @@ The `Markdown` ContentLine renders multiple visual lines but counts as a single 
 
 An alternative is to split the markdown rendering into individual lines by pre-rendering to a string buffer and creating one `ContentLine.Text()` per output line. This approach preserves accurate scroll counting but loses color information. For the initial implementation, the simpler single-ContentLine approach is recommended.
 
-## Acceptance Criteria
-
-- [x] Section content in TaskDetailPanel renders using `MarkdownRenderer.RenderMarkdownContent()`
-- [x] Acceptance Criteria checkboxes display as styled checkbox symbols (checked/unchecked) instead of raw `- [ ]` text
-- [x] Bullet points display with colored bullet symbols
-- [x] Bold text and code spans render with distinct colors
-- [x] Headings within sections render with heading colors
-- [x] Plain text sections (no markdown formatting) still render correctly
-- [x] Scrolling through the detail panel still works (may be imprecise for long markdown sections)
-- [x] `MarkdownRenderer` class is no longer dead code
-
 ## Dependencies
 
 None -- `MarkdownRenderer` is already fully implemented and tested.
@@ -127,3 +116,14 @@ None -- `MarkdownRenderer` is already fully implemented and tested.
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan
+
+## Acceptance Criteria
+
+- [x] Section content in TaskDetailPanel renders using `MarkdownRenderer.RenderMarkdownContent()`
+- [x] Acceptance Criteria checkboxes display as styled checkbox symbols (checked/unchecked) instead of raw `- [ ]` text
+- [x] Bullet points display with colored bullet symbols
+- [x] Bold text and code spans render with distinct colors
+- [x] Headings within sections render with heading colors
+- [x] Plain text sections (no markdown formatting) still render correctly
+- [x] Scrolling through the detail panel still works (may be imprecise for long markdown sections)
+- [x] `MarkdownRenderer` class is no longer dead code

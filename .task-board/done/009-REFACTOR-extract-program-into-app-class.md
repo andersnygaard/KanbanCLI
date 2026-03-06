@@ -34,20 +34,6 @@ The helper methods in Program.cs (PromptMoveTarget, ConfirmDelete, PromptPriorit
 
 A clean, testable application structure where `Program.cs` is minimal (DI setup + run), the main loop lives in a dedicated `KanbanApp` class, helper prompts are proper TUI components, and shared rendering utilities are consolidated.
 
-## Acceptance Criteria
-
-- [x] `Program.cs` reduced to DI wiring and `app.Run()` call (under 20 lines)
-- [x] New `KanbanApp` class (or `BoardController`) encapsulates the main loop and command dispatch
-- [x] `PromptMoveTarget` extracted to a TUI component (e.g., `MoveDialog.cs`)
-- [x] `ConfirmDelete` extracted to a TUI component (e.g., `ConfirmDialog.cs`)
-- [x] `PromptPriority` extracted to a TUI component (e.g., `PriorityDialog.cs`)
-- [x] `GetPriorityColor` consolidated into a shared `TuiConstants.cs` or `ColorScheme.cs`
-- [x] `FormatStatus` consolidated into a shared helper (models or a shared utility)
-- [x] Duplicated `RenderHeader` pattern consolidated
-- [x] `UnitTest1.cs` placeholder removed
-- [x] All existing tests pass
-- [x] Application behavior unchanged
-
 ## Affected Components
 
 ### Files to Create
@@ -137,3 +123,17 @@ A clean, testable application structure where `Program.cs` is minimal (DI setup 
 ## Progress Log
 
 - 2026-03-04 - Task created via backlog-scan
+
+## Acceptance Criteria
+
+- [x] `Program.cs` reduced to DI wiring and `app.Run()` call (under 20 lines)
+- [x] New `KanbanApp` class (or `BoardController`) encapsulates the main loop and command dispatch
+- [x] `PromptMoveTarget` extracted to a TUI component (e.g., `MoveDialog.cs`)
+- [x] `ConfirmDelete` extracted to a TUI component (e.g., `ConfirmDialog.cs`)
+- [x] `PromptPriority` extracted to a TUI component (e.g., `PriorityDialog.cs`)
+- [x] `GetPriorityColor` consolidated into a shared `TuiConstants.cs` or `ColorScheme.cs`
+- [x] `FormatStatus` consolidated into a shared helper (models or a shared utility)
+- [x] Duplicated `RenderHeader` pattern consolidated
+- [x] `UnitTest1.cs` placeholder removed
+- [x] All existing tests pass
+- [x] Application behavior unchanged

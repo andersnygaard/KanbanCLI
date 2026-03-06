@@ -13,15 +13,6 @@ IFileSystem interface (src/KanbanCli/Storage/IFileSystem.cs) is missing a `FileE
 
 Complete IFileSystem abstraction with FileExists, and consistent XML documentation on public API surfaces.
 
-## Acceptance Criteria
-
-- [x] Add FileExists(string path) to IFileSystem interface
-- [x] Implement FileExists in FileSystem class wrapping File.Exists
-- [x] Add XML doc comments to all IFileSystem interface methods
-- [x] Add XML doc comments to TuiHelpers public methods
-- [x] Add XML doc comments to FilterCriteria record
-- [x] All tests pass
-
 ## Technical Approach
 
 ### IFileSystem — BEFORE:
@@ -95,3 +86,12 @@ public record FilterCriteria(TaskType? Type = null, Priority? Priority = null, s
 
 - 2026-03-05 - Task created from backlog scan round 7
 - 2026-03-05 - Added before/after code examples
+
+## Acceptance Criteria
+
+- [x] Add FileExists(string path) to IFileSystem interface
+- [x] Implement FileExists in FileSystem class wrapping File.Exists
+- [x] Add XML doc comments to all IFileSystem interface methods
+- [x] Add XML doc comments to TuiHelpers public methods
+- [x] Add XML doc comments to FilterCriteria record
+- [x] All tests pass

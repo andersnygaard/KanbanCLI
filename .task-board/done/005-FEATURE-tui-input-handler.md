@@ -23,23 +23,6 @@ No TUI code exists. The spec defines:
 
 A working input handler that maps keyboard events to typed commands, with board navigation state (selected column, selected task). Ready to be wired into the board rendering loop.
 
-## Acceptance Criteria
-
-- [x] `IInputHandler` interface defined
-- [x] `KeyboardInputHandler` implementation using Console.ReadKey or TUI framework equivalent
-- [x] Arrow key navigation: left/right switches column, up/down navigates tasks
-- [x] Board navigation state: tracks selected column index and selected task index
-- [x] `Enter` key: view/edit task details
-- [x] `n` key: trigger new task creation flow
-- [x] `m` key: trigger move task to column flow
-- [x] `d` key: trigger delete task flow
-- [x] `p` key: trigger change priority flow
-- [x] `f` key: trigger filter by label/type flow
-- [x] `q` key: quit application
-- [x] Command pattern: input produces typed commands (enum or command objects)
-- [x] Navigation wraps or clamps at boundaries (first/last column, first/last task)
-- [x] Clean separation between input reading and command execution
-
 ## Affected Components
 
 ### Files to Create
@@ -153,6 +136,23 @@ A working input handler that maps keyboard events to typed commands, with board 
 ## Progress Log
 
 - 2026-03-04 - Task created via backlog-scan
+
+## Acceptance Criteria
+
+- [x] `IInputHandler` interface defined
+- [x] `KeyboardInputHandler` implementation using Console.ReadKey or TUI framework equivalent
+- [x] Arrow key navigation: left/right switches column, up/down navigates tasks
+- [x] Board navigation state: tracks selected column index and selected task index
+- [x] `Enter` key: view/edit task details
+- [x] `n` key: trigger new task creation flow
+- [x] `m` key: trigger move task to column flow
+- [x] `d` key: trigger delete task flow
+- [x] `p` key: trigger change priority flow
+- [x] `f` key: trigger filter by label/type flow
+- [x] `q` key: quit application
+- [x] Command pattern: input produces typed commands (enum or command objects)
+- [x] Navigation wraps or clamps at boundaries (first/last column, first/last task)
+- [x] Clean separation between input reading and command execution
 
 ---
 

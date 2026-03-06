@@ -20,24 +20,6 @@ No storage code exists. The `.task-board/` directory structure is already in pla
 
 Complete Storage layer with interfaces, implementations, and full test coverage. Can read, write, move, and delete task markdown files. Markdown parsing is roundtrip-safe.
 
-## Acceptance Criteria
-
-- [x] `IMarkdownParser` interface defined
-- [x] `MarkdigMarkdownParser` implementation using Markdig library
-- [x] Parses metadata header: Status, Priority, Labels, Created date
-- [x] Parses sections: Context & Motivation, Desired Outcome, Acceptance Criteria, Technical Approach, Progress Log
-- [x] Serializes `TaskItem` back to valid markdown preserving format
-- [x] Roundtrip test: parse → serialize → parse produces identical TaskItem
-- [x] `ITaskRepository` interface defined (GetAll, GetByColumn, Save, Move, Delete, GetNextId)
-- [x] `MarkdownTaskRepository` implementation
-- [x] `IFileSystem` abstraction for testability
-- [x] `FileSystem` production implementation
-- [x] Handles edge cases: missing fields default gracefully, unknown format doesn't crash
-- [x] `ParseFileName` extracts Id, Type, and Description from filename
-- [x] Full test suite with mocked file system
-- [x] Tests use FluentAssertions and NSubstitute
-- [x] Test naming follows `MethodName_Scenario_ExpectedResult` convention
-
 ## Affected Components
 
 ### Files to Create
@@ -143,6 +125,24 @@ public interface IFileSystem
 
 - 2026-03-04 - Task created via backlog-scan
 - 2026-03-04 - Implementation complete: all 8 files created, 29 tests passing
+
+## Acceptance Criteria
+
+- [x] `IMarkdownParser` interface defined
+- [x] `MarkdigMarkdownParser` implementation using Markdig library
+- [x] Parses metadata header: Status, Priority, Labels, Created date
+- [x] Parses sections: Context & Motivation, Desired Outcome, Acceptance Criteria, Technical Approach, Progress Log
+- [x] Serializes `TaskItem` back to valid markdown preserving format
+- [x] Roundtrip test: parse → serialize → parse produces identical TaskItem
+- [x] `ITaskRepository` interface defined (GetAll, GetByColumn, Save, Move, Delete, GetNextId)
+- [x] `MarkdownTaskRepository` implementation
+- [x] `IFileSystem` abstraction for testability
+- [x] `FileSystem` production implementation
+- [x] Handles edge cases: missing fields default gracefully, unknown format doesn't crash
+- [x] `ParseFileName` extracts Id, Type, and Description from filename
+- [x] Full test suite with mocked file system
+- [x] Tests use FluentAssertions and NSubstitute
+- [x] Test naming follows `MethodName_Scenario_ExpectedResult` convention
 
 ---
 

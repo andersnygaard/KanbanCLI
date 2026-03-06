@@ -43,17 +43,6 @@ The board currently has NO visual structure — columns blend together without s
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-## Acceptance Criteria
-
-- [x] Add top border with box-drawing around entire board (┌─┐)
-- [x] Add vertical column separators (│) between each column
-- [x] Add box-drawing junction characters at header intersections (┬ ┼ ┤ ├)
-- [x] Replace dash column separators with box-drawing horizontal lines (─)
-- [x] Add bottom border connecting to status bar (└─┘)
-- [x] Selected column separator highlighted in brighter color (Cyan)
-- [x] Column headers formatted with task count badge: "Backlog [3]"
-- [x] All tests pass
-
 ## Technical Approach
 
 ### BoardView changes:
@@ -76,3 +65,14 @@ The board currently has NO visual structure — columns blend together without s
 ## Progress Log
 
 - 2026-03-05 - Task created from visual audit round 9
+
+## Acceptance Criteria
+
+- [x] Add top border with box-drawing around entire board (┌─┐)
+- [x] Add vertical column separators (│) between each column
+- [x] Add box-drawing junction characters at header intersections (┬ ┼ ┤ ├)
+- [x] Replace dash column separators with box-drawing horizontal lines (─)
+- [x] Add bottom border connecting to status bar (└─┘)
+- [x] Selected column separator highlighted in brighter color (Cyan)
+- [x] Column headers formatted with task count badge: "Backlog [3]"
+- [x] All tests pass

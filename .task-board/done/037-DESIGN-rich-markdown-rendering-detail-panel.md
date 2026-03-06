@@ -54,20 +54,6 @@ A `MarkdownRenderer` class that interprets markdown content and renders it with 
 - **Inline code** (`` `code` ``): Rendered in a distinct color (e.g., DarkYellow)
 - **Horizontal rules** (`---`): Rendered as box-drawing separator
 
-## Acceptance Criteria
-
-- [x] Create `MarkdownRenderer` class in `src/KanbanCli/Tui/MarkdownRenderer.cs`
-- [x] Parse markdown content using Markdig AST (reuse existing Markdig dependency)
-- [x] Render headings with distinct colors (Cyan for H2, DarkCyan for H3, etc.)
-- [x] Render bullet lists with colored bullet symbols (• instead of -)
-- [x] Render checkboxes with ☐ (unchecked) and ☑ (checked) symbols
-- [x] Render bold text in bright white
-- [x] Render code blocks with distinct color (DarkGray background or DarkYellow text)
-- [x] Render inline code with distinct styling
-- [x] Integrate into TaskDetailPanel.RenderSectionContent
-- [x] Handle edge cases: empty content, very long lines, nested lists
-- [x] All existing tests pass (`dotnet build src/` and `dotnet test src/`)
-
 ## Technical Approach
 
 ### Create MarkdownRenderer class
@@ -133,3 +119,17 @@ MarkdownRenderer.RenderMarkdownContent(section.Value, width, borderColor);
 ## Progress Log
 
 - 2026-03-05 - Task created
+
+## Acceptance Criteria
+
+- [x] Create `MarkdownRenderer` class in `src/KanbanCli/Tui/MarkdownRenderer.cs`
+- [x] Parse markdown content using Markdig AST (reuse existing Markdig dependency)
+- [x] Render headings with distinct colors (Cyan for H2, DarkCyan for H3, etc.)
+- [x] Render bullet lists with colored bullet symbols (• instead of -)
+- [x] Render checkboxes with ☐ (unchecked) and ☑ (checked) symbols
+- [x] Render bold text in bright white
+- [x] Render code blocks with distinct color (DarkGray background or DarkYellow text)
+- [x] Render inline code with distinct styling
+- [x] Integrate into TaskDetailPanel.RenderSectionContent
+- [x] Handle edge cases: empty content, very long lines, nested lists
+- [x] All existing tests pass (`dotnet build src/` and `dotnet test src/`)

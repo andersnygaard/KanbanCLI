@@ -22,25 +22,6 @@ No models exist. The spec (.docs/specs.md) defines:
 
 Complete domain model layer with full test coverage. All models are immutable records with behavior methods, ready to be consumed by Storage and Services layers.
 
-## Acceptance Criteria
-
-- [x] `TaskItem` record with all properties from spec (Id, Title, Type, Priority, Status, Labels, CreatedDate, CompletedDate)
-- [x] `TaskItem` behavior: `ChangeStatus()`, `AddLabel()`, `SetPriority()`, `MatchesFilter()`
-- [x] `TaskItem.ChangeStatus(Done)` sets CompletedDate automatically
-- [x] `TaskItem.ChangeStatus(fromDone)` clears CompletedDate
-- [x] `TaskItem.AddLabel()` prevents duplicates
-- [x] `Board` record containing columns
-- [x] `Column` record containing tasks
-- [x] Enums: `TaskType` (FEATURE, BUG, REFACTOR, TEST, SECURITY, PERF, DESIGN, DOCS, EPIC, EXPLORE, CLEANUP, A11Y, QUALITY)
-- [x] Enums: `Priority` (High, Medium, Low)
-- [x] Enums: `TaskStatus` (Backlog, InProgress, Done, OnHold)
-- [x] `FilterCriteria` type for filtering support
-- [x] `FileName` generation method: `{Id:D3}-{Type}-{kebab-title}.md`
-- [x] All models use `record` with `init` properties
-- [x] Full xUnit test coverage for all behavior methods
-- [x] Tests use FluentAssertions
-- [x] Test naming: `MethodName_Scenario_ExpectedResult`
-
 ## Affected Components
 
 ### Files to Create
@@ -129,6 +110,25 @@ public record TaskItem
 
 - 2026-03-04 - Task created via backlog-scan
 - 2026-03-04 - Implementation complete. All 6 model files created, 13 tests passing.
+
+## Acceptance Criteria
+
+- [x] `TaskItem` record with all properties from spec (Id, Title, Type, Priority, Status, Labels, CreatedDate, CompletedDate)
+- [x] `TaskItem` behavior: `ChangeStatus()`, `AddLabel()`, `SetPriority()`, `MatchesFilter()`
+- [x] `TaskItem.ChangeStatus(Done)` sets CompletedDate automatically
+- [x] `TaskItem.ChangeStatus(fromDone)` clears CompletedDate
+- [x] `TaskItem.AddLabel()` prevents duplicates
+- [x] `Board` record containing columns
+- [x] `Column` record containing tasks
+- [x] Enums: `TaskType` (FEATURE, BUG, REFACTOR, TEST, SECURITY, PERF, DESIGN, DOCS, EPIC, EXPLORE, CLEANUP, A11Y, QUALITY)
+- [x] Enums: `Priority` (High, Medium, Low)
+- [x] Enums: `TaskStatus` (Backlog, InProgress, Done, OnHold)
+- [x] `FilterCriteria` type for filtering support
+- [x] `FileName` generation method: `{Id:D3}-{Type}-{kebab-title}.md`
+- [x] All models use `record` with `init` properties
+- [x] Full xUnit test coverage for all behavior methods
+- [x] Tests use FluentAssertions
+- [x] Test naming: `MethodName_Scenario_ExpectedResult`
 
 ---
 

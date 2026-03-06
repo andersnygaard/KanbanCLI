@@ -13,14 +13,6 @@ BoardServiceTests has only 4 tests and is missing edge cases. No dedicated Filte
 
 Comprehensive test coverage for BoardService edge cases and FilterCriteria scenarios matching the spec's test strategy section.
 
-## Acceptance Criteria
-
-- [x] Add BoardService tests: empty board, null completed dates, task name truncation, mixed priorities
-- [x] Add FilterCriteria tests: multi-criteria filtering, empty criteria matches all, priority-only filter
-- [x] Add TaskItem tests: MatchesFilter with combined label+type+priority criteria
-- [x] Add TaskService tests: error propagation scenarios, GetAllByColumn calls
-- [x] All existing tests still pass
-
 ## Technical Approach
 
 - Expand BoardServiceTests.cs with edge case scenarios
@@ -31,3 +23,11 @@ Comprehensive test coverage for BoardService edge cases and FilterCriteria scena
 ## Progress Log
 
 - 2026-03-05 - Task created from backlog scan round 2
+
+## Acceptance Criteria
+
+- [x] Add BoardService tests: empty board, null completed dates, task name truncation, mixed priorities
+- [x] Add FilterCriteria tests: multi-criteria filtering, empty criteria matches all, priority-only filter
+- [x] Add TaskItem tests: MatchesFilter with combined label+type+priority criteria
+- [x] Add TaskService tests: error propagation scenarios, GetAllByColumn calls
+- [x] All existing tests still pass

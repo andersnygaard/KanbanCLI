@@ -28,17 +28,6 @@ This is a visible gap in the TUI's interactivity. All the domain infrastructure 
 
 Pressing `f` opens a filter prompt where the user can filter by label or type. The board only shows tasks matching the active filter. The status bar shows the active filter. Pressing `f` again clears the filter. The feature integrates cleanly with existing domain logic.
 
-## Acceptance Criteria
-
-- [x] `Program.cs` handles `BoardCommand.ToggleFilter` command
-- [x] Filter prompt allows selecting filter by Type or by Label
-- [x] When a filter is active, `BoardService.GetBoard()` or the main loop filters tasks using `TaskItem.MatchesFilter()`
-- [x] `StatusBar` displays active filter info (e.g., "Filter: Bug" or "Filter: frontend")
-- [x] Pressing `f` when a filter is active clears the filter (toggle behavior)
-- [x] Empty filtered columns show "(no matching tasks)" placeholder
-- [x] Navigation adjusts correctly when filter reduces visible tasks
-- [x] Filter state is preserved across board refreshes (move, create, delete)
-
 ## Affected Components
 
 ### Files to Modify
@@ -117,3 +106,14 @@ Pressing `f` opens a filter prompt where the user can filter by label or type. T
 
 - 2026-03-04 - Task created via backlog-scan
 - 2026-03-05 - Implemented: FilterDialog.cs created, IBoardRenderer extended, BoardView passes filterInfo to StatusBar, Program.cs wires ToggleFilter handler with activeFilter state and ApplyFilter/BuildFilterInfo helpers, ColumnView shows "(no matching tasks)" placeholder. Build: 0 errors. Tests: 49/49 passed.
+
+## Acceptance Criteria
+
+- [x] `Program.cs` handles `BoardCommand.ToggleFilter` command
+- [x] Filter prompt allows selecting filter by Type or by Label
+- [x] When a filter is active, `BoardService.GetBoard()` or the main loop filters tasks using `TaskItem.MatchesFilter()`
+- [x] `StatusBar` displays active filter info (e.g., "Filter: Bug" or "Filter: frontend")
+- [x] Pressing `f` when a filter is active clears the filter (toggle behavior)
+- [x] Empty filtered columns show "(no matching tasks)" placeholder
+- [x] Navigation adjusts correctly when filter reduces visible tasks
+- [x] Filter state is preserved across board refreshes (move, create, delete)

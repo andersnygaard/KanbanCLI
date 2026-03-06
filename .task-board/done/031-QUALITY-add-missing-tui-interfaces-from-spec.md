@@ -61,6 +61,10 @@ public class ColumnView : IColumnView { ... }
 public class TaskCard : ITaskCard { ... }
 ```
 
+## Progress Log
+
+- 2026-03-05 - Task created from spec review round 8
+
 ## Acceptance Criteria
 
 - [x] Create IColumnView interface in src/KanbanCli/Tui/IColumnView.cs
@@ -70,7 +74,3 @@ public class TaskCard : ITaskCard { ... }
 - [x] Update BoardView to depend on IColumnView instead of concrete ColumnView (if applicable)
 - [x] Update ColumnView to depend on ITaskCard instead of concrete TaskCard (if applicable)
 - [x] All tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created from spec review round 8

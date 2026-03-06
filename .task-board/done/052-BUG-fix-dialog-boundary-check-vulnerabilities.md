@@ -105,6 +105,10 @@ return BoardConstants.ColumnOrder[choice - 1];
 return board.Columns[choice - 1].Status;
 ```
 
+## Progress Log
+
+- 2026-03-05 - Task created
+
 ## Acceptance Criteria
 
 - [x] PromptEnum<T> correctly returns null when choice is 0 and allowZeroCancel is true
@@ -112,7 +116,3 @@ return board.Columns[choice - 1].Status;
 - [x] PromptNumericChoice correctly returns null when choice is 0 and allowZeroCancel is true
 - [x] MoveDialog.Show uses board.Columns instead of BoardConstants.ColumnOrder for indexing
 - [ ] All existing tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created

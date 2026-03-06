@@ -58,20 +58,19 @@ This skill provides specialized workflows for creating and managing implementati
    - Check for existing utilities or shared components to reuse
 
 2. **Read relevant files**:
-   - Examine the feature area (components, pages, hooks)
-   - Review related components and dependencies
+   - Examine the feature area (models, services, storage, TUI)
+   - Review related interfaces and implementations
    - Check for existing patterns and conventions
 
 3. **Understand architecture**:
-   - **Components**: `src/components/` - Reusable UI components
-   - **Pages**: `src/pages/` - Page-level components
-   - **Hooks**: `src/hooks/` - Custom React hooks
-   - **Utils**: `src/utils/` - Utility functions
-   - **Types**: `src/types/` - Shared TypeScript types
-   - **Styling**: Styled Components co-located with components
+   - **Models**: `src/KanbanCli/Models/` - Domain models (TaskItem, Board, Column, Enums)
+   - **Storage**: `src/KanbanCli/Storage/` - ITaskRepository, IMarkdownParser, IFileSystem
+   - **Services**: `src/KanbanCli/Services/` - ITaskService, IBoardService
+   - **TUI**: `src/KanbanCli/Tui/` - IBoardRenderer, views, input handling
+   - **Tests**: `src/KanbanCli.Tests/` - Unit tests organized by layer
 
 4. **Map dependencies**:
-   - What npm packages might be needed?
+   - What NuGet packages might be needed?
    - What internal features does this depend on?
    - Are there any blocking tasks?
 
@@ -83,9 +82,9 @@ This skill provides specialized workflows for creating and managing implementati
 ### Phase 3: Approach Design (Technical Solution)
 
 1. **Define architecture decisions**:
-   - Where should code live? (component, page, hook, utility)
+   - Where should code live? (Models, Services, Storage, Tui)
    - What patterns to follow? (existing patterns in the codebase)
-   - State management approach? (useState, context, custom hooks)
+   - Interface design and dependency injection approach
 
 2. **Break down into phases**:
    - Phase 1: Core functionality
@@ -98,11 +97,13 @@ This skill provides specialized workflows for creating and managing implementati
    - Identify test scenarios
 
 4. **Consider project-specific context**:
-   - React 18+ with TypeScript strict mode
-   - Styled Components for all styling (StyledX naming)
-   - Functional components with hooks only
-   - Named exports preferred
-   - ~150 line max per component file
+   - .NET / C# with nullable reference types
+   - Immutable records with `init` properties for domain models
+   - Interface-driven with dependency injection
+   - Markdig for markdown parsing
+   - NUnit + FluentAssertions + NSubstitute for testing
+   - Block bodies only (no expression-bodied members)
+   - All TUI colors from Theme.cs
 
 ### Phase 4: Documentation (Create Plan File)
 
@@ -117,7 +118,7 @@ Create a comprehensive plan file in `.task-board/backlog/` with:
 2. **Complete template** with all sections filled (see template below)
 
 3. **Specific technical details**:
-   - File paths: `src/components/MyComponent.tsx`
+   - File paths: `src/KanbanCli/Models/TaskItem.cs`
    - Code snippets showing relevant patterns
    - Architecture context
    - Dependencies and integration points
@@ -174,33 +175,36 @@ Use numbered, descriptive, kebab-case names with type prefix:
 
 ### Technology Stack
 
-- **Framework**: React 18+ with Vite
-- **Language**: TypeScript (strict mode)
-- **Styling**: Styled Components
-- **Package manager**: npm
+- **Framework**: .NET / C#
+- **TUI**: Spectre.Console or Terminal.Gui
+- **Markdown**: Markdig for parsing, frontmatter for metadata
+- **Testing**: NUnit + FluentAssertions + NSubstitute
+- **Build**: `dotnet build src/` / `dotnet test src/`
 
 ### Architecture Patterns
 
 **Project Structure**:
 ```
 src/
-  components/    # Reusable UI components
-  pages/         # Page-level components
-  hooks/         # Custom React hooks
-  utils/         # Utility functions
-  types/         # Shared TypeScript types
-  assets/        # Static assets (images, fonts)
-  App.tsx        # Root component
-  main.tsx       # Entry point
+├── KanbanCli/
+│   ├── Program.cs
+│   ├── Models/        # TaskItem, Board, Column, Enums
+│   ├── Storage/       # ITaskRepository, IMarkdownParser, IFileSystem
+│   ├── Services/      # ITaskService, IBoardService
+│   └── Tui/           # IBoardRenderer, views, input handling
+└── KanbanCli.Tests/
+    ├── Models/
+    ├── Storage/
+    └── Services/
 ```
 
 **Conventions**:
-- Functional components with hooks (no class components)
-- `const` arrow functions for components
-- Named exports over default exports
-- Styled components co-located, prefixed with `Styled`
-- ~150 line max per component file
-- No `any` - use `unknown` or proper types
+- Immutable records with `init` properties for domain models
+- Interface-driven with dependency injection
+- PascalCase for public members, camelCase for private
+- Block bodies only (no expression-bodied members with `=>`)
+- All TUI colors from Theme.cs
+- Nullable reference types enabled
 - Early returns over nested conditionals
 
 ## Enhanced Plan Template
@@ -213,7 +217,7 @@ Use this comprehensive template for all plan files. Fill in ALL sections based o
 **Status**: Backlog
 **Created**: [YYYY-MM-DD]
 **Priority**: [High/Medium/Low]
-**Labels**: [components, pages, hooks, utils, styling, etc.]
+**Labels**: [models, services, storage, tui, testing, etc.]
 **Estimated Effort**: [Simple/Medium/Complex - X days/weeks]
 
 ## Context & Motivation
@@ -237,7 +241,7 @@ Use this comprehensive template for all plan files. Fill in ALL sections based o
 - [Specific file paths]
 
 ### Dependencies
-- **External**: [npm packages needed]
+- **External**: [NuGet packages needed]
 - **Internal**: [Other features/components this depends on]
 - **Blocking**: [Other tasks that must be completed first]
 
@@ -296,10 +300,10 @@ Show concrete code comparisons to clarify the intended changes. Include these li
 
 ## Design Notes
 
-### UI/UX Considerations (if applicable)
-- Styled Components to create
-- Responsive design needs
-- Theme tokens to use
+### TUI Considerations (if applicable)
+- Theme.cs colors to use
+- Terminal rendering approach
+- Keyboard input handling
 
 ## Progress Log
 
@@ -323,7 +327,7 @@ Show concrete code comparisons to clarify the intended changes. Include these li
 ## Best Practices
 
 ### Research Quality
-1. **Thorough exploration**: Search multiple ways (keywords, file patterns, component names)
+1. **Thorough exploration**: Search multiple ways (keywords, file patterns, class/interface names)
 2. **Read, don't skim**: Actually read files to understand patterns
 3. **Follow the trail**: Find imports, usages, related files
 4. **Check similar features**: Learn from existing implementations

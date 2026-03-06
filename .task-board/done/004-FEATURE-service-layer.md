@@ -23,24 +23,6 @@ No services code exists. The spec defines:
 
 Complete Services layer with interfaces, implementations, and full test coverage. The TUI layer can depend entirely on these services for all board operations.
 
-## Acceptance Criteria
-
-- [x] `ITaskService` interface defined with methods: CreateTask, MoveTask, DeleteTask, GetAllByColumn, GetAll
-- [x] `TaskService` implementation orchestrating `ITaskRepository` and domain model logic
-- [x] `TaskService.CreateTask` assigns next available ID via `ITaskRepository.GetNextId()`
-- [x] `TaskService.MoveTask` updates task status (via `TaskItem.ChangeStatus`) and calls `ITaskRepository.Move`
-- [x] `TaskService.MoveTask` to Done automatically sets CompletedDate (via domain model)
-- [x] `IBoardService` interface defined with methods: GetBoard, GeneratePlanningBoard
-- [x] `BoardService` implementation that builds `Board` model from all columns
-- [x] `BoardService.GeneratePlanningBoard` generates markdown for PLANNING-BOARD.md
-- [x] Planning board shows top priorities (High priority, In Progress first)
-- [x] Planning board shows recently completed tasks from Done column
-- [x] Planning board handles empty board gracefully
-- [x] All services depend on interfaces only (DI-ready)
-- [x] Full test suite with mocked `ITaskRepository` using NSubstitute
-- [x] Tests use FluentAssertions
-- [x] Test naming follows `MethodName_Scenario_ExpectedResult` convention
-
 ## Affected Components
 
 ### Files to Create
@@ -187,6 +169,24 @@ BoardServiceTests
 ## Progress Log
 
 - 2026-03-04 - Task created via backlog-scan
+
+## Acceptance Criteria
+
+- [x] `ITaskService` interface defined with methods: CreateTask, MoveTask, DeleteTask, GetAllByColumn, GetAll
+- [x] `TaskService` implementation orchestrating `ITaskRepository` and domain model logic
+- [x] `TaskService.CreateTask` assigns next available ID via `ITaskRepository.GetNextId()`
+- [x] `TaskService.MoveTask` updates task status (via `TaskItem.ChangeStatus`) and calls `ITaskRepository.Move`
+- [x] `TaskService.MoveTask` to Done automatically sets CompletedDate (via domain model)
+- [x] `IBoardService` interface defined with methods: GetBoard, GeneratePlanningBoard
+- [x] `BoardService` implementation that builds `Board` model from all columns
+- [x] `BoardService.GeneratePlanningBoard` generates markdown for PLANNING-BOARD.md
+- [x] Planning board shows top priorities (High priority, In Progress first)
+- [x] Planning board shows recently completed tasks from Done column
+- [x] Planning board handles empty board gracefully
+- [x] All services depend on interfaces only (DI-ready)
+- [x] Full test suite with mocked `ITaskRepository` using NSubstitute
+- [x] Tests use FluentAssertions
+- [x] Test naming follows `MethodName_Scenario_ExpectedResult` convention
 
 ---
 

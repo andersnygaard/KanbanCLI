@@ -27,19 +27,6 @@ Without these, the parser silently discards data when round-tripping task files.
 
 Full roundtrip fidelity: parse a task file, serialize it back, and the content is preserved. Unknown metadata fields and all body sections survive the round trip. This makes the format extensible without code changes.
 
-## Acceptance Criteria
-
-- [x] `TaskItem` record gains `ExtraMetadata` property: `IReadOnlyDictionary<string, string>`
-- [x] `TaskItem` record gains `Sections` property: `IReadOnlyDictionary<string, string>`
-- [x] `MarkdigMarkdownParser.Parse()` collects unknown metadata fields into `ExtraMetadata`
-- [x] `MarkdigMarkdownParser.Parse()` collects all `## Heading` sections dynamically into `Sections` (heading name as key, content as value)
-- [x] `MarkdigMarkdownParser.Serialize()` outputs ExtraMetadata fields after known metadata
-- [x] `MarkdigMarkdownParser.Serialize()` outputs all Sections in order (not hardcoded stubs)
-- [x] Roundtrip test verifies section content and extra metadata are preserved
-- [x] New tests: `Parse_ExtraMetadata_PreservesUnknownFields`, `Parse_Sections_ExtractsAllHeadings`, `Roundtrip_WithSectionsAndExtraMetadata_PreservesAll`
-- [x] Existing tests continue to pass
-- [x] `TaskDetailPanel.Show()` displays body sections (at minimum Context & Motivation)
-
 ## Affected Components
 
 ### Files to Modify
@@ -114,3 +101,16 @@ public IReadOnlyDictionary<string, string> Sections { get; init; }
 
 - 2026-03-04 - Task created via backlog-scan
 - 2026-03-05 - Implemented: ExtraMetadata and Sections on TaskItem, full roundtrip in MarkdigMarkdownParser, section display in TaskDetailPanel, 9 new tests added. All 49 tests pass.
+
+## Acceptance Criteria
+
+- [x] `TaskItem` record gains `ExtraMetadata` property: `IReadOnlyDictionary<string, string>`
+- [x] `TaskItem` record gains `Sections` property: `IReadOnlyDictionary<string, string>`
+- [x] `MarkdigMarkdownParser.Parse()` collects unknown metadata fields into `ExtraMetadata`
+- [x] `MarkdigMarkdownParser.Parse()` collects all `## Heading` sections dynamically into `Sections` (heading name as key, content as value)
+- [x] `MarkdigMarkdownParser.Serialize()` outputs ExtraMetadata fields after known metadata
+- [x] `MarkdigMarkdownParser.Serialize()` outputs all Sections in order (not hardcoded stubs)
+- [x] Roundtrip test verifies section content and extra metadata are preserved
+- [x] New tests: `Parse_ExtraMetadata_PreservesUnknownFields`, `Parse_Sections_ExtractsAllHeadings`, `Roundtrip_WithSectionsAndExtraMetadata_PreservesAll`
+- [x] Existing tests continue to pass
+- [x] `TaskDetailPanel.Show()` displays body sections (at minimum Context & Motivation)

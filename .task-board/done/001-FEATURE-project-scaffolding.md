@@ -23,21 +23,6 @@ Additionally, CLAUDE.md currently describes a React/TypeScript stack which contr
 
 A working .NET solution with proper project structure, ready for feature development. CLAUDE.md updated to reflect the actual tech stack.
 
-## Acceptance Criteria
-
-- [x] `src/KanbanCli/KanbanCli.csproj` exists as a console application
-- [x] `src/KanbanCli.Tests/KanbanCli.Tests.csproj` exists as an xUnit test project
-- [x] Solution file `KanbanCli.sln` at repo root (or `src/`)
-- [x] Folder structure in KanbanCli: `Models/`, `Storage/`, `Services/`, `Tui/`
-- [x] Folder structure in KanbanCli.Tests: `Models/`, `Storage/`, `Services/`
-- [x] NuGet references: Markdig (main project)
-- [x] NuGet references: xUnit, FluentAssertions, NSubstitute (test project)
-- [x] `dotnet build` succeeds with zero errors
-- [x] `dotnet test` runs (even if no tests yet)
-- [x] CLAUDE.md updated to reflect .NET/C# stack, conventions, and commands
-- [x] Nullable reference types enabled
-- [x] .gitignore includes standard .NET entries (bin/, obj/, etc.)
-
 ## Affected Components
 
 ### Files to Create
@@ -106,6 +91,21 @@ A working .NET solution with proper project structure, ready for feature develop
 
 - 2026-03-04 - Task created via backlog-scan
 - 2026-03-04 - Implementation completed: Solution scaffolding with .NET 8, xUnit, FluentAssertions, NSubstitute, and Markdig. All acceptance criteria verified. Build and tests pass successfully.
+
+## Acceptance Criteria
+
+- [x] `src/KanbanCli/KanbanCli.csproj` exists as a console application
+- [x] `src/KanbanCli.Tests/KanbanCli.Tests.csproj` exists as an xUnit test project
+- [x] Solution file `KanbanCli.sln` at repo root (or `src/`)
+- [x] Folder structure in KanbanCli: `Models/`, `Storage/`, `Services/`, `Tui/`
+- [x] Folder structure in KanbanCli.Tests: `Models/`, `Storage/`, `Services/`
+- [x] NuGet references: Markdig (main project)
+- [x] NuGet references: xUnit, FluentAssertions, NSubstitute (test project)
+- [x] `dotnet build` succeeds with zero errors
+- [x] `dotnet test` runs (even if no tests yet)
+- [x] CLAUDE.md updated to reflect .NET/C# stack, conventions, and commands
+- [x] Nullable reference types enabled
+- [x] .gitignore includes standard .NET entries (bin/, obj/, etc.)
 
 ---
 

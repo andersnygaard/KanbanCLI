@@ -13,6 +13,10 @@ While test coverage is good at 158 tests, the service layer could benefit from a
 
 Comprehensive service layer test coverage with all orchestration paths tested.
 
+## Progress Log
+
+- 2026-03-05 - Task created from backlog scan round 6
+
 ## Acceptance Criteria
 
 - [x] Add BoardService.GetBoard tests: verifies Board is correctly assembled with all columns
@@ -21,7 +25,3 @@ Comprehensive service layer test coverage with all orchestration paths tested.
 - [x] Add TaskService.GetAllTasks tests: verifies delegation to repository
 - [x] Add edge case: MoveTask to same status is no-op or handled gracefully
 - [x] All tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created from backlog scan round 6

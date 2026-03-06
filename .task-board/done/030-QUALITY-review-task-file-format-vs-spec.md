@@ -104,18 +104,6 @@ public void MoveTask(TaskItem task, TaskStatus targetColumn)
 }
 ```
 
-## Acceptance Criteria
-
-- [x] Fix TaskService.MoveTask to pass original task to repository (remove ChangeStatus from service)
-- [x] Verify repository.Move correctly computes source path from original status
-- [x] Add default template sections when creating a new task (Context & Motivation, Acceptance Criteria, Progress Log)
-- [x] Serialize CompletedDate as `**Completed**` metadata field when present
-- [x] Parse `**Completed**` metadata field back into CompletedDate
-- [x] Add "Completed" to KnownMetadataKeys set
-- [x] Add test: newly created task has default sections in serialized output
-- [x] Add test: serialize/parse roundtrip preserves CompletedDate
-- [x] Add test: MoveTask correctly resolves source and target folder paths
-
 ## Technical Approach
 
 1. **TaskService.CreateTask()**: Build default Sections dictionary with "Context & Motivation", "Acceptance Criteria", and "Progress Log" entries
@@ -128,3 +116,15 @@ public void MoveTask(TaskItem task, TaskStatus targetColumn)
 
 - 2026-03-05 - Task created from backlog scan round 7
 - 2026-03-05 - Detailed analysis with before/after code examples
+
+## Acceptance Criteria
+
+- [x] Fix TaskService.MoveTask to pass original task to repository (remove ChangeStatus from service)
+- [x] Verify repository.Move correctly computes source path from original status
+- [x] Add default template sections when creating a new task (Context & Motivation, Acceptance Criteria, Progress Log)
+- [x] Serialize CompletedDate as `**Completed**` metadata field when present
+- [x] Parse `**Completed**` metadata field back into CompletedDate
+- [x] Add "Completed" to KnownMetadataKeys set
+- [x] Add test: newly created task has default sections in serialized output
+- [x] Add test: serialize/parse roundtrip preserves CompletedDate
+- [x] Add test: MoveTask correctly resolves source and target folder paths

@@ -13,14 +13,6 @@ The audit identified two critical issues:
 
 2. **MarkdownTaskRepository.Move()** writes the target file first then deletes the source. If the write succeeds but delete fails, you get duplicate tasks. The file operations should be safer.
 
-## Acceptance Criteria
-
-- [ ] MoveDialog uses the actual board columns to build its selection list dynamically
-- [ ] MoveDialog excludes the current column from move targets
-- [ ] MarkdownTaskRepository.Move() uses safe file operations (write target, verify, then delete source)
-- [ ] Add error handling if target file already exists (don't silently overwrite)
-- [ ] All existing tests pass
-
 ## Technical Approach
 
 ### MoveDialog fix
@@ -38,3 +30,11 @@ In `MarkdownTaskRepository.Move()`:
 ## Progress Log
 
 - 2026-03-05 - Task created from audit findings
+
+## Acceptance Criteria
+
+- [ ] MoveDialog uses the actual board columns to build its selection list dynamically
+- [ ] MoveDialog excludes the current column from move targets
+- [ ] MarkdownTaskRepository.Move() uses safe file operations (write target, verify, then delete source)
+- [ ] Add error handling if target file already exists (don't silently overwrite)
+- [ ] All existing tests pass

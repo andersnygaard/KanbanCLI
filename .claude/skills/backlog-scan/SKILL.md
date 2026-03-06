@@ -38,24 +38,34 @@ Before any analysis, load ALL context:
 4. **Scan existing backlog**: `.task-board/backlog/` + `.task-board/in-progress/` + `.task-board/on-hold/`
 5. **Note available skills**: Check `.claude/skills/` for delegation
 
-### Phase 2: Implementation Audit
+### Phase 2: Spec vs Implementation Gap Analysis
 
-**Goal**: Map what EXISTS vs what the SPEC requires
+**Goal**: Produce a single, comprehensive gap report by comparing `.docs/specs.md` against the actual codebase.
 
-1. **Scan all source code**
-   - Find all code files in `src/`
-   - Map existing classes, interfaces, components to spec sections
-   - Track TODOs, FIXMEs, HACK comments
+Use a **subagent** (Agent tool, model: `sonnet`) to perform this analysis. The subagent should:
 
-2. **Spec coverage matrix**
-   Build a mental checklist of every feature/component in `.docs/specs.md`:
+1. **Read `.docs/specs.md`** end-to-end and extract every specified feature, interface, model, behavior, and non-functional requirement into a checklist.
+
+2. **Scan all source code in `src/`** — list every `.cs` file, read key files, and map what exists:
+   - Classes, records, enums, interfaces
+   - Method signatures and their behaviors
+   - Test files and what they cover
+   - TODOs, FIXMEs, HACK comments
+
+3. **Build a Spec Coverage Matrix** — for each item from the spec, mark its status:
+
+   | Spec Item | Status | Evidence |
+   |-----------|--------|----------|
+   | Feature X | Implemented / Partial / Missing / N/A | File path or note |
+
+   Categories to cover:
    - Core features (columns, tasks, labels, priorities, auto-numbering, type prefixes)
    - Architecture layers (TUI, Services, Models, Storage)
-   - Interfaces specified
-   - Test coverage specified
-   - Non-functional requirements (readability, DI, immutability)
+   - Interfaces specified in the spec
+   - Test coverage specified in the spec
+   - Non-functional requirements (readability, DI, immutability, block bodies, Theme.cs)
 
-3. **Mark each as**: Implemented | Partial | Missing | Not applicable
+4. **Return the matrix** and a summary of the top gaps, ordered by impact.
 
 ### Phase 3: Code Quality & Readability Review
 

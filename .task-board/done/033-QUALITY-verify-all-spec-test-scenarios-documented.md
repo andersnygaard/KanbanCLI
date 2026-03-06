@@ -60,13 +60,13 @@ BoardServiceTests
 └── GeneratePlanningBoard_EmptyBoard_ShowsEmptyMessage
 ```
 
+## Progress Log
+
+- 2026-03-05 - Task created from spec review round 8
+
 ## Acceptance Criteria
 
 - [x] Verify every spec-listed test name exists (exact or equivalent) in test files
 - [x] Add any missing spec-listed tests with correct names
 - [x] Ensure test naming follows MethodName_Scenario_ExpectedResult convention
 - [x] All tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created from spec review round 8

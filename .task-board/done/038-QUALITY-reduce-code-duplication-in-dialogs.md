@@ -42,16 +42,6 @@ private static int? PromptForChoice(int maxValue) { ... }
 
 Consolidate these shared patterns into `DialogHelper` so all dialogs use the same building blocks. This reduces duplication and ensures consistent styling.
 
-## Acceptance Criteria
-
-- [x] Move `PromptText` pattern into `DialogHelper.PromptTextInBox(string prompt, int width, ConsoleColor borderColor)`
-- [x] Move `RenderNumberedList` into `DialogHelper.RenderNumberedListInBox(IReadOnlyList<string> items, int width, ConsoleColor borderColor)`
-- [x] Move `PromptForChoice` into `DialogHelper.PromptNumericChoice(int maxValue, bool allowZeroCancel = false)`
-- [x] Update `NewTaskDialog` to use `DialogHelper` methods
-- [x] Update `TaskDetailPanel` to use `DialogHelper` methods
-- [x] Verify consistent styling across all dialogs
-- [x] All existing tests pass (`dotnet build src/` and `dotnet test src/`)
-
 ## Technical Approach
 
 Add to `DialogHelper`:
@@ -102,3 +92,13 @@ public static int? PromptNumericChoice(int maxValue, bool allowZeroCancel = fals
 ## Progress Log
 
 - 2026-03-05 - Task created
+
+## Acceptance Criteria
+
+- [x] Move `PromptText` pattern into `DialogHelper.PromptTextInBox(string prompt, int width, ConsoleColor borderColor)`
+- [x] Move `RenderNumberedList` into `DialogHelper.RenderNumberedListInBox(IReadOnlyList<string> items, int width, ConsoleColor borderColor)`
+- [x] Move `PromptForChoice` into `DialogHelper.PromptNumericChoice(int maxValue, bool allowZeroCancel = false)`
+- [x] Update `NewTaskDialog` to use `DialogHelper` methods
+- [x] Update `TaskDetailPanel` to use `DialogHelper` methods
+- [x] Verify consistent styling across all dialogs
+- [x] All existing tests pass (`dotnet build src/` and `dotnet test src/`)

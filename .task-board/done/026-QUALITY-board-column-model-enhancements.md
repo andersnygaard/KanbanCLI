@@ -13,6 +13,10 @@ Board and Column records are pure data carriers with no behavior methods. Adding
 
 Board and Column models have useful utility properties/methods that simplify code at call sites.
 
+## Progress Log
+
+- 2026-03-05 - Task created from backlog scan round 6
+
 ## Acceptance Criteria
 
 - [x] Add Board.GetColumn(TaskStatus) method that finds column by status
@@ -21,7 +25,3 @@ Board and Column models have useful utility properties/methods that simplify cod
 - [x] Add tests for all new model methods
 - [x] Refactor existing call sites to use new methods where cleaner
 - [x] All tests pass
-
-## Progress Log
-
-- 2026-03-05 - Task created from backlog scan round 6

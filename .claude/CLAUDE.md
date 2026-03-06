@@ -1,89 +1,19 @@
-# Project: Kanban CLI — .NET C# TUI Application
+# Project: AI Assistert Kode
 
-## Tech Stack
-- **Runtime:** .NET 8.0 / C#
-- **TUI Framework:** TBD (e.g., Spectre.Console, Terminal.Gui)
-- **Storage:** Markdown files (task-board system)
-- **Markdown Parsing:** Markdig
-- **Testing:** xUnit + FluentAssertions + NSubstitute
-- **Package Manager:** NuGet (dotnet CLI)
+A .NET terminal-based (TUI) kanban board where tasks are individual markdown files organized in folders (backlog/, in-progress/, done/, on-hold/).
 
-## Project Structure
-```
-src/
-├── KanbanCli/
-│   ├── Program.cs                  # Entry point, DI setup
-│   ├── Models/                     # Rich domain models (TaskItem, Board, Column, Enums)
-│   ├── Storage/                    # Markdown parsing & file I/O
-│   │   ├── ITaskRepository.cs
-│   │   ├── MarkdownTaskRepository.cs
-│   │   ├── IMarkdownParser.cs
-│   │   └── MarkdigMarkdownParser.cs
-│   ├── Services/                   # Business logic orchestration
-│   │   ├── ITaskService.cs
-│   │   ├── TaskService.cs
-│   │   ├── IBoardService.cs
-│   │   └── BoardService.cs
-│   └── Tui/                        # Terminal UI components
-│       ├── IBoardRenderer.cs
-│       ├── BoardView.cs
-│       ├── ColumnView.cs
-│       ├── TaskCard.cs
-│       ├── TaskDetailPanel.cs
-│       ├── StatusBar.cs
-│       └── InputHandler.cs
-└── KanbanCli.Tests/
-    ├── Models/                     # Domain logic tests
-    ├── Storage/                    # Markdown parsing & repository tests
-    └── Services/                   # Business logic tests
-```
+# Architecture
+- Layered: TUI layer → Services layer → Models layer → Storage layer
+- Interface-driven with dependency injection (ITaskRepository, IBoardRenderer, etc.)
+- Markdown parsed with Markdig; task metadata stored as frontmatter
 
-## C# Code Conventions
-- **PascalCase** for public members and types
-- **camelCase** for private/local variables and parameters
-- Use `record` for immutable data types (models)
-- Use `class` for services and stateful objects
-- Enable nullable reference types — mark all reference types as nullable (`?`) or non-nullable
-- Prefer **pattern matching** and **switch expressions** over traditional if/else
-- **No `null` where possible** — use `nullable reference types` for explicit nullability
-- Keep methods short and single-purpose — max ~30 lines
-- Prefer **early returns** over nested conditionals
-- Use **meaningful names** — avoid abbreviations
-- **All methods and properties must use block bodies** — no expression-bodied members (`=>`)
-  - `public int Foo() { return 42; }` — YES
-  - `public int Foo() => 42;` — NO
-  - Switch expressions inside a block body are fine: `return x switch { ... };`
-- **All TUI colors come from `Theme.cs`** — never hardcode `ConsoleColor` values in TUI files
+# Tech Stack
+- Language: C# / .NET
+- TUI: Spectre.Console or Terminal.Gui (TBD)
+- Testing: NUnit + FluentAssertions + NSubstitute
+- Full spec in [.docs/specs.md](.docs/specs.md)
 
-## Architectural Principles
-- **Layered architecture:** Clear separation between TUI, Services, Models, and Storage
-- **Dependency injection:** All layers depend on interfaces (contracts)
-- **Interface-driven design:** Every major component has an interface (ITaskRepository, IBoardRenderer, etc.)
-- **Rich domain models:** Business logic lives in models (ChangeStatus, AddLabel, MatchesFilter, etc.)
-- **Testability first:** Mock dependencies via NSubstitute, test domain logic with FluentAssertions
-
-## Testing
-- **Framework:** xUnit
-- **Assertions:** FluentAssertions (`result.Should().Be(...)`)
-- **Mocking:** NSubstitute (for interfaces)
-- **Test naming:** `MethodUnderTest_Scenario_ExpectedResult`
-- **One assertion per test** (where it makes sense)
-- **Arrange-Act-Assert:** Clear three-phase structure
-- **What to test:**
-  - Models: Pure domain logic (no dependencies)
-  - Storage: Markdown roundtrip, file naming conventions
-  - Services: Orchestration with mocked repositories
-  - TUI: Manual testing only (not unit tested)
-
-## Commands
-- `dotnet build src/` — build solution
-- `dotnet test src/` — run all tests
-- `dotnet run --project src/KanbanCli/` — run application
-- `dotnet add <project> package <name>` — install NuGet package
-- `dotnet clean src/` — clean build artifacts
-
-## Developers Notes
-- Always use tools over bash for file operations (Read/Edit/Write/Glob/Grep)
-- No git commands — development focuses on code, not VCS
-- Read specs.md for architectural details and layer responsibilities
-- Keep .task-board/ in sync — it's the source of truth for planning
+# Developers notes
+- Always use tools over bash for simple tasks like copy, find etc.
+- Prefer immutable records with `init` properties for domain models
+- Readability-first; all conventions documented in specs.md (Norwegian)
