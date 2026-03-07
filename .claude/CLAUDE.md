@@ -13,7 +13,12 @@ A .NET terminal-based (TUI) kanban board where tasks are individual markdown fil
 - Testing: NUnit + FluentAssertions + NSubstitute
 - Full spec in [.docs/specs.md](.docs/specs.md)
 
+# Context
+- Created for "AI timen episode 13", an internal training program at Bouvet
+- Run the project via `run.bat` from the repository root
+
 # Developers notes
 - Always use tools over bash for simple tasks like copy, find etc.
 - Prefer immutable records with `init` properties for domain models
 - Readability-first; all conventions documented in specs.md
+- Always write in English, even if the user writes in Norwegian

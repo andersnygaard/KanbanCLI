@@ -2,7 +2,7 @@
 
 A terminal-based (TUI) kanban board built with .NET, where tasks are stored as individual markdown files organized in folders.
 
-**Laget i forbindelse med AI timen episode 13, et internt opplæringsopplegg i Bouvet.**
+**Created for AI timen episode 13, an internal training program at Bouvet.**
 
 ## What is this?
 
