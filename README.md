@@ -2,7 +2,7 @@
 
 A terminal-based (TUI) kanban board built with .NET, where tasks are stored as individual markdown files organized in folders.
 
-**This project is created for educational purposes in connection with the AI session at Bouvet.**
+**Laget i forbindelse med AI timen episode 13, et internt opplæringsopplegg i Bouvet.**
 
 ## What is this?
 
@@ -39,11 +39,8 @@ Tasks are stored in a `.task-board/` directory:
 ## Getting Started
 
 ```bash
-# Build the project
-dotnet build
-
 # Run the application
-dotnet run --project src/KanbanCli
+run.bat
 
 # Run tests
 dotnet test
