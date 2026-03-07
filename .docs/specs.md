@@ -51,7 +51,7 @@ Each task is a standalone markdown file with structured sections. The parser mus
 **Created**: 2026-03-04
 **Priority**: High | Medium | Low
 **Labels**: frontend, api, database
-**Estimated Effort**: Medium - 2-3 days          ← valgfritt ekstra-felt
+**Estimated Effort**: Medium - 2-3 days          ← optional extra field
 
 ## Context & Motivation
 
@@ -92,7 +92,7 @@ Relevant snippets from existing code (optional section).
 - 2026-03-04 - Task created
 ```
 
-**Viktig:** Parseren skal ikke hardkode seksjonsnavn. Alle `## Heading`-seksjoner leses inn dynamisk og lagres i `TaskItem.Sections`. Dette gjør formatet utvidbart uten kodeendringer.
+**Important:** The parser must not hardcode section names. All `## Heading` sections are read dynamically and stored in `TaskItem.Sections`. This makes the format extensible without code changes.
 
 ### PLANNING-BOARD.md
 
@@ -161,56 +161,56 @@ A summary view showing the current top priorities and recently completed work:
 
 ### Code Readability First
 
-Lesbarhet er hovedprioritet. Koden skal være lett å forstå for andre utviklere (og fremtidig deg selv).
+Readability is the top priority. Code should be easy to understand for other developers (and your future self).
 
-- **Beskrivende navn:** Klasser, metoder og variabler skal ha navn som forklarer hva de gjør — unngå forkortelser og kryptiske navn
-- **Små, fokuserte metoder:** Hver metode gjør én ting. Hvis en metode trenger en kommentar for å forklares, bør den splittes opp
-- **Selvdokumenterende kode:** Koden skal leses som prosa. Kommentarer kun for *hvorfor*, ikke *hva*
-- **Konsistent stil:** Én måte å gjøre ting på gjennom hele prosjektet
+- **Descriptive names:** Classes, methods, and variables should have names that explain what they do — avoid abbreviations and cryptic names
+- **Small, focused methods:** Each method does one thing. If a method needs a comment to be explained, it should be split up
+- **Self-documenting code:** Code should read like prose. Comments only for *why*, not *what*
+- **Consistent style:** One way of doing things throughout the project
 
-### Arkitektur
+### Architecture
 
-- **Tydelig lagdeling:** Separer TUI-rendering, domenelogikk og filsystem-I/O
-- **Interfaces overalt:** Alle lag kommuniserer via interfaces (`ITaskRepository`, `IBoardRenderer`, `IMarkdownParser` etc.) for full testbarhet og fleksibilitet
-- **Dependency injection:** Gjør det enkelt å teste og bytte ut komponenter
-- **Ingen magiske strenger:** Bruk enums/constants for type-prefikser, statuser, kolonnenavn
+- **Clear layering:** Separate TUI rendering, domain logic, and file system I/O
+- **Interfaces everywhere:** All layers communicate via interfaces (`ITaskRepository`, `IBoardRenderer`, `IMarkdownParser`, etc.) for full testability and flexibility
+- **Dependency injection:** Makes it easy to test and swap components
+- **No magic strings:** Use enums/constants for type prefixes, statuses, column names
 
-### Lag-oversikt
+### Layer Overview
 
 ```
 ┌─────────────────────────────────────────────┐
 │  TUI (Tui/)                                 │
-│  Rendrer board, håndterer input             │
-│  Avhenger av: ITaskService, IBoardService   │
+│  Renders board, handles input               │
+│  Depends on: ITaskService, IBoardService    │
 ├─────────────────────────────────────────────┤
 │  Services (Services/)                       │
-│  Orkestrerer operasjoner                    │
-│  Avhenger av: ITaskRepository               │
+│  Orchestrates operations                    │
+│  Depends on: ITaskRepository                │
 ├─────────────────────────────────────────────┤
 │  Models (Models/)                           │
-│  Rike domenemodeller med egen logikk        │
-│  Ingen avhengigheter                        │
+│  Rich domain models with own logic          │
+│  No dependencies                            │
 ├─────────────────────────────────────────────┤
 │  Storage (Storage/)                         │
-│  Markdown-parsing (Markdig), filsystem-I/O  │
-│  Implementerer: ITaskRepository             │
+│  Markdown parsing (Markdig), file system I/O│
+│  Implements: ITaskRepository                │
 └─────────────────────────────────────────────┘
 ```
 
 ### Interfaces
 
-| Interface | Ansvar | Implementasjon |
-|-----------|--------|----------------|
-| `ITaskRepository` | Les/skriv/flytt/slett task-filer | `MarkdownTaskRepository` |
-| `IMarkdownParser` | Parse/serialiser markdown ↔ TaskItem | `MarkdigMarkdownParser` |
-| `IBoardRenderer` | Tegn boardet i terminalen | `BoardRenderer` |
-| `IColumnView` | Rendrer én kolonne med tasks | `ColumnView` |
-| `ITaskCard` | Rendrer én task-rad | `TaskCard` |
-| `IInputHandler` | Håndterer tastatur-input | `KeyboardInputHandler` |
+| Interface | Responsibility | Implementation |
+|-----------|----------------|----------------|
+| `ITaskRepository` | Read/write/move/delete task files | `MarkdownTaskRepository` |
+| `IMarkdownParser` | Parse/serialize markdown ↔ TaskItem | `MarkdigMarkdownParser` |
+| `IBoardRenderer` | Render the board in the terminal | `BoardRenderer` |
+| `IColumnView` | Render a single column with tasks | `ColumnView` |
+| `ITaskCard` | Render a single task row | `TaskCard` |
+| `IInputHandler` | Handle keyboard input | `KeyboardInputHandler` |
 
-### Domenemodeller (rike)
+### Domain Models (rich)
 
-Modellene inneholder egen logikk — ikke bare data:
+Models contain their own logic — not just data:
 
 ```csharp
 public record TaskItem
@@ -225,14 +225,14 @@ public record TaskItem
     public DateTime CreatedDate { get; init; }
     public DateTime? CompletedDate { get; init; }
 
-    // Ekstra metadata (Estimated Effort, etc.) — bevares ved roundtrip
+    // Extra metadata (Estimated Effort, etc.) — preserved on roundtrip
     public IReadOnlyDictionary<string, string> ExtraMetadata { get; init; }
 
-    // Body-seksjoner: nøkkel = heading, verdi = innhold
-    // Bevarer alle seksjoner (Context, Acceptance Criteria, Technical Approach, osv.)
+    // Body sections: key = heading, value = content
+    // Preserves all sections (Context, Acceptance Criteria, Technical Approach, etc.)
     public IReadOnlyDictionary<string, string> Sections { get; init; }
 
-    // Logikk
+    // Logic
     public TaskItem ChangeStatus(TaskStatus newStatus) => ...
     public TaskItem AddLabel(string label) => ...
     public TaskItem SetPriority(Priority priority) => ...
@@ -241,64 +241,64 @@ public record TaskItem
 }
 ```
 
-- Records med `init`-properties — immutable, men med `with`-expressions for endringer
-- Logikk som hører til dataene lever i modellen (ChangeStatus, AddLabel, etc.)
-- Kompleks orkestrering (flytt fil + oppdater PLANNING-BOARD) lever i Services
+- Records with `init` properties — immutable, but with `with` expressions for changes
+- Logic that belongs to the data lives in the model (ChangeStatus, AddLabel, etc.)
+- Complex orchestration (move file + update PLANNING-BOARD) lives in Services
 
-### TUI-komponenter
+### TUI Components
 
-Komponent-basert: små klasser som hver rendrer sin del av skjermen.
+Component-based: small classes that each render their part of the screen.
 
 ```
 Tui/
-├── KanbanApp.cs              # Hovedloop: input → dispatch → render
-├── BoardView.cs              # Overordnet board-layout (kolonner side om side)
-├── ColumnView.cs             # Én kolonne med header + task-liste + scroll
-├── TaskCard.cs               # Én task-rad (tittel, prioritet-farge, labels)
-├── TaskDetailPanel.cs        # Utvidet visning av valgt task (scrollbar)
-├── StatusBar.cs              # Bunnen: keybindings, filter-status
+├── KanbanApp.cs              # Main loop: input → dispatch → render
+├── BoardView.cs              # Overall board layout (columns side by side)
+├── ColumnView.cs             # One column with header + task list + scroll
+├── TaskCard.cs               # One task row (title, priority color, labels)
+├── TaskDetailPanel.cs        # Expanded view of selected task (scrollable)
+├── StatusBar.cs              # Bottom: keybindings, filter status
 ├── NavigationState.cs        # Immutable record: SelectedColumn + SelectedTask
-├── Theme.cs                  # Sentralisert fargepalett — alle TUI-farger herfra
-├── TuiHelpers.cs             # Felles rendering-utilities (SafeSetCursorPosition, etc.)
+├── Theme.cs                  # Centralized color palette — all TUI colors from here
+├── TuiHelpers.cs             # Shared rendering utilities (SafeSetCursorPosition, etc.)
 ├── KeyboardInputHandler.cs   # Console.ReadKey → BoardCommand mapping
-├── NewTaskDialog.cs          # Opprett ny task
-├── MoveDialog.cs             # Flytt task til annen kolonne
-├── ConfirmDialog.cs          # Bekreft sletting
-├── PriorityDialog.cs         # Endre prioritet
-├── FilterDialog.cs           # Filtrer board etter label/type/priority
-├── DialogHelper.cs           # Felles dialog-rendering (box borders, etc.)
-└── MarkdownRenderer.cs       # Rendrer markdown-innhold i detail panel
+├── NewTaskDialog.cs          # Create new task
+├── MoveDialog.cs             # Move task to another column
+├── ConfirmDialog.cs          # Confirm deletion
+├── PriorityDialog.cs         # Change priority
+├── FilterDialog.cs           # Filter board by label/type/priority
+├── DialogHelper.cs           # Shared dialog rendering (box borders, etc.)
+└── MarkdownRenderer.cs       # Render markdown content in detail panel
 ```
 
-### TUI-ytelse
+### TUI Performance
 
-Rendering-loopen i `KanbanApp` bruker to teknikker for å unngå lag ved navigasjon:
+The rendering loop in `KanbanApp` uses two techniques to avoid lag during navigation:
 
-- **Board-caching:** `BoardService.GetBoard()` (filsystem-lesing) kalles kun etter mutasjoner (opprett, flytt, slett, prioritet, detaljer). Ren navigasjon (piltaster) gjenbruker cached board — ingen disk-I/O.
-- **Buffret output:** All rendering skrives til en `BufferedStream` (64 KB) rundt `Console.Out`. Hundrevis av `Console.Write`- og farge-kall batches til én flush — eliminerer flicker og reduserer systemkall dramatisk.
-- **Full body-clearing:** Kolonner fyller hele sin høyde med blanke linjer etter siste task-kort. Dette forhindrer ghost-innhold fra tidligere skjermbilder (f.eks. detail panel-tekst som "blør igjennom" i tomme kolonner).
+- **Board caching:** `BoardService.GetBoard()` (file system reads) is only called after mutations (create, move, delete, priority, details). Pure navigation (arrow keys) reuses the cached board — no disk I/O.
+- **Buffered output:** All rendering is written to a `BufferedStream` (64 KB) around `Console.Out`. Hundreds of `Console.Write` and color calls are batched into a single flush — eliminates flicker and dramatically reduces system calls.
+- **Full body clearing:** Columns fill their entire height with blank lines after the last task card. This prevents ghost content from previous screen renders (e.g., detail panel text "bleeding through" in empty columns).
 
-### Markdown-parsing
+### Markdown Parsing
 
-Bruk **Markdig**-biblioteket for robust AST-parsing av task-filer:
+Use the **Markdig** library for robust AST parsing of task files:
 
-- Parser metadata-header (Status, Priority, Labels, Created) fra markdown
-- Ukjente metadata-felter (f.eks. `Estimated Effort`) lagres i `TaskItem.ExtraMetadata` — bevares ved roundtrip
-- Ekstraher alle `## Heading`-seksjoner dynamisk via AST — lagres i `TaskItem.Sections`
-- Ikke hardkode seksjonsnavn — nye seksjoner håndteres automatisk
-- Serialiser tilbake til markdown ved endringer — bevar formatering og ukjente felter
-- Håndter edge cases (manglende felter, ukjent format) gracefully
+- Parse metadata header (Status, Priority, Labels, Created) from markdown
+- Unknown metadata fields (e.g., `Estimated Effort`) are stored in `TaskItem.ExtraMetadata` — preserved on roundtrip
+- Extract all `## Heading` sections dynamically via AST — stored in `TaskItem.Sections`
+- Do not hardcode section names — new sections are handled automatically
+- Serialize back to markdown on changes — preserve formatting and unknown fields
+- Handle edge cases (missing fields, unknown format) gracefully
 
-### Prosjektstruktur
+### Project Structure
 
 ```
 src/
 ├── KanbanCli/
-│   ├── Program.cs                  # Entry point, DI-oppsett
+│   ├── Program.cs                  # Entry point, DI setup
 │   ├── Models/
-│   │   ├── TaskItem.cs             # Rik domenemodell for tasks
-│   │   ├── Board.cs                # Board med kolonner
-│   │   ├── Column.cs               # Kolonne med tasks
+│   │   ├── TaskItem.cs             # Rich domain model for tasks
+│   │   ├── Board.cs                # Board with columns
+│   │   ├── Column.cs               # Column with tasks
 │   │   └── Enums.cs                # TaskType, Priority, TaskStatus
 │   ├── Storage/
 │   │   ├── ITaskRepository.cs
@@ -343,47 +343,47 @@ src/
         └── TaskServiceTests.cs
 ```
 
-### Kodekonvensjoner
+### Code Conventions
 
-- Følg standard C#/.NET-konvensjoner (PascalCase for public, camelCase for private)
-- Bruk `nullable reference types` — unngå null der det er mulig
-- Foretrekk pattern matching og switch expressions
-- Bruk `record` for datatyper, `class` for tjenester med oppførsel
-- Markdig for markdown-parsing
-- Testprosjekt med xUnit
+- Follow standard C#/.NET conventions (PascalCase for public, camelCase for private)
+- Use `nullable reference types` — avoid null where possible
+- Prefer pattern matching and switch expressions
+- Use `record` for data types, `class` for services with behavior
+- Markdig for markdown parsing
+- Test project with xUnit
 
-## Test-strategi
+## Test Strategy
 
-### Rammeverk
+### Frameworks
 
-- **xUnit** — test-runner
-- **FluentAssertions** — lesbare assertions (`result.Should().Be(...)`)
-- **NSubstitute** — mocking av interfaces
+- **xUnit** — test runner
+- **FluentAssertions** — readable assertions (`result.Should().Be(...)`)
+- **NSubstitute** — mocking interfaces
 
-### Hva testes hvor
+### What is Tested Where
 
-| Lag | Hva testes | Mocking |
-|-----|-----------|---------|
-| **Models** | Domenelogikk: ChangeStatus, AddLabel, SetPriority, MatchesFilter | Ingen — pure funksjoner |
-| **Storage** | Markdown-parsing ↔ TaskItem roundtrip, filnavn-konvensjoner | Filsystem mockes med `IFileSystem` |
-| **Services** | Orkestrering: opprett task, flytt mellom kolonner, oppdater PLANNING-BOARD | `ITaskRepository` mockes |
-| **TUI** | Ikke enhetstestet — manuell testing | — |
+| Layer | What is tested | Mocking |
+|-------|---------------|---------|
+| **Models** | Domain logic: ChangeStatus, AddLabel, SetPriority, MatchesFilter | None — pure functions |
+| **Storage** | Markdown parsing ↔ TaskItem roundtrip, filename conventions | File system mocked with `IFileSystem` |
+| **Services** | Orchestration: create task, move between columns, update PLANNING-BOARD | `ITaskRepository` mocked |
+| **TUI** | Not unit tested — manual testing | — |
 
-### Testkonvensjoner
+### Test Conventions
 
-- **Navngivning:** `MetodeSomTestes_Scenario_ForventetResultat`
+- **Naming:** `MethodUnderTest_Scenario_ExpectedResult`
   ```
   ChangeStatus_ToDone_SetsCompletedDate
   Parse_MissingPriority_DefaultsToMedium
   MoveTask_ToInProgress_UpdatesStatusInFile
   ```
-- **Arrange-Act-Assert:** Tydelig tredeling i hver test
-- **Én assertion per test** (der det gir mening) — gjør feilmeldinger presise
-- **Testdata:** Bruk builder-pattern eller factory-metoder for å lage TaskItems — unngå duplisering
+- **Arrange-Act-Assert:** Clear three-part structure in each test
+- **One assertion per test** (where it makes sense) — makes error messages precise
+- **Test data:** Use builder pattern or factory methods for creating TaskItems — avoid duplication
 
-### Models-tester
+### Model Tests
 
-Rike modeller betyr mye testbar logikk uten avhengigheter:
+Rich models mean lots of testable logic without dependencies:
 
 ```
 TaskItemTests
@@ -398,9 +398,9 @@ TaskItemTests
 └── FileName_GeneratesCorrectFormat
 ```
 
-### Storage-tester
+### Storage Tests
 
-Verifiser at markdown-parsing er robust og roundtrip-safe:
+Verify that markdown parsing is robust and roundtrip-safe:
 
 ```
 MarkdownParserTests
@@ -421,9 +421,9 @@ TaskRepositoryTests
 └── GetNextId_WithExistingTasks_ReturnsIncrementedId
 ```
 
-### Service-tester
+### Service Tests
 
-Orkestrering med mockede avhengigheter:
+Orchestration with mocked dependencies:
 
 ```
 TaskServiceTests
@@ -440,9 +440,9 @@ BoardServiceTests
 └── GeneratePlanningBoard_EmptyBoard_ShowsEmptyMessage
 ```
 
-### Filsystem-abstraksjon
+### File System Abstraction
 
-For å unngå å lese/skrive ekte filer i tester:
+To avoid reading/writing real files in tests:
 
 ```csharp
 public interface IFileSystem
@@ -456,7 +456,7 @@ public interface IFileSystem
 }
 ```
 
-Produksjon bruker `FileSystem : IFileSystem`, tester bruker mock/in-memory.
+Production uses `FileSystem : IFileSystem`, tests use mock/in-memory.
 
 ## Non-Goals (for now)
 

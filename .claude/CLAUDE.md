@@ -16,4 +16,4 @@ A .NET terminal-based (TUI) kanban board where tasks are individual markdown fil
 # Developers notes
 - Always use tools over bash for simple tasks like copy, find etc.
 - Prefer immutable records with `init` properties for domain models
-- Readability-first; all conventions documented in specs.md (Norwegian)
+- Readability-first; all conventions documented in specs.md
